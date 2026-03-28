@@ -5,407 +5,543 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#f2f2f7">
+  <meta name="theme-color" content="#f5f5f7">
   <title>Taakmanager — R.H.L.</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #f2f2f7;
+      --bg: #f5f5f7;
+      --sidebar-bg: #fafafa;
       --card: #ffffff;
-      --text: #1c1c1e;
-      --text-2: #8e8e93;
+      --text: #1d1d1f;
+      --text-2: #86868b;
       --text-3: #aeaeb2;
-      --sep: #e5e5ea;
+      --sep: #e8e8ed;
       --accent: #007aff;
       --red: #ff3b30;
       --orange: #ff9500;
       --green: #34c759;
       --yellow: #ffcc00;
-      --grey: #8e8e93;
+      --sidebar-w: 240px;
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
       font-size: 15px;
       color: var(--text);
-      background: var(--bg);
       -webkit-font-smoothing: antialiased;
     }
 
-    body {
-      min-height: 100dvh;
-      padding: env(safe-area-inset-top, 0px) 24px env(safe-area-inset-bottom, 0px) 24px;
-      max-width: 1400px;
-      margin: 0 auto;
+    body { display: flex; min-height: 100dvh; background: var(--bg); }
+
+    /* ═══════════════════════════════════
+       SIDEBAR
+       ═══════════════════════════════════ */
+    .sidebar {
+      width: var(--sidebar-w); min-width: var(--sidebar-w);
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--sep);
+      padding: 20px 0;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      overflow-y: auto;
+      z-index: 200;
     }
 
-    /* ── Header ── */
-    .header {
-      padding: 20px 0 8px;
-      position: sticky; top: 0;
-      background: var(--bg); z-index: 100;
+    .sidebar-section {
+      padding: 0 16px;
+      margin-bottom: 24px;
     }
-    .header h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.5px; }
-    .header-sub { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+    .sidebar-title {
+      font-size: 10px; font-weight: 700;
+      color: var(--text-2); text-transform: uppercase;
+      letter-spacing: .8px; margin-bottom: 8px;
+      padding: 0 8px;
+    }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 8px; border-radius: 8px;
+      font-size: 13px; font-weight: 500;
+      color: var(--text); cursor: pointer;
+      transition: background .15s;
+      user-select: none;
+    }
+    .sidebar-item:hover { background: rgba(0,0,0,.04); }
+    .sidebar-item.active { background: rgba(0,122,255,.1); color: var(--accent); }
+    .sidebar-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+    .sidebar-item .badge {
+      margin-left: auto; font-size: 11px; font-weight: 600;
+      background: var(--accent); color: #fff;
+      border-radius: 10px; padding: 1px 7px; min-width: 20px; text-align: center;
+    }
+    .sidebar-item .chevron {
+      margin-left: auto; font-size: 10px; color: var(--text-3);
+      transition: transform .2s;
+    }
+    .sidebar-item .chevron.open { transform: rotate(90deg); }
+
+    .sidebar-logo {
+      padding: 0 24px; margin-bottom: 24px;
+      font-size: 15px; font-weight: 700;
+      color: var(--text); letter-spacing: -.3px;
+    }
+    .sidebar-logo span { color: var(--text-2); font-weight: 400; font-size: 12px; display: block; margin-top: 2px; }
+
+    /* ═══════════════════════════════════
+       MAIN CONTENT
+       ═══════════════════════════════════ */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1; padding: 20px 32px;
+      min-width: 0;
+    }
+
+    /* ── Top bar: titel + knop ── */
+    .topbar {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .topbar h1 { font-size: 28px; font-weight: 700; letter-spacing: -.3px; }
+    .btn-new {
+      padding: 8px 18px; border-radius: 8px; border: none;
+      background: var(--accent); color: #fff;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      transition: background .15s;
+    }
+    .btn-new:hover { background: #006ae6; }
 
     /* ── Metrics ── */
-    .metrics { display: flex; gap: 8px; margin: 16px 0; }
+    .metrics { display: flex; gap: 8px; margin-bottom: 20px; }
     .metric {
       flex: 1; min-width: 0; background: var(--card);
-      border-radius: 12px; padding: 12px 8px; text-align: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      border-radius: 10px; padding: 12px 10px; text-align: center;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04);
     }
-    .metric .num { font-size: 24px; font-weight: 700; }
+    .metric .num { font-size: 22px; font-weight: 700; }
     .metric .lbl {
       font-size: 10px; color: var(--text-2);
-      text-transform: uppercase; letter-spacing: .5px; margin-top: 2px;
+      text-transform: uppercase; letter-spacing: .4px; margin-top: 2px;
     }
     .metric.prio .num { color: var(--red); }
     .metric.werk .num { color: var(--accent); }
 
-    /* ── Toolbar ── */
-    .toolbar {
-      display: flex; gap: 6px; margin: 0 0 12px;
-      flex-wrap: wrap; align-items: center;
+    /* ── Filter dropdowns ── */
+    .filter-row {
+      display: flex; gap: 8px; margin-bottom: 16px;
+      flex-wrap: wrap;
     }
-    .toolbar-group { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-    .toolbar-sep { width: 1px; height: 20px; background: var(--sep); margin: 0 4px; }
-    .fbtn {
-      padding: 6px 14px; border-radius: 20px; border: none;
-      background: var(--card); color: var(--text-2);
-      font-size: 12px; font-weight: 500; cursor: pointer;
-      transition: all .2s; box-shadow: 0 1px 2px rgba(0,0,0,.06);
-      font-family: inherit; white-space: nowrap;
+    .filter-dd {
+      position: relative; display: inline-block;
     }
-    .fbtn.active { background: var(--accent); color: #fff; }
-    .fbtn:hover:not(.active) { background: #e8e8ed; }
-    .fbtn.action { background: var(--accent); color: #fff; font-weight: 600; }
-    .fbtn.action:hover { background: #006ae6; }
-    .fbtn.secondary { background: var(--card); color: var(--text); }
-    .fbtn.secondary:hover { background: #e8e8ed; }
+    .filter-dd-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 8px;
+      border: 1px solid var(--sep);
+      background: var(--card); color: var(--text);
+      font-size: 12px; font-weight: 500;
+      cursor: pointer; font-family: inherit;
+      transition: all .15s; user-select: none;
+    }
+    .filter-dd-btn:hover { border-color: #ccc; }
+    .filter-dd-btn.has-value { border-color: var(--accent); color: var(--accent); }
+    .filter-dd-btn .arrow {
+      font-size: 8px; color: var(--text-3);
+      margin-left: 2px;
+    }
+    .filter-dd-menu {
+      display: none;
+      position: absolute; top: calc(100% + 4px); left: 0;
+      background: var(--card); border: 1px solid var(--sep);
+      border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      padding: 6px 0; min-width: 160px;
+      z-index: 50;
+    }
+    .filter-dd-menu.open { display: block; }
+    .filter-dd-option {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 14px; font-size: 12px;
+      cursor: pointer; transition: background .1s;
+    }
+    .filter-dd-option:hover { background: rgba(0,122,255,.06); }
+    .filter-dd-option input { accent-color: var(--accent); }
 
-    /* ── Table ── */
+    /* ── Tabel ── */
     .table-wrap {
       background: var(--card);
-      border-radius: 13px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      border-radius: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04);
       overflow-x: auto;
     }
-    table {
-      width: 100%; border-collapse: collapse;
-      min-width: 900px;
-    }
+    table { width: 100%; border-collapse: collapse; min-width: 960px; }
+
     thead th {
-      text-align: left; padding: 10px 8px;
-      font-size: 10px; font-weight: 600;
+      text-align: left; padding: 11px 10px;
+      font-size: 11px; font-weight: 600;
       color: var(--text-2); text-transform: uppercase;
-      letter-spacing: .5px; border-bottom: 2px solid var(--sep);
+      letter-spacing: .4px; border-bottom: 1px solid var(--sep);
       background: var(--card); position: sticky; top: 0;
       white-space: nowrap; user-select: none;
     }
     tbody td {
-      padding: 7px 8px; vertical-align: top;
-      border-top: 1px solid var(--sep);
+      padding: 10px 10px; vertical-align: middle;
+      border-top: 1px solid #f0f0f2;
       font-size: 13px;
     }
+    tbody tr:first-child td { border-top: none; }
 
     /* Kolombreedtes */
-    .col-nr { width: 36px; text-align: center; }
-    .col-check { width: 32px; text-align: center; }
-    .col-cat { width: 40px; text-align: center; }
-    .col-project { width: 14%; }
-    .col-taak { width: 18%; }
+    .col-check { width: 36px; text-align: center; }
+    .col-done  { width: 36px; text-align: center; }
+    .col-prio  { width: 32px; text-align: center; }
+    .col-cat   { width: 50px; }
+    .col-project { width: 15%; }
+    .col-taak  { width: 18%; }
     .col-subtaak { }
-    .col-deadline { width: 85px; }
-    .col-geschat { width: 70px; }
-    .col-werkelijk { width: 60px; }
-    .col-context { width: 90px; }
-    .col-prio { width: 36px; text-align: center; }
+    .col-deadline { width: 90px; }
+    .col-geschat  { width: 75px; }
+    .col-werkelijk { width: 70px; }
+    .col-context { width: 100px; }
 
-    /* Rij-types */
-    tr.row-project td {
-      font-weight: 600; font-size: 14px;
-      background: rgba(0,0,0,.015);
-    }
-    tr.row-project td:first-child { border-left: 3px solid transparent; }
-    tr.row-project.is-prio td:first-child { border-left-color: var(--red); }
-    tr.row-project.is-laag td:first-child { border-left-color: var(--grey); }
+    /* Rij hover */
+    tbody tr:hover td { background: rgba(0,122,255,.015); }
 
-    tr.row-taak td { padding-left: 8px; }
-    tr.row-subtaak td { font-size: 12px; color: var(--text); }
-
-    tr.collapsed { display: none; }
-
-    tr:hover td { background: rgba(0,122,255,.02); }
+    /* Project-rij */
+    tr.row-project td { font-weight: 600; font-size: 13px; }
 
     /* Categorie badge */
     .cat {
-      font-size: 10px; font-weight: 700; padding: 2px 6px;
-      border-radius: 4px; display: inline-block; cursor: pointer;
-      user-select: none;
+      font-size: 10px; font-weight: 700; padding: 2px 7px;
+      border-radius: 4px; display: inline-block;
     }
-    .cat.w { background: rgba(0,122,255,.1); color: var(--accent); }
-    .cat.p { background: rgba(255,149,0,.12); color: var(--orange); }
+    .cat.w { background: rgba(0,122,255,.08); color: var(--accent); }
+    .cat.p { background: rgba(255,149,0,.1); color: var(--orange); }
 
-    /* Chevron voor in/uitklappen */
-    .chevron {
-      display: inline-block; font-size: 10px; color: var(--text-3);
-      transition: transform .2s ease; cursor: pointer;
-      user-select: none; width: 14px; text-align: center;
+    /* Chevron */
+    .chev {
+      display: inline-block; font-size: 9px; color: var(--text-3);
+      transition: transform .2s; cursor: pointer;
+      user-select: none; width: 14px; margin-right: 4px;
     }
-    .chevron.open { transform: rotate(90deg); }
+    .chev.open { transform: rotate(90deg); }
 
     /* Prio ster */
     .star {
       font-size: 16px; cursor: pointer; user-select: none;
-      transition: transform .15s; display: inline-block; line-height: 1;
+      transition: transform .12s; line-height: 1;
     }
-    .star:hover { transform: scale(1.2); }
+    .star:hover { transform: scale(1.15); }
     .star.on { color: var(--yellow); }
-    .star.off { color: var(--sep); }
+    .star.off { color: #ddd; }
 
     /* Checkbox */
     .cb {
-      width: 18px; height: 18px; border-radius: 50%;
-      border: 2px solid var(--sep); display: inline-flex;
+      width: 17px; height: 17px; border-radius: 50%;
+      border: 1.5px solid #d1d1d6; display: inline-flex;
       align-items: center; justify-content: center;
       cursor: pointer; transition: all .2s;
     }
     .cb:hover { border-color: var(--accent); }
-    .cb.done { background: var(--green); border-color: var(--green); pointer-events: none; }
-    .cb.done::after { content: '\2713'; color: #fff; font-size: 11px; font-weight: 700; }
+    .cb.done { background: var(--green); border-color: var(--green); }
+    .cb.done::after { content: '\2713'; color: #fff; font-size: 10px; font-weight: 700; }
 
     /* Deadline */
-    .dl { font-size: 11px; font-weight: 500; white-space: nowrap; }
+    .dl { font-size: 12px; font-weight: 500; white-space: nowrap; }
     .dl.urgent { color: var(--red); }
     .dl.normal { color: var(--text-3); }
 
+    /* Status badge */
+    .status-badge {
+      font-size: 10px; font-weight: 600; padding: 2px 8px;
+      border-radius: 4px; display: inline-block;
+    }
+    .status-badge.actief { background: rgba(52,199,89,.1); color: var(--green); }
+    .status-badge.inbox { background: rgba(0,122,255,.08); color: var(--accent); }
+
     /* Context tags */
-    .ctx { display: flex; flex-direction: column; gap: 1px; }
+    .ctx { display: flex; flex-direction: column; gap: 2px; }
     .ctx span {
-      font-size: 10px; background: rgba(0,0,0,.05); padding: 1px 5px;
+      font-size: 10px; background: rgba(0,0,0,.04); padding: 2px 6px;
       border-radius: 3px; color: var(--text-2); white-space: nowrap;
     }
 
     /* Tijd */
-    .tijd { font-size: 11px; color: var(--text-2); white-space: nowrap; }
+    .tijd { font-size: 12px; color: var(--text-2); white-space: nowrap; }
 
-    /* Editable cel */
-    .editable { cursor: pointer; border-radius: 3px; padding: 1px 3px; margin: -1px -3px; }
-    .editable:hover { background: rgba(0,122,255,.06); }
-    .edit-input {
-      width: 100%; border: 1px solid var(--accent);
-      border-radius: 4px; padding: 2px 4px;
-      font-size: inherit; font-family: inherit;
-      background: #fff; outline: none;
-    }
-
-    /* ── Loading ── */
-    .loading { text-align: center; padding: 48px 16px; color: var(--text-2); }
-    .spinner {
-      width: 24px; height: 24px; border: 3px solid var(--sep);
-      border-top-color: var(--accent); border-radius: 50%;
-      animation: spin .8s linear infinite; margin: 0 auto 12px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    /* Collapsed rows */
+    tr.collapsed { display: none; }
 
     /* ── Footer ── */
     .footer {
-      text-align: center; padding: 24px 0 16px;
-      font-size: 12px; color: var(--text-3);
+      text-align: center; padding: 28px 0 16px;
+      font-size: 11px; color: var(--text-3);
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <div class="header">
-    <h1>Taken</h1>
-    <div class="header-sub">R.H.L. Consultancy · Taakmanager</div>
-  </div>
+  <!-- ═══ SIDEBAR ═══ -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      R.H.L.<span>Taakmanager</span>
+    </div>
 
-  <!-- Metrics -->
-  <div class="metrics">
-    <div class="metric">
-      <div class="num" id="mTotal">0</div>
-      <div class="lbl">Totaal</div>
+    <div class="sidebar-section">
+      <div class="sidebar-item active">
+        <span class="icon">📥</span> Alle taken
+      </div>
     </div>
-    <div class="metric">
-      <div class="num" id="mOpen">0</div>
-      <div class="lbl">Open</div>
-    </div>
-    <div class="metric werk">
-      <div class="num" id="mWerk">0</div>
-      <div class="lbl">Werk</div>
-    </div>
-    <div class="metric prio">
-      <div class="num" id="mPrio">0</div>
-      <div class="lbl">Prioriteit</div>
-    </div>
-  </div>
 
-  <!-- Toolbar: Filters + acties -->
-  <div class="toolbar">
-    <div class="toolbar-group" id="filters">
-      <button class="fbtn active" data-f="alles">Alles</button>
-      <button class="fbtn" data-f="prioriteit">Prioriteit</button>
-      <button class="fbtn" data-f="werk">Werk</button>
-      <button class="fbtn" data-f="prive">Privé</button>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Snelle weergaven</div>
+      <div class="sidebar-item">
+        <span class="icon">🔴</span> Vandaag
+        <span class="badge" id="badgeVandaag">0</span>
+      </div>
+      <div class="sidebar-item">
+        <span class="icon">📅</span> Deze week
+      </div>
+      <div class="sidebar-item">
+        <span class="icon">⏳</span> Wachten op
+      </div>
+      <div class="sidebar-item">
+        <span class="icon">⚡</span> Quick wins
+      </div>
     </div>
-    <div class="toolbar-sep"></div>
-    <div class="toolbar-group">
-      <button class="fbtn secondary" id="btnCollapseAll">Alles inklappen</button>
-      <button class="fbtn secondary" id="btnExpandAll">Alles uitklappen</button>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Projecten</div>
+      <div class="sidebar-item">
+        <span class="icon">▸</span> HSPI project
+      </div>
+      <div class="sidebar-item">
+        <span class="icon">▸</span> Commercie
+      </div>
+      <div class="sidebar-item">
+        <span class="icon">▸</span> Privé divers
+      </div>
+      <div class="sidebar-item">
+        <span class="icon">▸</span> Natasja
+      </div>
     </div>
-    <div class="toolbar-sep"></div>
-    <div class="toolbar-group">
-      <button class="fbtn action" id="btnAdd">+ Nieuwe taak</button>
+
+    <div style="flex:1"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-item">
+        <span class="icon">📦</span> Archief
+      </div>
+      <div class="sidebar-item">
+        <span class="icon">⚙️</span> Beheer
+      </div>
     </div>
-  </div>
+  </nav>
 
-  <!-- Loading -->
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <div>Taken laden...</div>
-  </div>
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
 
-  <!-- Tabel -->
-  <div class="table-wrap" id="tableWrap" style="display:none;">
-    <table>
-      <thead>
-        <tr>
-          <th class="col-nr">#</th>
-          <th class="col-check"></th>
-          <th class="col-cat">W/P</th>
-          <th class="col-project">Project</th>
-          <th class="col-taak">Taak</th>
-          <th class="col-subtaak">Subtaak</th>
-          <th class="col-deadline">Deadline</th>
-          <th class="col-geschat">Geschat</th>
-          <th class="col-werkelijk">Werkelijk</th>
-          <th class="col-context">Context</th>
-          <th class="col-prio">Prio</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
+    <!-- Top bar -->
+    <div class="topbar">
+      <h1>Alle taken</h1>
+      <button class="btn-new">+ Nieuwe taak</button>
+    </div>
 
-  <div class="footer">R.H.L. Consultancy · Taakmanager</div>
+    <!-- Metrics -->
+    <div class="metrics">
+      <div class="metric">
+        <div class="num" id="mTotal">–</div>
+        <div class="lbl">Totaal</div>
+      </div>
+      <div class="metric">
+        <div class="num" id="mOpen">–</div>
+        <div class="lbl">Open</div>
+      </div>
+      <div class="metric werk">
+        <div class="num" id="mWerk">–</div>
+        <div class="lbl">Werk</div>
+      </div>
+      <div class="metric prio">
+        <div class="num" id="mPrio">–</div>
+        <div class="lbl">Prioriteit</div>
+      </div>
+    </div>
+
+    <!-- Filter dropdowns -->
+    <div class="filter-row">
+      <div class="filter-dd">
+        <button class="filter-dd-btn">Categorie <span class="arrow">▾</span></button>
+        <div class="filter-dd-menu">
+          <label class="filter-dd-option"><input type="checkbox" value="Werk"> Werk</label>
+          <label class="filter-dd-option"><input type="checkbox" value="Privé"> Privé</label>
+        </div>
+      </div>
+      <div class="filter-dd">
+        <button class="filter-dd-btn">Prioriteit <span class="arrow">▾</span></button>
+        <div class="filter-dd-menu">
+          <label class="filter-dd-option"><input type="checkbox" value="hoog"> Hoog</label>
+          <label class="filter-dd-option"><input type="checkbox" value="normaal"> Normaal</label>
+          <label class="filter-dd-option"><input type="checkbox" value="laag"> Laag</label>
+        </div>
+      </div>
+      <div class="filter-dd">
+        <button class="filter-dd-btn">Deadline <span class="arrow">▾</span></button>
+        <div class="filter-dd-menu">
+          <label class="filter-dd-option"><input type="checkbox" value="vandaag"> Vandaag</label>
+          <label class="filter-dd-option"><input type="checkbox" value="week"> Deze week</label>
+          <label class="filter-dd-option"><input type="checkbox" value="geen"> Geen deadline</label>
+        </div>
+      </div>
+      <div class="filter-dd">
+        <button class="filter-dd-btn">Context <span class="arrow">▾</span></button>
+        <div class="filter-dd-menu">
+          <label class="filter-dd-option"><input type="checkbox" value="Kantoor"> @Kantoor</label>
+          <label class="filter-dd-option"><input type="checkbox" value="Thuis"> @Thuis</label>
+          <label class="filter-dd-option"><input type="checkbox" value="Onderweg"> @Onderweg</label>
+          <label class="filter-dd-option"><input type="checkbox" value="Computer"> @Computer</label>
+          <label class="filter-dd-option"><input type="checkbox" value="Telefoon"> @Telefoon</label>
+          <label class="filter-dd-option"><input type="checkbox" value="Online"> @Online</label>
+        </div>
+      </div>
+      <div class="filter-dd">
+        <button class="filter-dd-btn">Geschat <span class="arrow">▾</span></button>
+        <div class="filter-dd-menu">
+          <label class="filter-dd-option"><input type="checkbox" value="15"> &lt;15 min</label>
+          <label class="filter-dd-option"><input type="checkbox" value="30"> &lt;30 min</label>
+          <label class="filter-dd-option"><input type="checkbox" value="60"> &lt;60 min</label>
+          <label class="filter-dd-option"><input type="checkbox" value="90"> &lt;90 min</label>
+          <label class="filter-dd-option"><input type="checkbox" value="120"> &lt;120 min</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabel -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-check"></th>
+            <th class="col-done">✓</th>
+            <th class="col-prio">P</th>
+            <th class="col-cat">W/P</th>
+            <th class="col-project">Project</th>
+            <th class="col-taak">Taak</th>
+            <th class="col-subtaak">Subtaak</th>
+            <th class="col-deadline">Deadline</th>
+            <th class="col-geschat">Geschat</th>
+            <th class="col-werkelijk">Werkelijk</th>
+            <th class="col-context">Context</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <!-- Voorbeeld rijen (placeholder, wordt vervangen door Supabase data) -->
+          <tr class="row-project">
+            <td style="text-align:center"><input type="checkbox"></td>
+            <td></td>
+            <td style="text-align:center"><span class="star on">★</span></td>
+            <td><span class="cat w">W</span></td>
+            <td><span class="chev open">▶</span> HSPI project</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr class="row-taak">
+            <td></td>
+            <td></td>
+            <td style="text-align:center"><span class="star off">★</span></td>
+            <td><span class="cat w">W</span></td>
+            <td></td>
+            <td><span class="chev open">▶</span> Bellen reguliere leden</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr class="row-subtaak">
+            <td></td>
+            <td style="text-align:center"><div class="cb"></div></td>
+            <td style="text-align:center"><span class="star off">★</span></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>Auke (RFH)</td>
+            <td></td>
+            <td class="tijd"></td>
+            <td class="tijd"></td>
+            <td></td>
+          </tr>
+          <tr class="row-subtaak">
+            <td></td>
+            <td style="text-align:center"><div class="cb"></div></td>
+            <td style="text-align:center"><span class="star off">★</span></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>Nick (MS)</td>
+            <td></td>
+            <td class="tijd"></td>
+            <td class="tijd"></td>
+            <td></td>
+          </tr>
+          <tr class="row-taak">
+            <td></td>
+            <td style="text-align:center"><div class="cb"></div></td>
+            <td style="text-align:center"><span class="star off">★</span></td>
+            <td><span class="cat w">W</span></td>
+            <td></td>
+            <td>Bellen handelaren</td>
+            <td></td>
+            <td><span class="dl urgent">30-03-2026</span></td>
+            <td class="tijd"></td>
+            <td class="tijd"></td>
+            <td></td>
+          </tr>
+          <tr class="row-project">
+            <td style="text-align:center"><input type="checkbox"></td>
+            <td></td>
+            <td style="text-align:center"><span class="star off">★</span></td>
+            <td><span class="cat p">P</span></td>
+            <td><span class="chev">▶</span> Privé divers</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer">R.H.L. Consultancy · Taakmanager</div>
+  </div>
 
   <script>
-    // ── Supabase config ──
-    const SB_URL = 'https://fhkttfzqdjynzmtjbujv.supabase.co';
-    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoa3R0ZnpxZGp5bnptdGpidWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDg5NjgsImV4cCI6MjA5MDI4NDk2OH0.0p7IK97uPxBcazlUwredncV8EIFuvgjAhe46N9P118I';
-    const hdrs = {
-      'apikey': SB_KEY,
-      'Authorization': `Bearer ${SB_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation'
-    };
+    // ── Dropdown filter toggle ──
+    document.querySelectorAll('.filter-dd-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const menu = btn.nextElementSibling;
+        // Sluit alle andere menus
+        document.querySelectorAll('.filter-dd-menu.open').forEach(m => {
+          if (m !== menu) m.classList.remove('open');
+        });
+        menu.classList.toggle('open');
+      });
+    });
 
-    // ── Placeholder: data wordt in stap 2 geladen ──
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('tableWrap').style.display = 'block';
-    document.getElementById('tbody').innerHTML = `
-      <tr class="row-project is-prio">
-        <td style="text-align:center">1</td>
-        <td></td>
-        <td style="text-align:center"><span class="cat w">W</span></td>
-        <td><span class="chevron open">&#9656;</span> HSPI project</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td style="text-align:center"><span class="star on">★</span></td>
-      </tr>
-      <tr class="row-taak">
-        <td style="text-align:center">2</td>
-        <td></td>
-        <td style="text-align:center"><span class="cat w">W</span></td>
-        <td></td>
-        <td><span class="chevron open">&#9656;</span> Bellen reguliere leden</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td style="text-align:center"><span class="star off">★</span></td>
-      </tr>
-      <tr class="row-subtaak">
-        <td style="text-align:center">3</td>
-        <td style="text-align:center"><div class="cb"></div></td>
-        <td style="text-align:center"><span class="cat w">W</span></td>
-        <td></td>
-        <td></td>
-        <td class="editable">Auke (RFH)</td>
-        <td></td>
-        <td class="tijd"></td>
-        <td class="tijd"></td>
-        <td></td>
-        <td style="text-align:center"><span class="star off">★</span></td>
-      </tr>
-      <tr class="row-subtaak">
-        <td style="text-align:center">4</td>
-        <td style="text-align:center"><div class="cb"></div></td>
-        <td style="text-align:center"><span class="cat w">W</span></td>
-        <td></td>
-        <td></td>
-        <td class="editable">Nick (MS)</td>
-        <td></td>
-        <td class="tijd"></td>
-        <td class="tijd"></td>
-        <td></td>
-        <td style="text-align:center"><span class="star off">★</span></td>
-      </tr>
-      <tr class="row-subtaak">
-        <td style="text-align:center">5</td>
-        <td style="text-align:center"><div class="cb"></div></td>
-        <td style="text-align:center"><span class="cat w">W</span></td>
-        <td></td>
-        <td></td>
-        <td class="editable">Sean (JBB)</td>
-        <td></td>
-        <td class="tijd"></td>
-        <td class="tijd"></td>
-        <td></td>
-        <td style="text-align:center"><span class="star off">★</span></td>
-      </tr>
-      <tr class="row-taak">
-        <td style="text-align:center">6</td>
-        <td></td>
-        <td style="text-align:center"><span class="cat w">W</span></td>
-        <td></td>
-        <td>Bellen handelaren</td>
-        <td></td>
-        <td><span class="dl urgent">30-03-2026</span></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td style="text-align:center"><span class="star off">★</span></td>
-      </tr>
-      <tr class="row-project">
-        <td style="text-align:center">7</td>
-        <td></td>
-        <td style="text-align:center"><span class="cat p">P</span></td>
-        <td><span class="chevron">&#9656;</span> Privé divers</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td style="text-align:center"><span class="star off">★</span></td>
-      </tr>
-    `;
+    // Sluit dropdown bij klik buiten
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.filter-dd-menu.open').forEach(m => m.classList.remove('open'));
+    });
 
-    // Placeholder metrics
-    document.getElementById('mTotal').textContent = '9';
-    document.getElementById('mOpen').textContent = '42';
-    document.getElementById('mWerk').textContent = '5';
-    document.getElementById('mPrio').textContent = '2';
+    // Voorkom sluiten bij klik in menu
+    document.querySelectorAll('.filter-dd-menu').forEach(menu => {
+      menu.addEventListener('click', (e) => e.stopPropagation());
+    });
   </script>
 </body>
 </html>

@@ -367,6 +367,59 @@
     }
 
     /* ============================================
+       Sub-subtaken
+       ============================================ */
+    .sub-subtask-list {
+      margin: 6px 0 4px 32px;
+    }
+
+    .sub-subtask {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 0;
+    }
+
+    .sub-subtask-checkbox {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--separator);
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .sub-subtask-checkbox:hover {
+      border-color: var(--accent);
+    }
+
+    .sub-subtask-checkbox.checked {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .sub-subtask-checkbox.checked::after {
+      content: '✓';
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .sub-subtask-text {
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .sub-subtask-text.done {
+      color: var(--text-tertiary);
+      text-decoration: line-through;
+    }
+
+    /* ============================================
        Lage Prioriteit Section
        ============================================ */
     .section-toggle {
@@ -545,6 +598,7 @@
     // ============================================
     let taken = [];
     let subtaken = [];
+    let subSubtaken = [];
     let laagLijsten = [];
     let laagItems = [];
     let activeFilter = 'alles';
@@ -572,14 +626,16 @@
     // Data Loading
     // ============================================
     async function loadData() {
-      const [t, s, ll, li] = await Promise.all([
+      const [t, s, ss, ll, li] = await Promise.all([
         query('taken', 'order=nr.asc'),
         query('subtaken', 'order=volgorde.asc'),
+        query('sub_subtaken', 'order=volgorde.asc'),
         query('laag_prioriteit', 'order=nr.asc'),
         query('laag_items', 'order=volgorde.asc')
       ]);
       taken = t;
       subtaken = s;
+      subSubtaken = ss;
       laagLijsten = ll;
       laagItems = li;
     }
@@ -746,14 +802,35 @@
           ${formatDeadline(s.deadline)}
         </span>` : '';
 
+      // Sub-subtaken voor deze subtaak (altijd allemaal tonen, ook afgevinkte)
+      const subs = subSubtaken.filter(ss => ss.subtaak_id === s.id);
+      const hasSubSubs = subs.length > 0;
+
+      const subSubHtml = hasSubSubs ? `
+        <div class="sub-subtask-list">
+          ${subs.map(ss => `
+            <div class="sub-subtask" data-ss-id="${ss.id}">
+              <div class="sub-subtask-checkbox ${ss.gedaan ? 'checked' : ''}" data-ss-id="${ss.id}"></div>
+              <span class="sub-subtask-text ${ss.gedaan ? 'done' : ''}">${ss.tekst}</span>
+            </div>
+          `).join('')}
+        </div>` : '';
+
+      // Als er sub-subtaken zijn, toon geen checkbox op subtaak-niveau
+      // (subtaak wordt pas afgerond als alle sub-subtaken klaar zijn)
+      const checkboxHtml = hasSubSubs
+        ? `<div style="width:22px;flex-shrink:0;"></div>`
+        : `<div class="subtask-checkbox" data-id="${s.id}"></div>`;
+
       return `
         <div class="subtask" data-sub-id="${s.id}">
-          <div class="subtask-checkbox" data-id="${s.id}"></div>
+          ${checkboxHtml}
           <div class="subtask-text">
             <span class="sub-id">${s.sub_id}.</span>
             ${s.tekst}
+            ${deadlineHtml}
+            ${subSubHtml}
           </div>
-          ${deadlineHtml}
         </div>`;
     }
 
@@ -825,6 +902,57 @@
                 gedaan_datum: new Date().toISOString().split('T')[0]
               })
             });
+          }
+
+          setTimeout(async () => {
+            await loadData();
+            render();
+          }, 300);
+        });
+      });
+
+      // Sub-subtask checkboxes
+      document.querySelectorAll('.sub-subtask-checkbox:not(.checked)').forEach(cb => {
+        cb.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = cb.dataset.ssId;
+          cb.classList.add('checked');
+          cb.nextElementSibling.classList.add('done');
+
+          await patch('sub_subtaken', id, {
+            gedaan: true,
+            gedaan_datum: new Date().toISOString().split('T')[0]
+          });
+
+          // Check of alle sub-subtaken van deze subtaak nu gedaan zijn
+          const ss = subSubtaken.find(s => s.id === id);
+          if (ss) {
+            const siblings = subSubtaken.filter(s => s.subtaak_id === ss.subtaak_id);
+            const alleDone = siblings.every(s => s.id === id ? true : s.gedaan);
+
+            if (alleDone) {
+              // Subtaak ook als gedaan markeren
+              const subtaak = subtaken.find(s => s.id === ss.subtaak_id);
+              if (subtaak) {
+                await patch('subtaken', subtaak.id, {
+                  gedaan: true,
+                  gedaan_datum: new Date().toISOString().split('T')[0]
+                });
+
+                // Log naar afgerond
+                const taak = taken.find(t => t.id === subtaak.taak_id);
+                await fetch(`${SUPABASE_URL}/rest/v1/afgerond_log`, {
+                  method: 'POST',
+                  headers,
+                  body: JSON.stringify({
+                    taak_nr: subtaak.sub_id,
+                    taak_tekst: subtaak.tekst,
+                    categorie: taak ? taak.categorie : null,
+                    gedaan_datum: new Date().toISOString().split('T')[0]
+                  })
+                });
+              }
+            }
           }
 
           setTimeout(async () => {

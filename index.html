@@ -23,8 +23,8 @@
       --red: #ff3b30;
       --orange: #ff9500;
       --green: #34c759;
+      --yellow: #ffcc00;
       --grey: #8e8e93;
-      --radius: 13px;
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
       font-size: 15px;
       color: var(--text);
@@ -34,8 +34,8 @@
 
     body {
       min-height: 100dvh;
-      padding: env(safe-area-inset-top, 0px) 16px env(safe-area-inset-bottom, 0px) 16px;
-      max-width: 800px;
+      padding: env(safe-area-inset-top, 0px) 24px env(safe-area-inset-bottom, 0px) 24px;
+      max-width: 1400px;
       margin: 0 auto;
     }
 
@@ -63,10 +63,13 @@
     .metric.prio .num { color: var(--red); }
     .metric.werk .num { color: var(--accent); }
 
-    /* ── Filters ── */
-    .filters { display: flex; gap: 6px; margin: 0 0 8px; flex-wrap: wrap; }
-    .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
-    .filter-group + .filter-group { margin-left: 8px; padding-left: 8px; border-left: 1px solid var(--sep); }
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex; gap: 6px; margin: 0 0 12px;
+      flex-wrap: wrap; align-items: center;
+    }
+    .toolbar-group { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .toolbar-sep { width: 1px; height: 20px; background: var(--sep); margin: 0 4px; }
     .fbtn {
       padding: 6px 14px; border-radius: 20px; border: none;
       background: var(--card); color: var(--text-2);
@@ -76,140 +79,129 @@
     }
     .fbtn.active { background: var(--accent); color: #fff; }
     .fbtn:hover:not(.active) { background: #e8e8ed; }
+    .fbtn.action { background: var(--accent); color: #fff; font-weight: 600; }
+    .fbtn.action:hover { background: #006ae6; }
+    .fbtn.secondary { background: var(--card); color: var(--text); }
+    .fbtn.secondary:hover { background: #e8e8ed; }
 
-    /* ── Section Headers ── */
-    .section-header {
-      font-size: 20px; font-weight: 700; margin: 24px 0 12px;
-      display: flex; align-items: center; gap: 8px; cursor: pointer;
+    /* ── Table ── */
+    .table-wrap {
+      background: var(--card);
+      border-radius: 13px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      overflow-x: auto;
+    }
+    table {
+      width: 100%; border-collapse: collapse;
+      min-width: 900px;
+    }
+    thead th {
+      text-align: left; padding: 10px 8px;
+      font-size: 10px; font-weight: 600;
+      color: var(--text-2); text-transform: uppercase;
+      letter-spacing: .5px; border-bottom: 2px solid var(--sep);
+      background: var(--card); position: sticky; top: 0;
+      white-space: nowrap; user-select: none;
+    }
+    tbody td {
+      padding: 7px 8px; vertical-align: top;
+      border-top: 1px solid var(--sep);
+      font-size: 13px;
+    }
+
+    /* Kolombreedtes */
+    .col-nr { width: 36px; text-align: center; }
+    .col-check { width: 32px; text-align: center; }
+    .col-cat { width: 40px; text-align: center; }
+    .col-project { width: 14%; }
+    .col-taak { width: 18%; }
+    .col-subtaak { }
+    .col-deadline { width: 85px; }
+    .col-geschat { width: 70px; }
+    .col-werkelijk { width: 60px; }
+    .col-context { width: 90px; }
+    .col-prio { width: 36px; text-align: center; }
+
+    /* Rij-types */
+    tr.row-project td {
+      font-weight: 600; font-size: 14px;
+      background: rgba(0,0,0,.015);
+    }
+    tr.row-project td:first-child { border-left: 3px solid transparent; }
+    tr.row-project.is-prio td:first-child { border-left-color: var(--red); }
+    tr.row-project.is-laag td:first-child { border-left-color: var(--grey); }
+
+    tr.row-taak td { padding-left: 8px; }
+    tr.row-subtaak td { font-size: 12px; color: var(--text); }
+
+    tr.collapsed { display: none; }
+
+    tr:hover td { background: rgba(0,122,255,.02); }
+
+    /* Categorie badge */
+    .cat {
+      font-size: 10px; font-weight: 700; padding: 2px 6px;
+      border-radius: 4px; display: inline-block; cursor: pointer;
       user-select: none;
     }
-    .section-header .chevron {
-      font-size: 14px; color: var(--text-3);
-      transition: transform .25s ease; display: inline-block;
-    }
-    .section-header .chevron.open { transform: rotate(90deg); }
-    .section-header .count {
-      font-size: 13px; font-weight: 400; color: var(--text-2);
-    }
+    .cat.w { background: rgba(0,122,255,.1); color: var(--accent); }
+    .cat.p { background: rgba(255,149,0,.12); color: var(--orange); }
 
-    /* ── Task Card ── */
-    .task-card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: 0 1px 3px rgba(0,0,0,.06);
-      margin-bottom: 10px;
-      overflow: hidden;
-      border-left: 4px solid transparent;
+    /* Chevron voor in/uitklappen */
+    .chevron {
+      display: inline-block; font-size: 10px; color: var(--text-3);
+      transition: transform .2s ease; cursor: pointer;
+      user-select: none; width: 14px; text-align: center;
     }
-    .task-card.prio { border-left-color: var(--red); }
-    .task-card.laag { border-left-color: var(--grey); }
+    .chevron.open { transform: rotate(90deg); }
 
-    /* Card header (hoofdtaak) */
-    .card-head {
-      display: flex; align-items: center; gap: 10px;
-      padding: 14px 16px; cursor: pointer; user-select: none;
-      transition: background .15s;
+    /* Prio ster */
+    .star {
+      font-size: 16px; cursor: pointer; user-select: none;
+      transition: transform .15s; display: inline-block; line-height: 1;
     }
-    .card-head:hover { background: rgba(0,0,0,.02); }
-    .card-head .chevron {
-      font-size: 12px; color: var(--text-3);
-      transition: transform .25s ease; flex-shrink: 0;
-    }
-    .card-head .chevron.open { transform: rotate(90deg); }
-
-    .card-info { flex: 1; min-width: 0; }
-    .card-title {
-      font-weight: 600; font-size: 15px;
-      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    }
-    .card-title .nr { color: var(--text-3); font-weight: 500; font-size: 13px; }
-    .card-meta {
-      display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap;
-      align-items: center;
-    }
-
-    /* Badges */
-    .badge {
-      font-size: 10px; font-weight: 600; padding: 2px 7px;
-      border-radius: 4px; text-transform: uppercase; letter-spacing: .3px;
-      display: inline-block; white-space: nowrap;
-    }
-    .badge.werk { background: rgba(0,122,255,.1); color: var(--accent); }
-    .badge.prive { background: rgba(255,149,0,.12); color: var(--orange); }
-    .badge.prio-badge { background: rgba(255,59,48,.1); color: var(--red); }
-    .badge.laag-badge { background: rgba(142,142,147,.12); color: var(--grey); }
-    .badge.context-badge { background: rgba(0,0,0,.05); color: var(--text-2); }
-
-    .deadline-tag {
-      font-size: 11px; font-weight: 500; white-space: nowrap;
-    }
-    .deadline-tag.urgent { color: var(--red); }
-    .deadline-tag.normal { color: var(--text-3); }
-
-    .open-count {
-      font-size: 12px; color: var(--text-2); white-space: nowrap;
-    }
-
-    /* Subtaken lijst */
-    .subtaken { display: none; padding: 0 16px 12px 42px; }
-    .subtaken.open { display: block; }
-
-    .subtaak-item {
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 8px 0;
-      border-top: 1px solid rgba(0,0,0,.05);
-    }
-    .subtaak-item:first-child { border-top: none; }
+    .star:hover { transform: scale(1.2); }
+    .star.on { color: var(--yellow); }
+    .star.off { color: var(--sep); }
 
     /* Checkbox */
     .cb {
-      width: 20px; height: 20px; border-radius: 50%;
-      border: 2px solid var(--sep); flex-shrink: 0; margin-top: 1px;
-      cursor: pointer; display: flex; align-items: center;
-      justify-content: center; transition: all .2s;
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--sep); display: inline-flex;
+      align-items: center; justify-content: center;
+      cursor: pointer; transition: all .2s;
     }
     .cb:hover { border-color: var(--accent); }
-    .cb.done {
-      background: var(--green); border-color: var(--green);
-      pointer-events: none;
-    }
-    .cb.done::after { content: '\2713'; color: #fff; font-size: 12px; font-weight: 700; }
+    .cb.done { background: var(--green); border-color: var(--green); pointer-events: none; }
+    .cb.done::after { content: '\2713'; color: #fff; font-size: 11px; font-weight: 700; }
 
-    .subtaak-content { flex: 1; min-width: 0; }
-    .subtaak-tekst {
-      font-size: 14px; line-height: 1.4;
-      cursor: default;
-    }
-    .subtaak-tekst.editable { cursor: pointer; border-radius: 4px; padding: 1px 4px; margin: -1px -4px; }
-    .subtaak-tekst.editable:hover { background: rgba(0,122,255,.06); }
-    .subtaak-meta {
-      display: flex; gap: 6px; margin-top: 3px; flex-wrap: wrap;
-      align-items: center;
+    /* Deadline */
+    .dl { font-size: 11px; font-weight: 500; white-space: nowrap; }
+    .dl.urgent { color: var(--red); }
+    .dl.normal { color: var(--text-3); }
+
+    /* Context tags */
+    .ctx { display: flex; flex-direction: column; gap: 1px; }
+    .ctx span {
+      font-size: 10px; background: rgba(0,0,0,.05); padding: 1px 5px;
+      border-radius: 3px; color: var(--text-2); white-space: nowrap;
     }
 
-    /* Sub-subtaken (niveau 3) */
-    .sub-subtaken { margin: 6px 0 2px 30px; }
-    .sub-subtaak-item {
-      display: flex; align-items: flex-start; gap: 8px;
-      padding: 5px 0;
-      border-top: 1px solid rgba(0,0,0,.03);
-    }
-    .sub-subtaak-item:first-child { border-top: none; }
-    .sub-subtaak-item .cb { width: 17px; height: 17px; }
-    .sub-subtaak-item .cb.done::after { font-size: 10px; }
-    .sub-subtaak-tekst { font-size: 13px; color: var(--text); line-height: 1.3; }
+    /* Tijd */
+    .tijd { font-size: 11px; color: var(--text-2); white-space: nowrap; }
 
-    /* Inline editing */
-    .inline-edit {
+    /* Editable cel */
+    .editable { cursor: pointer; border-radius: 3px; padding: 1px 3px; margin: -1px -3px; }
+    .editable:hover { background: rgba(0,122,255,.06); }
+    .edit-input {
       width: 100%; border: 1px solid var(--accent);
-      border-radius: 4px; padding: 2px 6px;
+      border-radius: 4px; padding: 2px 4px;
       font-size: inherit; font-family: inherit;
       background: #fff; outline: none;
     }
 
-    /* ── Loading / Empty ── */
-    .loading, .empty { text-align: center; padding: 48px 16px; color: var(--text-2); }
-    .empty .icon { font-size: 48px; margin-bottom: 12px; }
+    /* ── Loading ── */
+    .loading { text-align: center; padding: 48px 16px; color: var(--text-2); }
     .spinner {
       width: 24px; height: 24px; border: 3px solid var(--sep);
       border-top-color: var(--accent); border-radius: 50%;
@@ -217,551 +209,203 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── Footer ── */
     .footer {
       text-align: center; padding: 24px 0 16px;
       font-size: 12px; color: var(--text-3);
-    }
-
-    /* ── Responsive ── */
-    @media (max-width: 480px) {
-      body { padding-left: 10px; padding-right: 10px; }
-      .header h1 { font-size: 28px; }
-      .metric { padding: 10px 4px; }
-      .metric .num { font-size: 20px; }
-      .filter-group + .filter-group { margin-left: 0; padding-left: 0; border-left: none; }
-      .subtaken { padding-left: 30px; }
     }
   </style>
 </head>
 <body>
 
+  <!-- Header -->
   <div class="header">
     <h1>Taken</h1>
-    <div class="header-sub" id="lastUpdate"></div>
+    <div class="header-sub">R.H.L. Consultancy · Taakmanager</div>
   </div>
 
+  <!-- Metrics -->
   <div class="metrics">
     <div class="metric">
-      <div class="num" id="mTotaal">-</div>
-      <div class="lbl">Taken</div>
+      <div class="num" id="mTotal">0</div>
+      <div class="lbl">Totaal</div>
     </div>
     <div class="metric">
-      <div class="num" id="mOpen">-</div>
+      <div class="num" id="mOpen">0</div>
       <div class="lbl">Open</div>
     </div>
     <div class="metric werk">
-      <div class="num" id="mWerk">-</div>
+      <div class="num" id="mWerk">0</div>
       <div class="lbl">Werk</div>
     </div>
     <div class="metric prio">
-      <div class="num" id="mPrio">-</div>
+      <div class="num" id="mPrio">0</div>
       <div class="lbl">Prioriteit</div>
     </div>
   </div>
 
-  <!-- Filters -->
-  <div class="filters" id="filterBar">
-    <div class="filter-group" data-group="main">
-      <button class="fbtn active" data-filter="alles">Alles</button>
-      <button class="fbtn" data-filter="prioriteit">Prioriteit</button>
-      <button class="fbtn" data-filter="werk">Werk</button>
-      <button class="fbtn" data-filter="prive">Priv&eacute;</button>
+  <!-- Toolbar: Filters + acties -->
+  <div class="toolbar">
+    <div class="toolbar-group" id="filters">
+      <button class="fbtn active" data-f="alles">Alles</button>
+      <button class="fbtn" data-f="prioriteit">Prioriteit</button>
+      <button class="fbtn" data-f="werk">Werk</button>
+      <button class="fbtn" data-f="prive">Privé</button>
     </div>
-    <div class="filter-group" data-group="context">
-      <button class="fbtn" data-filter="@Thuis">Thuis</button>
-      <button class="fbtn" data-filter="@Kantoor">Kantoor</button>
-      <button class="fbtn" data-filter="@Telefoon">Telefoon</button>
-      <button class="fbtn" data-filter="@Onderweg">Onderweg</button>
-      <button class="fbtn" data-filter="@Computer">PC</button>
+    <div class="toolbar-sep"></div>
+    <div class="toolbar-group">
+      <button class="fbtn secondary" id="btnCollapseAll">Alles inklappen</button>
+      <button class="fbtn secondary" id="btnExpandAll">Alles uitklappen</button>
     </div>
-    <div class="filter-group" data-group="tijd">
-      <button class="fbtn" data-filter="<15 min">&lt;15m</button>
-      <button class="fbtn" data-filter="<30 min">&lt;30m</button>
-      <button class="fbtn" data-filter="<60 min">&lt;1u</button>
+    <div class="toolbar-sep"></div>
+    <div class="toolbar-group">
+      <button class="fbtn action" id="btnAdd">+ Nieuwe taak</button>
     </div>
   </div>
 
+  <!-- Loading -->
   <div class="loading" id="loading">
     <div class="spinner"></div>
     <div>Taken laden...</div>
   </div>
 
-  <div id="app" style="display:none;">
-    <div id="normalSection"></div>
-
-    <div class="section-header" id="laagHeader" style="display:none;">
-      <span class="chevron">&#9656;</span>
-      Lage prioriteit
-      <span class="count" id="laagCount"></span>
-    </div>
-    <div id="laagSection" style="display:none;"></div>
+  <!-- Tabel -->
+  <div class="table-wrap" id="tableWrap" style="display:none;">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-nr">#</th>
+          <th class="col-check"></th>
+          <th class="col-cat">W/P</th>
+          <th class="col-project">Project</th>
+          <th class="col-taak">Taak</th>
+          <th class="col-subtaak">Subtaak</th>
+          <th class="col-deadline">Deadline</th>
+          <th class="col-geschat">Geschat</th>
+          <th class="col-werkelijk">Werkelijk</th>
+          <th class="col-context">Context</th>
+          <th class="col-prio">Prio</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
   </div>
 
-  <div class="footer">R.H.L. Consultancy &middot; Taakmanager</div>
+  <div class="footer">R.H.L. Consultancy · Taakmanager</div>
 
   <script>
-    /* ══════════════════════════════════════════
-       CONFIG
-       ══════════════════════════════════════════ */
-    const SUPA_URL = 'https://fhkttfzqdjynzmtjbujv.supabase.co';
-    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoa3R0ZnpxZGp5bnptdGpidWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDg5NjgsImV4cCI6MjA5MDI4NDk2OH0.0p7IK97uPxBcazlUwredncV8EIFuvgjAhe46N9P118I';
-    const H = {
-      'apikey': SUPA_KEY,
-      'Authorization': `Bearer ${SUPA_KEY}`,
+    // ── Supabase config ──
+    const SB_URL = 'https://fhkttfzqdjynzmtjbujv.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoa3R0ZnpxZGp5bnptdGpidWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDg5NjgsImV4cCI6MjA5MDI4NDk2OH0.0p7IK97uPxBcazlUwredncV8EIFuvgjAhe46N9P118I';
+    const hdrs = {
+      'apikey': SB_KEY,
+      'Authorization': `Bearer ${SB_KEY}`,
       'Content-Type': 'application/json',
       'Prefer': 'return=representation'
     };
 
-    /* ══════════════════════════════════════════
-       STATE
-       ══════════════════════════════════════════ */
-    let taken = [], subtaken = [], subSubtaken = [];
-    let activeFilter = 'alles';
-    let contextFilter = null;
-    let tijdFilter = null;
-    let laagOpen = false;
+    // ── Placeholder: data wordt in stap 2 geladen ──
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('tableWrap').style.display = 'block';
+    document.getElementById('tbody').innerHTML = `
+      <tr class="row-project is-prio">
+        <td style="text-align:center">1</td>
+        <td></td>
+        <td style="text-align:center"><span class="cat w">W</span></td>
+        <td><span class="chevron open">&#9656;</span> HSPI project</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center"><span class="star on">★</span></td>
+      </tr>
+      <tr class="row-taak">
+        <td style="text-align:center">2</td>
+        <td></td>
+        <td style="text-align:center"><span class="cat w">W</span></td>
+        <td></td>
+        <td><span class="chevron open">&#9656;</span> Bellen reguliere leden</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center"><span class="star off">★</span></td>
+      </tr>
+      <tr class="row-subtaak">
+        <td style="text-align:center">3</td>
+        <td style="text-align:center"><div class="cb"></div></td>
+        <td style="text-align:center"><span class="cat w">W</span></td>
+        <td></td>
+        <td></td>
+        <td class="editable">Auke (RFH)</td>
+        <td></td>
+        <td class="tijd"></td>
+        <td class="tijd"></td>
+        <td></td>
+        <td style="text-align:center"><span class="star off">★</span></td>
+      </tr>
+      <tr class="row-subtaak">
+        <td style="text-align:center">4</td>
+        <td style="text-align:center"><div class="cb"></div></td>
+        <td style="text-align:center"><span class="cat w">W</span></td>
+        <td></td>
+        <td></td>
+        <td class="editable">Nick (MS)</td>
+        <td></td>
+        <td class="tijd"></td>
+        <td class="tijd"></td>
+        <td></td>
+        <td style="text-align:center"><span class="star off">★</span></td>
+      </tr>
+      <tr class="row-subtaak">
+        <td style="text-align:center">5</td>
+        <td style="text-align:center"><div class="cb"></div></td>
+        <td style="text-align:center"><span class="cat w">W</span></td>
+        <td></td>
+        <td></td>
+        <td class="editable">Sean (JBB)</td>
+        <td></td>
+        <td class="tijd"></td>
+        <td class="tijd"></td>
+        <td></td>
+        <td style="text-align:center"><span class="star off">★</span></td>
+      </tr>
+      <tr class="row-taak">
+        <td style="text-align:center">6</td>
+        <td></td>
+        <td style="text-align:center"><span class="cat w">W</span></td>
+        <td></td>
+        <td>Bellen handelaren</td>
+        <td></td>
+        <td><span class="dl urgent">30-03-2026</span></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center"><span class="star off">★</span></td>
+      </tr>
+      <tr class="row-project">
+        <td style="text-align:center">7</td>
+        <td></td>
+        <td style="text-align:center"><span class="cat p">P</span></td>
+        <td><span class="chevron">&#9656;</span> Privé divers</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center"><span class="star off">★</span></td>
+      </tr>
+    `;
 
-    /* ══════════════════════════════════════════
-       API
-       ══════════════════════════════════════════ */
-    async function api(table, params = '') {
-      const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${params}`, { headers: H });
-      if (!r.ok) throw new Error(`Fout bij laden ${table}`);
-      return r.json();
-    }
-    async function patch(table, id, data) {
-      const r = await fetch(`${SUPA_URL}/rest/v1/${table}?id=eq.${id}`, {
-        method: 'PATCH', headers: H, body: JSON.stringify(data)
-      });
-      if (!r.ok) throw new Error('Fout bij bijwerken');
-      return r.json();
-    }
-
-    async function loadData() {
-      const [t, s, ss] = await Promise.all([
-        api('taken', 'order=nr.asc'),
-        api('subtaken', 'order=volgorde.asc'),
-        api('sub_subtaken', 'order=volgorde.asc')
-      ]);
-      taken = t;
-      subtaken = s;
-      subSubtaken = ss;
-    }
-
-    /* ══════════════════════════════════════════
-       HELPERS
-       ══════════════════════════════════════════ */
-    function daysUntil(d) {
-      if (!d) return null;
-      const date = new Date(d), today = new Date();
-      today.setHours(0,0,0,0); date.setHours(0,0,0,0);
-      return Math.ceil((date - today) / 86400000);
-    }
-    function fmtDate(d) {
-      if (!d) return '';
-      const dt = new Date(d);
-      return `${String(dt.getDate()).padStart(2,'0')}-${String(dt.getMonth()+1).padStart(2,'0')}-${dt.getFullYear()}`;
-    }
-    function isUrgent(d) { const days = daysUntil(d); return days !== null && days <= 7; }
-    function esc(s) { const el = document.createElement('span'); el.textContent = s; return el.innerHTML; }
-
-    function getSubtaken(taakId) {
-      return subtaken.filter(s => s.taak_id === taakId);
-    }
-    function getOpenSubtaken(taakId) {
-      return subtaken.filter(s => s.taak_id === taakId && !s.gedaan);
-    }
-    function getSubSubs(subtaakId) {
-      return subSubtaken.filter(ss => ss.subtaak_id === subtaakId);
-    }
-    function getOpenSubSubs(subtaakId) {
-      return subSubtaken.filter(ss => ss.subtaak_id === subtaakId && !ss.gedaan);
-    }
-
-    function isPrio(taak) {
-      if (taak.prioriteit === 'hoog') return true;
-      if (isUrgent(taak.deadline)) return true;
-      const subs = getSubtaken(taak.id);
-      return subs.some(s => {
-        if (s.prio_ster || s.prioriteit || isUrgent(s.deadline)) return true;
-        return getSubSubs(s.id).some(ss => ss.prioriteit || isUrgent(ss.deadline));
-      });
-    }
-
-    function isLaag(taak) {
-      return taak.prioriteit === 'laag';
-    }
-
-    function hasOpenItems(taak) {
-      const openSubs = getOpenSubtaken(taak.id);
-      return openSubs.length > 0;
-    }
-
-    function taakMatchesContext(taak) {
-      if (!contextFilter) return true;
-      // Check taak-level context
-      if (taak.context && taak.context.includes(contextFilter)) return true;
-      if (taak.locatie && taak.locatie.includes(contextFilter)) return true;
-      // Check subtaken context
-      const subs = getOpenSubtaken(taak.id);
-      return subs.some(s => {
-        if (s.context && s.context.includes(contextFilter)) return true;
-        if (s.locatie && (Array.isArray(s.locatie) ? s.locatie.includes(contextFilter) : s.locatie === contextFilter)) return true;
-        return getOpenSubSubs(s.id).some(ss => ss.context && ss.context.includes(contextFilter));
-      });
-    }
-
-    function taakMatchesTijd(taak) {
-      if (!tijdFilter) return true;
-      if (taak.tijdsinschatting === tijdFilter) return true;
-      const subs = getOpenSubtaken(taak.id);
-      return subs.some(s => {
-        if (s.tijdsinschatting === tijdFilter) return true;
-        return getOpenSubSubs(s.id).some(ss => ss.tijdsinschatting === tijdFilter);
-      });
-    }
-
-    /* ══════════════════════════════════════════
-       RENDER
-       ══════════════════════════════════════════ */
-    function render() {
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-
-      // Separate normal and laag
-      let normal = taken.filter(t => !t.gedaan && !isLaag(t) && hasOpenItems(t));
-      let laag = taken.filter(t => !t.gedaan && isLaag(t) && hasOpenItems(t));
-
-      // Apply main filter
-      if (activeFilter === 'prioriteit') {
-        normal = normal.filter(t => isPrio(t));
-      } else if (activeFilter === 'werk') {
-        normal = normal.filter(t => t.categorie === 'Werk');
-        laag = laag.filter(t => t.categorie === 'Werk');
-      } else if (activeFilter === 'prive') {
-        normal = normal.filter(t => t.categorie === 'Privé');
-        laag = laag.filter(t => t.categorie === 'Privé');
-      }
-
-      // Apply context filter
-      if (contextFilter) {
-        normal = normal.filter(taakMatchesContext);
-        laag = laag.filter(taakMatchesContext);
-      }
-
-      // Apply tijd filter
-      if (tijdFilter) {
-        normal = normal.filter(taakMatchesTijd);
-        laag = laag.filter(taakMatchesTijd);
-      }
-
-      // Sort: prio first, then by nr
-      normal.sort((a, b) => {
-        const ap = isPrio(a), bp = isPrio(b);
-        if (ap && !bp) return -1;
-        if (!ap && bp) return 1;
-        return a.nr - b.nr;
-      });
-      laag.sort((a, b) => a.nr - b.nr);
-
-      // Metrics (always based on all data, ignoring filters)
-      const allNormal = taken.filter(t => !t.gedaan && !isLaag(t) && hasOpenItems(t));
-      const allOpenSubs = allNormal.reduce((n, t) => n + getOpenSubtaken(t.id).length, 0);
-      document.getElementById('mTotaal').textContent = allNormal.length;
-      document.getElementById('mOpen').textContent = allOpenSubs;
-      document.getElementById('mWerk').textContent = allNormal.filter(t => t.categorie === 'Werk').length;
-      document.getElementById('mPrio').textContent = allNormal.filter(t => isPrio(t)).length;
-
-      // Render normal section
-      const normalEl = document.getElementById('normalSection');
-      if (normal.length === 0) {
-        normalEl.innerHTML = '<div class="empty"><div class="icon">&#10003;</div><div>Geen taken gevonden</div></div>';
-      } else {
-        normalEl.innerHTML = normal.map(t => renderCard(t)).join('');
-      }
-
-      // Render laag section
-      const laagHeader = document.getElementById('laagHeader');
-      const laagEl = document.getElementById('laagSection');
-      if (laag.length > 0) {
-        laagHeader.style.display = 'flex';
-        document.getElementById('laagCount').textContent = `(${laag.length})`;
-        laagEl.innerHTML = laag.map(t => renderCard(t)).join('');
-        laagEl.style.display = laagOpen ? 'block' : 'none';
-        laagHeader.querySelector('.chevron').classList.toggle('open', laagOpen);
-      } else {
-        laagHeader.style.display = 'none';
-        laagEl.style.display = 'none';
-      }
-
-      attachEvents();
-    }
-
-    function renderCard(taak) {
-      const prio = isPrio(taak);
-      const laag = isLaag(taak);
-      const openSubs = getOpenSubtaken(taak.id);
-      const catClass = taak.categorie === 'Werk' ? 'werk' : 'prive';
-      const cardClass = prio ? 'prio' : (laag ? 'laag' : '');
-
-      // Deadline
-      let deadlineHtml = '';
-      if (taak.deadline) {
-        const cls = isUrgent(taak.deadline) ? 'urgent' : 'normal';
-        deadlineHtml = `<span class="deadline-tag ${cls}">${fmtDate(taak.deadline)}</span>`;
-      }
-
-      // Badges
-      let badges = `<span class="badge ${catClass}">${esc(taak.categorie)}</span>`;
-      if (prio && !laag) badges += ' <span class="badge prio-badge">Prioriteit</span>';
-      if (laag) badges += ' <span class="badge laag-badge">Laag</span>';
-
-      return `
-        <div class="task-card ${cardClass}" data-id="${taak.id}">
-          <div class="card-head" data-id="${taak.id}">
-            <span class="chevron">&#9656;</span>
-            <div class="card-info">
-              <div class="card-title">
-                <span class="nr">#${taak.nr}</span>
-                ${esc(taak.taak)}
-              </div>
-              <div class="card-meta">
-                ${badges}
-                <span class="open-count">${openSubs.length} open</span>
-                ${deadlineHtml}
-              </div>
-            </div>
-          </div>
-          <div class="subtaken" data-parent="${taak.id}">
-            ${openSubs.map(s => renderSubtaak(s, taak)).join('')}
-          </div>
-        </div>`;
-    }
-
-    function renderSubtaak(sub, taak) {
-      const subs = getSubSubs(sub.id);
-      const openSubs = getOpenSubSubs(sub.id);
-      const hasSubs = subs.length > 0;
-
-      // If has sub-subtaken, don't show checkbox (parent task)
-      let checkboxHtml = '';
-      if (!hasSubs) {
-        checkboxHtml = `<div class="cb" data-id="${sub.id}" data-table="subtaken"></div>`;
-      }
-
-      // Deadline badge
-      let deadlineHtml = '';
-      if (sub.deadline) {
-        const cls = isUrgent(sub.deadline) ? 'urgent' : 'normal';
-        deadlineHtml = `<span class="deadline-tag ${cls}">${fmtDate(sub.deadline)}</span>`;
-      }
-
-      // Prio badge
-      let prioHtml = '';
-      if (sub.prio_ster || sub.prioriteit) {
-        prioHtml = '<span class="badge prio-badge">!</span>';
-      }
-
-      // Context badges
-      let contextHtml = '';
-      const ctx = sub.context || sub.locatie;
-      if (ctx) {
-        const arr = Array.isArray(ctx) ? ctx : [ctx];
-        contextHtml = arr.filter(Boolean).map(c => `<span class="badge context-badge">${esc(c)}</span>`).join(' ');
-      }
-
-      // Tijd badge
-      let tijdHtml = '';
-      if (sub.tijdsinschatting) {
-        tijdHtml = `<span class="badge context-badge">${esc(sub.tijdsinschatting)}</span>`;
-      }
-
-      let metaItems = [prioHtml, deadlineHtml, contextHtml, tijdHtml].filter(Boolean).join(' ');
-      let metaHtml = metaItems ? `<div class="subtaak-meta">${metaItems}</div>` : '';
-
-      // Sub-subtaken
-      let subSubHtml = '';
-      if (hasSubs) {
-        const openItems = openSubs;
-        if (openItems.length > 0) {
-          subSubHtml = `<div class="sub-subtaken">${openItems.map(ss => renderSubSubtaak(ss)).join('')}</div>`;
-        }
-      }
-
-      return `
-        <div class="subtaak-item">
-          ${checkboxHtml}
-          <div class="subtaak-content">
-            <div class="subtaak-tekst editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</div>
-            ${metaHtml}
-            ${subSubHtml}
-          </div>
-        </div>`;
-    }
-
-    function renderSubSubtaak(ss) {
-      let deadlineHtml = '';
-      if (ss.deadline) {
-        const cls = isUrgent(ss.deadline) ? 'urgent' : 'normal';
-        deadlineHtml = ` <span class="deadline-tag ${cls}">${fmtDate(ss.deadline)}</span>`;
-      }
-      let prioHtml = '';
-      if (ss.prioriteit) {
-        prioHtml = ' <span class="badge prio-badge">!</span>';
-      }
-
-      return `
-        <div class="sub-subtaak-item">
-          <div class="cb" data-id="${ss.id}" data-table="sub_subtaken"></div>
-          <span class="sub-subtaak-tekst">${esc(ss.tekst)}${deadlineHtml}${prioHtml}</span>
-        </div>`;
-    }
-
-    /* ══════════════════════════════════════════
-       EVENTS
-       ══════════════════════════════════════════ */
-    function attachEvents() {
-      // Card expand/collapse
-      document.querySelectorAll('.card-head').forEach(head => {
-        head.addEventListener('click', () => {
-          const id = head.dataset.id;
-          const chevron = head.querySelector('.chevron');
-          const subtakenEl = head.nextElementSibling;
-          const isOpen = chevron.classList.contains('open');
-          chevron.classList.toggle('open', !isOpen);
-          subtakenEl.classList.toggle('open', !isOpen);
-        });
-      });
-
-      // Checkboxes
-      document.querySelectorAll('.cb:not(.done)').forEach(cb => {
-        cb.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          const id = cb.dataset.id;
-          const table = cb.dataset.table;
-          cb.classList.add('done');
-
-          await patch(table, id, {
-            gedaan: true,
-            gedaan_datum: new Date().toISOString().split('T')[0]
-          });
-
-          setTimeout(async () => { await loadData(); render(); }, 400);
-        });
-      });
-
-      // Inline edit (double-click)
-      document.querySelectorAll('.subtaak-tekst.editable').forEach(el => {
-        el.addEventListener('dblclick', (e) => {
-          e.stopPropagation();
-          if (el.querySelector('input')) return;
-          const current = el.textContent.trim();
-          const id = el.dataset.id;
-          const table = el.dataset.table;
-          const field = el.dataset.field;
-
-          const input = document.createElement('input');
-          input.className = 'inline-edit';
-          input.type = 'text';
-          input.value = current;
-          el.textContent = '';
-          el.appendChild(input);
-          input.focus();
-          input.select();
-
-          const save = async () => {
-            const val = input.value.trim();
-            el.textContent = val || current;
-            if (val && val !== current) {
-              await patch(table, id, { [field]: val });
-            }
-          };
-          input.addEventListener('blur', save);
-          input.addEventListener('keydown', (ev) => {
-            if (ev.key === 'Enter') input.blur();
-            if (ev.key === 'Escape') { el.textContent = current; }
-          });
-        });
-      });
-
-      // Laag section toggle
-      document.getElementById('laagHeader').addEventListener('click', () => {
-        laagOpen = !laagOpen;
-        document.getElementById('laagSection').style.display = laagOpen ? 'block' : 'none';
-        document.querySelector('#laagHeader .chevron').classList.toggle('open', laagOpen);
-      });
-    }
-
-    /* ══════════════════════════════════════════
-       FILTERS
-       ══════════════════════════════════════════ */
-    document.getElementById('filterBar').addEventListener('click', (e) => {
-      const btn = e.target.closest('.fbtn');
-      if (!btn) return;
-
-      const filter = btn.dataset.filter;
-      const group = btn.closest('.filter-group').dataset.group;
-
-      if (group === 'main') {
-        // Main filters: single select
-        activeFilter = filter;
-        contextFilter = null;
-        tijdFilter = null;
-        // Clear context/tijd active states
-        document.querySelectorAll('[data-group="context"] .fbtn, [data-group="tijd"] .fbtn').forEach(b => b.classList.remove('active'));
-      } else if (group === 'context') {
-        // Context: toggle (only one at a time)
-        if (contextFilter === filter) {
-          contextFilter = null;
-          btn.classList.remove('active');
-        } else {
-          contextFilter = filter;
-          document.querySelectorAll('[data-group="context"] .fbtn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-        }
-      } else if (group === 'tijd') {
-        // Tijd: toggle (only one at a time)
-        if (tijdFilter === filter) {
-          tijdFilter = null;
-          btn.classList.remove('active');
-        } else {
-          tijdFilter = filter;
-          document.querySelectorAll('[data-group="tijd"] .fbtn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-        }
-      }
-
-      // Update main filter buttons
-      document.querySelectorAll('[data-group="main"] .fbtn').forEach(b => {
-        b.classList.toggle('active', b.dataset.filter === activeFilter);
-      });
-
-      render();
-    });
-
-    /* ══════════════════════════════════════════
-       INIT
-       ══════════════════════════════════════════ */
-    async function init() {
-      try {
-        await loadData();
-        // Update header
-        const meta = await api('meta', 'sleutel=eq.laatste_update');
-        if (meta.length > 0) {
-          document.getElementById('lastUpdate').textContent = `Laatste update: ${meta[0].waarde}`;
-        }
-        render();
-      } catch (err) {
-        document.getElementById('loading').innerHTML = `
-          <div class="empty">
-            <div class="icon">&#9888;</div>
-            <div>Kan taken niet laden</div>
-            <div style="font-size:13px;margin-top:8px;color:var(--text-3);">${esc(err.message)}</div>
-          </div>`;
-      }
-    }
-
-    init();
+    // Placeholder metrics
+    document.getElementById('mTotal').textContent = '9';
+    document.getElementById('mOpen').textContent = '42';
+    document.getElementById('mWerk').textContent = '5';
+    document.getElementById('mPrio').textContent = '2';
   </script>
 </body>
 </html>

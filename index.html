@@ -26,7 +26,7 @@
       --grey: #8e8e93;
       --card-radius: 13px;
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
-      font-size: 16px;
+      font-size: 15px;
       color: var(--text);
       background: var(--bg);
       -webkit-font-smoothing: antialiased;
@@ -35,17 +35,15 @@
     body {
       min-height: 100dvh;
       padding: env(safe-area-inset-top, 0px) 16px env(safe-area-inset-bottom, 0px) 16px;
-      max-width: 1100px;
+      max-width: 1400px;
       margin: 0 auto;
     }
 
     /* Header */
     .header {
       padding: 16px 0 8px;
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 100;
+      position: sticky; top: 0;
+      background: var(--bg); z-index: 100;
     }
     .header h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.5px; }
     .header-sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
@@ -53,7 +51,7 @@
     /* Metrics */
     .metrics { display: flex; gap: 8px; margin: 16px 0; }
     .metric-card {
-      flex: 1; min-width: 80px; background: var(--card-bg);
+      flex: 1; min-width: 70px; background: var(--card-bg);
       border-radius: 12px; padding: 12px; text-align: center;
       box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
@@ -65,12 +63,12 @@
     .metric-card.prioriteit .number { color: var(--red); }
     .metric-card.werk .number { color: var(--accent); }
 
-    /* Filter Bar — combineerbare filters */
+    /* Filter Bar */
     .filter-bar { display: flex; gap: 8px; margin: 0 0 16px; flex-wrap: wrap; }
     .filter-btn {
       padding: 7px 16px; border-radius: 20px; border: none;
       background: var(--card-bg); color: var(--text-secondary);
-      font-size: 14px; font-weight: 500; cursor: pointer;
+      font-size: 13px; font-weight: 500; cursor: pointer;
       transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.06);
       font-family: inherit;
     }
@@ -85,76 +83,68 @@
       overflow: hidden; border-collapse: collapse;
     }
     .task-table thead th {
-      text-align: left; padding: 12px 10px;
-      font-size: 11px; font-weight: 600;
+      text-align: left; padding: 10px 8px;
+      font-size: 10px; font-weight: 600;
       color: var(--text-secondary); text-transform: uppercase;
       letter-spacing: 0.5px; border-bottom: 2px solid var(--separator);
-      background: var(--card-bg); position: sticky; top: 60px; z-index: 10;
+      background: var(--card-bg); position: sticky; top: 58px; z-index: 10;
       white-space: nowrap;
     }
-    .col-nr { width: 40px; }
-    .col-hoofdtaak { width: 18%; }
-    .col-subtaak { width: 22%; }
-    .col-subsubtaak { width: auto; }
-    .col-deadline { width: 80px; }
-    .col-tijd { width: 80px; }
-    .col-locatie { width: 100px; }
 
-    /* Row styles */
-    .row-hoofdtaak td {
-      padding: 11px 10px; border-top: 1px solid var(--separator);
-      vertical-align: top; font-weight: 600; font-size: 14px;
+    .col-nr { width: 36px; text-align: center; }
+    .col-check { width: 32px; text-align: center; }
+    .col-cat { width: 60px; }
+    .col-project { width: 14%; }
+    .col-taak { width: 20%; }
+    .col-subtaak { }
+    .col-deadline { width: 80px; }
+    .col-tijd-in { width: 70px; }
+    .col-tijd-uit { width: 60px; }
+    .col-context { width: 90px; }
+    .col-prio { width: 36px; text-align: center; }
+
+    /* Row base */
+    tr.row td {
+      padding: 8px 8px;
+      vertical-align: top;
+      border-top: 1px solid var(--separator);
+      font-size: 13px;
+    }
+
+    /* Project row (hoofdtaak) */
+    tr.row-project td {
+      font-weight: 600; font-size: 14px;
       cursor: pointer; user-select: none;
     }
-    .row-hoofdtaak:first-child td { border-top: none; }
-    .row-hoofdtaak:hover td { background: rgba(0,0,0,0.02); }
+    tr.row-project:hover td { background: rgba(0,0,0,0.02); }
+    tr.row-project:first-child td { border-top: none; }
 
-    .row-subtaak, .row-subsubtaak { display: none; }
-    .row-subtaak.visible { display: table-row; }
-    .row-subsubtaak.visible { display: table-row; }
+    /* Taak row (subtaak) */
+    tr.row-taak { display: none; }
+    tr.row-taak.visible { display: table-row; }
+    tr.row-taak td { border-top-color: rgba(0,0,0,0.06); }
 
-    .row-subtaak td {
-      padding: 8px 10px; vertical-align: top;
-      font-size: 13px; border-top: 1px solid rgba(0,0,0,0.04);
-    }
-    .row-subsubtaak td {
-      padding: 5px 10px; vertical-align: top;
-      font-size: 12px; border-top: 1px solid rgba(0,0,0,0.03);
-    }
+    /* Subtaak row (sub-subtaak) */
+    tr.row-subtaak { display: none; }
+    tr.row-subtaak.visible { display: table-row; }
+    tr.row-subtaak td { border-top-color: rgba(0,0,0,0.03); font-size: 12px; }
 
     /* Content wrappers */
-    .hoofdtaak-content, .subtaak-content, .subsubtaak-content {
-      display: flex; align-items: flex-start; gap: 6px;
-    }
+    .cell-content { display: flex; align-items: flex-start; gap: 6px; }
     .chevron {
-      font-size: 11px; color: var(--text-tertiary);
-      transition: transform 0.25s ease; flex-shrink: 0; margin-top: 2px;
+      font-size: 10px; color: var(--text-tertiary);
+      transition: transform 0.25s ease; flex-shrink: 0; margin-top: 3px;
     }
     .chevron.open { transform: rotate(90deg); }
-
-    .subtaak-has-children { cursor: pointer; user-select: none; }
-    .subtaak-has-children:hover { color: var(--accent); }
-    .sub-id { color: var(--text-secondary); font-weight: 500; flex-shrink: 0; }
-
-    /* Badges */
-    .badge {
-      display: inline-block; font-size: 9px; font-weight: 600;
-      padding: 2px 6px; border-radius: 4px; text-transform: uppercase;
-      letter-spacing: 0.3px; vertical-align: middle; margin-left: 4px;
-    }
-    .badge.prio { background: rgba(255,59,48,0.12); color: var(--red); }
-    .badge.werk { background: rgba(0,122,255,0.1); color: var(--accent); }
-    .badge.prive { background: rgba(255,149,0,0.12); color: var(--orange); }
-    .subtask-count-label {
-      font-size: 11px; font-weight: 400; color: var(--text-secondary); margin-left: 4px;
-    }
+    .clickable { cursor: pointer; user-select: none; }
+    .clickable:hover { color: var(--accent); }
 
     /* Checkbox */
     .checkbox {
       width: 18px; height: 18px; border-radius: 50%;
       border: 2px solid var(--separator); flex-shrink: 0;
-      cursor: pointer; display: flex; align-items: center;
-      justify-content: center; transition: all 0.2s; margin-top: 1px;
+      cursor: pointer; display: inline-flex; align-items: center;
+      justify-content: center; transition: all 0.2s;
     }
     .checkbox:hover { border-color: var(--accent); }
     .checkbox.checked {
@@ -162,32 +152,75 @@
     }
     .checkbox.checked::after { content: '✓'; color: white; font-size: 11px; font-weight: 700; }
 
-    .subsubtaak-text.done { color: var(--text-tertiary); text-decoration: line-through; }
+    /* Category badge */
+    .cat-badge {
+      font-size: 10px; font-weight: 600; padding: 2px 6px;
+      border-radius: 4px; text-transform: uppercase; letter-spacing: 0.3px;
+      cursor: pointer; user-select: none; display: inline-block;
+    }
+    .cat-badge.werk { background: rgba(0,122,255,0.1); color: var(--accent); }
+    .cat-badge.prive { background: rgba(255,149,0,0.12); color: var(--orange); }
+
+    /* Prio star */
+    .prio-star {
+      font-size: 18px; cursor: pointer; user-select: none;
+      transition: transform 0.15s; display: inline-block; line-height: 1;
+    }
+    .prio-star:hover { transform: scale(1.2); }
+    .prio-star.active { color: #ffcc00; }
+    .prio-star:not(.active) { color: var(--separator); }
 
     /* Inline editing */
-    .editable-cell {
-      cursor: pointer; min-height: 20px; padding: 2px 4px;
-      border-radius: 4px; transition: background 0.15s;
+    .editable {
+      min-height: 18px; padding: 1px 4px; border-radius: 4px;
+      cursor: pointer; transition: background 0.15s;
     }
-    .editable-cell:hover { background: rgba(0,122,255,0.06); }
-
-    .editable-cell input,
-    .editable-cell select {
+    .editable:hover { background: rgba(0,122,255,0.06); }
+    .editable input, .editable select {
       width: 100%; border: 1px solid var(--accent);
-      border-radius: 4px; padding: 3px 6px;
+      border-radius: 4px; padding: 2px 4px;
       font-size: inherit; font-family: inherit;
       background: white; outline: none;
     }
-    .editable-cell select { padding: 2px 4px; }
+    .editable select { padding: 1px 2px; }
 
     /* Deadline */
-    .deadline { font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .deadline { font-size: 11px; font-weight: 500; white-space: nowrap; }
     .deadline.urgent { color: var(--red); }
     .deadline.normal { color: var(--text-tertiary); }
 
-    /* Tijd & Locatie */
+    /* Context tags */
+    .context-tags { display: flex; flex-direction: column; gap: 2px; }
+    .context-tag {
+      font-size: 10px; background: rgba(0,0,0,0.05); padding: 1px 5px;
+      border-radius: 3px; color: var(--text-secondary); white-space: nowrap;
+    }
+
+    /* Context dropdown */
+    .context-dropdown {
+      position: relative; display: inline-block;
+    }
+    .context-menu {
+      position: absolute; top: 100%; left: 0; z-index: 50;
+      background: white; border: 1px solid var(--separator);
+      border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 6px 0; min-width: 140px;
+    }
+    .context-menu label {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px; font-size: 12px; cursor: pointer;
+    }
+    .context-menu label:hover { background: rgba(0,122,255,0.06); }
+    .context-menu input[type="checkbox"] { accent-color: var(--accent); }
+
+    /* Tijd */
     .tijd { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
-    .locatie { font-size: 11px; color: var(--text-secondary); }
+
+    /* Done text */
+    .text-done { color: var(--text-tertiary); text-decoration: line-through; }
+
+    /* Subtask count */
+    .count-label { font-size: 11px; font-weight: 400; color: var(--text-secondary); }
 
     /* Loading & Empty */
     .loading, .empty-state { text-align: center; padding: 48px 16px; color: var(--text-secondary); }
@@ -200,7 +233,10 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* Footer */
-    .footer { text-align: center; padding: 24px 0 16px; font-size: 12px; color: var(--text-tertiary); }
+    .footer {
+      text-align: center; padding: 24px 0 16px;
+      font-size: 12px; color: var(--text-tertiary);
+    }
   </style>
 </head>
 <body>
@@ -212,19 +248,19 @@
 
   <div class="metrics">
     <div class="metric-card">
-      <div class="number" id="metricTotaal">-</div>
-      <div class="label">Totaal</div>
+      <div class="number" id="metricTotaal">0</div>
+      <div class="label">Projecten</div>
     </div>
     <div class="metric-card">
-      <div class="number" id="metricOpen">-</div>
-      <div class="label">Open</div>
+      <div class="number" id="metricOpen">0</div>
+      <div class="label">Open taken</div>
     </div>
     <div class="metric-card werk">
-      <div class="number" id="metricWerk">-</div>
+      <div class="number" id="metricWerk">0</div>
       <div class="label">Werk</div>
     </div>
     <div class="metric-card prioriteit">
-      <div class="number" id="metricPrio">-</div>
+      <div class="number" id="metricPrio">0</div>
       <div class="label">Prioriteit</div>
     </div>
   </div>
@@ -241,29 +277,30 @@
     <div>Taken laden...</div>
   </div>
 
-  <div id="taskTableContainer" style="display:none;">
+  <div id="tableContainer" style="display:none;">
     <table class="task-table">
       <thead>
         <tr>
           <th class="col-nr">#</th>
-          <th class="col-hoofdtaak">Hoofdtaak</th>
+          <th class="col-check"></th>
+          <th class="col-cat">W/P</th>
+          <th class="col-project">Project</th>
+          <th class="col-taak">Taak</th>
           <th class="col-subtaak">Subtaak</th>
-          <th class="col-subsubtaak">Sub-subtaak</th>
           <th class="col-deadline">Deadline</th>
-          <th class="col-tijd">Tijd</th>
-          <th class="col-locatie">Locatie</th>
+          <th class="col-tijd-in">Geschat</th>
+          <th class="col-tijd-uit">Werkelijk</th>
+          <th class="col-context">Context</th>
+          <th class="col-prio">Prio</th>
         </tr>
       </thead>
       <tbody id="taskBody"></tbody>
     </table>
   </div>
 
-  <div class="footer">R.H.L. Consultancy &middot; Taakmanager</div>
+  <div class="footer">R.H.L. Consultancy · Taakmanager</div>
 
   <script>
-    // ============================================
-    // Config
-    // ============================================
     const SUPABASE_URL = 'https://fhkttfzqdjynzmtjbujv.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoa3R0ZnpxZGp5bnptdGpidWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDg5NjgsImV4cCI6MjA5MDI4NDk2OH0.0p7IK97uPxBcazlUwredncV8EIFuvgjAhe46N9P118I';
     const hdrs = {
@@ -273,223 +310,237 @@
       'Prefer': 'return=representation'
     };
 
-    const TIJD_OPTIES = ['', '<15 min', '<1 uur', '<2 uur'];
+    const CONTEXT_OPTIONS = ['@Kantoor', '@Thuis', '@Onderweg', '@Computer', '@Telefoon', '@Online'];
+    const TIJD_OPTIONS = ['', '<15 min', '<30 min', '<60 min', '<90 min', '<120 min'];
 
-    // ============================================
-    // State
-    // ============================================
+    let projecten = [];
     let taken = [];
     let subtaken = [];
-    let subSubtaken = [];
-    let activeFilters = new Set(); // 'werk', 'prive', 'prioriteit'
+    let activeFilters = new Set(['alles']);
 
-    // ============================================
     // API
-    // ============================================
     async function query(table, params = '') {
       const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, { headers: hdrs });
       if (!r.ok) throw new Error(`Fout bij laden ${table}`);
       return r.json();
     }
-
     async function patch(table, id, data) {
       const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
         method: 'PATCH', headers: hdrs, body: JSON.stringify(data)
       });
-      if (!r.ok) throw new Error(`Fout bij bijwerken ${table}`);
+      if (!r.ok) throw new Error(`Fout bij bijwerken`);
       return r.json();
     }
 
-    async function postLog(taak_nr, taak_tekst, categorie) {
-      await fetch(`${SUPABASE_URL}/rest/v1/afgerond_log`, {
-        method: 'POST', headers: hdrs,
-        body: JSON.stringify({ taak_nr, taak_tekst, categorie, gedaan_datum: today() })
-      });
-    }
-
-    function today() { return new Date().toISOString().split('T')[0]; }
-
-    // ============================================
-    // Data Loading
-    // ============================================
+    // Data loading
     async function loadData() {
-      const [t, s, ss] = await Promise.all([
+      const [p, t, s] = await Promise.all([
         query('taken', 'order=nr.asc'),
         query('subtaken', 'order=volgorde.asc'),
         query('sub_subtaken', 'order=volgorde.asc')
       ]);
+      projecten = p;
       taken = t;
       subtaken = s;
-      subSubtaken = ss;
     }
 
-    // ============================================
-    // Helpers
-    // ============================================
+    // Deadline helpers
     function daysUntil(dateStr) {
       if (!dateStr) return null;
-      const d = new Date(dateStr), t = new Date();
-      d.setHours(0,0,0,0); t.setHours(0,0,0,0);
-      return Math.ceil((d - t) / 86400000);
+      const d = new Date(dateStr), today = new Date();
+      today.setHours(0,0,0,0); d.setHours(0,0,0,0);
+      return Math.ceil((d - today) / 86400000);
     }
-
-    function formatDeadline(dateStr) {
+    function formatDate(dateStr) {
       if (!dateStr) return '';
-      const d = new Date(dateStr), days = daysUntil(dateStr);
-      if (days === 0) return 'Vandaag';
-      if (days === 1) return 'Morgen';
-      if (days < 0) return 'Verlopen';
-      if (days <= 7) return ['zo','ma','di','wo','do','vr','za'][d.getDay()];
-      return `${d.getDate()}-${d.getMonth()+1}`;
+      const d = new Date(dateStr);
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      return `${dd}-${mm}-${yyyy}`;
     }
-
     function isUrgent(dateStr) {
-      const d = daysUntil(dateStr);
-      return d !== null && d <= 7;
+      const days = daysUntil(dateStr);
+      return days !== null && days <= 7;
     }
 
-    function isPrio(taak, subs) {
-      if (taak.prioriteit === 'hoog') return true;
-      if (isUrgent(taak.deadline)) return true;
-      return subs.some(s => !s.gedaan && (s.prioriteit || isUrgent(s.deadline)));
+    // Priority: project is prio if prioriteit='hoog' or any child has prio star or urgent deadline
+    function isProjectPrio(project, projectTaken) {
+      if (project.prioriteit === 'hoog') return true;
+      if (isUrgent(project.deadline)) return true;
+      return projectTaken.some(t => {
+        if (t.prio_ster || isUrgent(t.deadline)) return true;
+        const subs = subtaken.filter(s => s.subtaak_id === t.id);
+        return subs.some(s => s.prioriteit || isUrgent(s.deadline));
+      });
     }
 
-    function deadlineHtml(dateStr) {
-      if (!dateStr) return '';
-      return `<span class="deadline ${isUrgent(dateStr)?'urgent':'normal'}">${formatDeadline(dateStr)}</span>`;
-    }
-
-    function tijdLabel(val) {
-      if (!val) return '';
-      return val;
-    }
-
-    // ============================================
     // Rendering
-    // ============================================
     function render() {
       document.getElementById('loading').style.display = 'none';
-      document.getElementById('taskTableContainer').style.display = 'block';
+      document.getElementById('tableContainer').style.display = 'block';
       const tbody = document.getElementById('taskBody');
 
-      // Bouw taken met subtaken
-      let alleTaken = taken.map(t => {
-        const alleSubs = subtaken.filter(s => s.taak_id === t.id);
-        const openSubs = alleSubs.filter(s => !s.gedaan);
-        return { ...t, openSubtaken: openSubs, alleSubtaken: alleSubs, isPrio: isPrio(t, alleSubs) };
+      // Build project data
+      let projects = projecten.filter(p => !p.gedaan).map(p => {
+        const pTaken = taken.filter(t => t.taak_id === p.id && !t.gedaan);
+        const allTaken = taken.filter(t => t.taak_id === p.id);
+        return { ...p, openTaken: pTaken, alleTaken: allTaken, isPrio: isProjectPrio(p, allTaken) };
       });
 
-      // Verberg taken zonder open subtaken
-      alleTaken = alleTaken.filter(t => t.openSubtaken.length > 0);
+      // Filter: hide projects with no open taken
+      projects = projects.filter(p => p.openTaken.length > 0);
 
-      // Filters toepassen
-      let gefilterd = alleTaken;
-      const hasWerk = activeFilters.has('werk');
-      const hasPrive = activeFilters.has('prive');
-      const hasPrio = activeFilters.has('prioriteit');
+      // Apply filters
+      let filtered = projects;
+      const hasAlles = activeFilters.has('alles');
+      if (!hasAlles) {
+        const hasPrio = activeFilters.has('prioriteit');
+        const hasWerk = activeFilters.has('werk');
+        const hasPrive = activeFilters.has('prive');
+        const hasCat = hasWerk || hasPrive;
 
-      if (hasWerk && !hasPrive) gefilterd = gefilterd.filter(t => t.categorie === 'Werk');
-      if (hasPrive && !hasWerk) gefilterd = gefilterd.filter(t => t.categorie === 'Privé');
-      if (hasPrio) gefilterd = gefilterd.filter(t => t.isPrio);
-
-      // Sorteer op nr
-      gefilterd.sort((a, b) => a.nr - b.nr);
-
-      // Metrics (altijd op basis van alleTaken, niet gefilterd)
-      document.getElementById('metricTotaal').textContent = alleTaken.length;
-      document.getElementById('metricOpen').textContent = alleTaken.reduce((s, t) => s + t.openSubtaken.length, 0);
-      document.getElementById('metricWerk').textContent = alleTaken.filter(t => t.categorie === 'Werk').length;
-      document.getElementById('metricPrio').textContent = alleTaken.filter(t => t.isPrio).length;
-
-      if (gefilterd.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="icon">&#10003;</div><div>Geen taken gevonden</div></div></td></tr>`;
-      } else {
-        tbody.innerHTML = gefilterd.map(t => renderTaskRows(t)).join('');
+        filtered = projects.filter(p => {
+          let catMatch = true;
+          let prioMatch = true;
+          if (hasCat) {
+            catMatch = (hasWerk && p.categorie === 'Werk') || (hasPrive && p.categorie === 'Privé');
+          }
+          if (hasPrio) {
+            prioMatch = p.isPrio;
+          }
+          if (hasCat && hasPrio) return catMatch && prioMatch;
+          if (hasCat) return catMatch;
+          if (hasPrio) return prioMatch;
+          return true;
+        });
       }
 
-      attachEventListeners();
+      // Sort: prio first, then by nr
+      filtered.sort((a, b) => {
+        if (a.isPrio && !b.isPrio) return -1;
+        if (!a.isPrio && b.isPrio) return 1;
+        return a.nr - b.nr;
+      });
+
+      // Metrics
+      document.getElementById('metricTotaal').textContent = projects.length;
+      document.getElementById('metricOpen').textContent = projects.reduce((s, p) => s + p.openTaken.length, 0);
+      document.getElementById('metricWerk').textContent = projects.filter(p => p.categorie === 'Werk').length;
+      document.getElementById('metricPrio').textContent = projects.filter(p => p.isPrio).length;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-secondary);">Geen taken gevonden</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(p => renderProject(p)).join('');
+      attachListeners();
     }
 
-    function renderTaskRows(t) {
-      const catClass = t.categorie === 'Werk' ? 'werk' : 'prive';
-      const openCount = t.openSubtaken.length;
+    function renderProject(p) {
+      const catClass = p.categorie === 'Werk' ? 'werk' : 'prive';
+      const openCount = p.openTaken.length;
+      const deadlineHtml = p.deadline ? `<span class="deadline ${isUrgent(p.deadline) ? 'urgent' : 'normal'}">${formatDate(p.deadline)}</span>` : '';
+      const tijdHtml = p.tijdsinschatting || '';
+      const tijdUitHtml = p.tijd_uitgevoerd ? `${p.tijd_uitgevoerd} min` : '';
+      const contextHtml = renderContextTags(p.context);
+      const prioActive = p.prioriteit === 'hoog' ? 'active' : '';
 
       let rows = `
-        <tr class="row-hoofdtaak" data-taak-id="${t.id}">
-          <td>${t.nr}</td>
+        <tr class="row row-project" data-project-id="${p.id}">
+          <td style="text-align:center;">${p.nr}</td>
+          <td></td>
+          <td><span class="cat-badge ${catClass}" data-id="${p.id}" data-table="taken" data-field="categorie">${p.categorie === 'Werk' ? 'W' : 'P'}</span></td>
           <td>
-            <div class="hoofdtaak-content">
-              <span class="chevron" data-taak-id="${t.id}">&#9656;</span>
-              <span class="editable-cell" data-table="taken" data-id="${t.id}" data-field="taak" data-type="text">${t.taak}</span>
+            <div class="cell-content">
+              <span class="chevron" data-project-id="${p.id}">&#9656;</span>
+              <span class="editable" data-id="${p.id}" data-table="taken" data-field="taak">${p.taak}</span>
             </div>
-            ${t.isPrio ? '<span class="badge prio">Prio</span>' : ''}
-            <span class="badge ${catClass}">${t.categorie}</span>
-            <span class="subtask-count-label">${openCount} open</span>
+            <span class="count-label">${openCount} open</span>
           </td>
           <td></td>
           <td></td>
-          <td class="editable-cell" data-table="taken" data-id="${t.id}" data-field="deadline" data-type="date">${deadlineHtml(t.deadline)}</td>
-          <td class="editable-cell" data-table="taken" data-id="${t.id}" data-field="tijdsinschatting" data-type="tijd"><span class="tijd">${tijdLabel(t.tijdsinschatting)}</span></td>
-          <td class="editable-cell" data-table="taken" data-id="${t.id}" data-field="locatie" data-type="text-short"><span class="locatie">${t.locatie || ''}</span></td>
+          <td>${deadlineHtml}</td>
+          <td class="tijd">${tijdHtml}</td>
+          <td class="tijd">${tijdUitHtml}</td>
+          <td>${contextHtml}</td>
+          <td style="text-align:center;"><span class="prio-star ${prioActive}" data-id="${p.id}" data-table="taken">★</span></td>
         </tr>`;
 
-      t.openSubtaken.forEach(s => {
-        const subs = subSubtaken.filter(ss => ss.subtaak_id === s.id);
+      // Taak rows (subtaken)
+      p.openTaken.forEach(t => {
+        const subs = subtaken.filter(s => s.subtaak_id === t.id);
         const hasChildren = subs.length > 0;
+        const tDeadline = t.deadline ? `<span class="deadline ${isUrgent(t.deadline) ? 'urgent' : 'normal'}">${formatDate(t.deadline)}</span>` : '';
+        const tTijd = t.tijdsinschatting || '';
+        const tTijdUit = t.tijd_uitgevoerd ? `${t.tijd_uitgevoerd} min` : '';
+        const tContext = renderContextTags(t.locatie ? (Array.isArray(t.locatie) ? t.locatie : [t.locatie]) : t.context);
+        const tPrioActive = t.prio_ster ? 'active' : '';
+        const tCatClass = p.categorie === 'Werk' ? 'werk' : 'prive';
 
         if (hasChildren) {
           rows += `
-            <tr class="row-subtaak" data-parent="${t.id}">
+            <tr class="row row-taak" data-parent="${p.id}">
               <td></td>
+              <td></td>
+              <td><span class="cat-badge ${tCatClass}">${p.categorie === 'Werk' ? 'W' : 'P'}</span></td>
               <td></td>
               <td>
-                <div class="subtaak-content subtaak-has-children" data-subtaak-id="${s.id}">
-                  <span class="chevron" data-subtaak-id="${s.id}">&#9656;</span>
-                  <span class="sub-id">${s.sub_id}.</span>
-                  <span class="editable-cell" data-table="subtaken" data-id="${s.id}" data-field="tekst" data-type="text">${s.tekst}</span>
+                <div class="cell-content clickable" data-taak-id="${t.id}">
+                  <span class="chevron" data-taak-id="${t.id}">&#9656;</span>
+                  <span class="editable" data-id="${t.id}" data-table="subtaken" data-field="tekst">${t.tekst}</span>
                 </div>
               </td>
               <td></td>
-              <td class="editable-cell" data-table="subtaken" data-id="${s.id}" data-field="deadline" data-type="date">${deadlineHtml(s.deadline)}</td>
-              <td class="editable-cell" data-table="subtaken" data-id="${s.id}" data-field="tijdsinschatting" data-type="tijd"><span class="tijd">${tijdLabel(s.tijdsinschatting)}</span></td>
-              <td class="editable-cell" data-table="subtaken" data-id="${s.id}" data-field="locatie" data-type="text-short"><span class="locatie">${s.locatie || ''}</span></td>
+              <td>${tDeadline}</td>
+              <td class="tijd">${tTijd}</td>
+              <td class="tijd">${tTijdUit}</td>
+              <td>${tContext}</td>
+              <td style="text-align:center;"><span class="prio-star ${tPrioActive}" data-id="${t.id}" data-table="subtaken">★</span></td>
             </tr>`;
 
-          subs.forEach(ss => {
-            const doneClass = ss.gedaan ? 'done' : '';
-            const checkedClass = ss.gedaan ? 'checked' : '';
+          subs.forEach(s => {
+            const sDone = s.gedaan;
+            const sChecked = sDone ? 'checked' : '';
+            const sTextClass = sDone ? 'text-done' : '';
+            const sDeadline = s.deadline ? `<span class="deadline ${isUrgent(s.deadline) ? 'urgent' : 'normal'}">${formatDate(s.deadline)}</span>` : '';
+            const sTijd = s.tijdsinschatting || '';
+            const sTijdUit = s.tijd_uitgevoerd ? `${s.tijd_uitgevoerd} min` : '';
+            const sContext = renderContextTags(s.context);
+            const sPrioActive = s.prioriteit ? 'active' : '';
+
             rows += `
-              <tr class="row-subsubtaak" data-parent-sub="${s.id}">
+              <tr class="row row-subtaak" data-parent-taak="${t.id}">
+                <td></td>
+                <td style="text-align:center;"><div class="checkbox ${sChecked}" data-id="${s.id}" data-table="sub_subtaken"></div></td>
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>
-                  <div class="subsubtaak-content">
-                    <div class="checkbox ${checkedClass}" data-ss-id="${ss.id}"></div>
-                    <span class="subsubtaak-text ${doneClass} editable-cell" data-table="sub_subtaken" data-id="${ss.id}" data-field="tekst" data-type="text">${ss.tekst}</span>
-                  </div>
-                </td>
-                <td class="editable-cell" data-table="sub_subtaken" data-id="${ss.id}" data-field="deadline" data-type="date">${deadlineHtml(ss.deadline)}</td>
-                <td class="editable-cell" data-table="sub_subtaken" data-id="${ss.id}" data-field="tijdsinschatting" data-type="tijd"><span class="tijd">${tijdLabel(ss.tijdsinschatting)}</span></td>
-                <td class="editable-cell" data-table="sub_subtaken" data-id="${ss.id}" data-field="locatie" data-type="text-short"><span class="locatie">${ss.locatie || ''}</span></td>
+                <td><span class="${sTextClass} editable" data-id="${s.id}" data-table="sub_subtaken" data-field="tekst">${s.tekst}</span></td>
+                <td>${sDeadline}</td>
+                <td class="tijd">${sTijd}</td>
+                <td class="tijd">${sTijdUit}</td>
+                <td>${sContext}</td>
+                <td style="text-align:center;"><span class="prio-star ${sPrioActive}" data-id="${s.id}" data-table="sub_subtaken">★</span></td>
               </tr>`;
           });
         } else {
           rows += `
-            <tr class="row-subtaak" data-parent="${t.id}">
+            <tr class="row row-taak" data-parent="${p.id}">
               <td></td>
+              <td style="text-align:center;"><div class="checkbox" data-id="${t.id}" data-table="subtaken"></div></td>
+              <td><span class="cat-badge ${tCatClass}">${p.categorie === 'Werk' ? 'W' : 'P'}</span></td>
               <td></td>
               <td>
-                <div class="subtaak-content">
-                  <div class="checkbox" data-sub-id="${s.id}"></div>
-                  <span class="sub-id">${s.sub_id}.</span>
-                  <span class="editable-cell" data-table="subtaken" data-id="${s.id}" data-field="tekst" data-type="text">${s.tekst}</span>
-                </div>
+                <span class="editable" data-id="${t.id}" data-table="subtaken" data-field="tekst">${t.tekst}</span>
               </td>
               <td></td>
-              <td class="editable-cell" data-table="subtaken" data-id="${s.id}" data-field="deadline" data-type="date">${deadlineHtml(s.deadline)}</td>
-              <td class="editable-cell" data-table="subtaken" data-id="${s.id}" data-field="tijdsinschatting" data-type="tijd"><span class="tijd">${tijdLabel(s.tijdsinschatting)}</span></td>
-              <td class="editable-cell" data-table="subtaken" data-id="${s.id}" data-field="locatie" data-type="text-short"><span class="locatie">${s.locatie || ''}</span></td>
+              <td>${tDeadline}</td>
+              <td class="tijd">${tTijd}</td>
+              <td class="tijd">${tTijdUit}</td>
+              <td>${tContext}</td>
+              <td style="text-align:center;"><span class="prio-star ${tPrioActive}" data-id="${t.id}" data-table="subtaken">★</span></td>
             </tr>`;
         }
       });
@@ -497,214 +548,191 @@
       return rows;
     }
 
-    // ============================================
-    // Inline Editing
-    // ============================================
-    function startEdit(cell) {
-      if (cell.querySelector('input, select')) return;
-
-      const table = cell.dataset.table;
-      const id = cell.dataset.id;
-      const field = cell.dataset.field;
-      const type = cell.dataset.type;
-
-      // Haal huidige waarde op
-      let currentVal = '';
-      const dataSource = table === 'taken' ? taken : table === 'subtaken' ? subtaken : subSubtaken;
-      const record = dataSource.find(r => r.id === id);
-      if (record) currentVal = record[field] || '';
-
-      cell.dataset.originalHtml = cell.innerHTML;
-
-      if (type === 'date') {
-        cell.innerHTML = `<input type="date" value="${currentVal || ''}">`;
-      } else if (type === 'tijd') {
-        const options = TIJD_OPTIES.map(o =>
-          `<option value="${o}" ${currentVal === o ? 'selected' : ''}>${o || '—'}</option>`
-        ).join('');
-        cell.innerHTML = `<select>${options}</select>`;
-      } else if (type === 'text-short') {
-        const val = Array.isArray(currentVal) ? currentVal.join(', ') : (currentVal || '');
-        cell.innerHTML = `<input type="text" value="${val}" placeholder="Locatie...">`;
-      } else {
-        cell.innerHTML = `<input type="text" value="${currentVal}">`;
-      }
-
-      const input = cell.querySelector('input, select');
-      input.focus();
-
-      async function saveEdit() {
-        let newVal = input.value;
-
-        // Voor locatie: sla op als string (niet array)
-        const updateData = { [field]: newVal || null };
-        if (field === 'deadline' && !newVal) updateData[field] = null;
-
-        try {
-          await patch(table, id, updateData);
-          await loadData();
-          render();
-        } catch (e) {
-          cell.innerHTML = cell.dataset.originalHtml;
-        }
-      }
-
-      input.addEventListener('blur', saveEdit);
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') input.blur();
-        if (e.key === 'Escape') {
-          cell.innerHTML = cell.dataset.originalHtml;
-        }
-      });
+    function renderContextTags(ctx) {
+      if (!ctx || (Array.isArray(ctx) && ctx.length === 0)) return '';
+      const arr = Array.isArray(ctx) ? ctx : [ctx];
+      return `<div class="context-tags">${arr.map(c => `<span class="context-tag">${c}</span>`).join('')}</div>`;
     }
 
-    // ============================================
-    // Event Listeners
-    // ============================================
-    function attachEventListeners() {
-      // Hoofdtaak expand/collapse
-      document.querySelectorAll('.row-hoofdtaak').forEach(row => {
+    // Event listeners
+    function attachListeners() {
+      // Project expand/collapse
+      document.querySelectorAll('.row-project').forEach(row => {
         row.addEventListener('click', (e) => {
-          if (e.target.closest('.editable-cell') || e.target.closest('input') || e.target.closest('select')) return;
-          const taakId = row.dataset.taakId;
+          if (e.target.closest('.editable') || e.target.closest('.prio-star') || e.target.closest('.cat-badge') || e.target.closest('.checkbox')) return;
+          const id = row.dataset.projectId;
           const chevron = row.querySelector('.chevron');
           const isOpen = chevron.classList.contains('open');
           chevron.classList.toggle('open');
 
-          document.querySelectorAll(`.row-subtaak[data-parent="${taakId}"]`).forEach(sr => {
-            sr.classList.toggle('visible', !isOpen);
+          document.querySelectorAll(`.row-taak[data-parent="${id}"]`).forEach(r => {
+            r.classList.toggle('visible', !isOpen);
           });
 
           if (isOpen) {
-            document.querySelectorAll(`.row-subtaak[data-parent="${taakId}"] .subtaak-has-children`).forEach(el => {
-              const subId = el.dataset.subtaakId;
-              const subChevron = el.querySelector('.chevron');
-              if (subChevron) subChevron.classList.remove('open');
-              document.querySelectorAll(`.row-subsubtaak[data-parent-sub="${subId}"]`).forEach(ssr => {
-                ssr.classList.remove('visible');
-              });
+            document.querySelectorAll(`.row-taak[data-parent="${id}"]`).forEach(r => {
+              const clickable = r.querySelector('.clickable');
+              if (clickable) {
+                const tId = clickable.dataset.taakId;
+                const ch = clickable.querySelector('.chevron');
+                if (ch) ch.classList.remove('open');
+                document.querySelectorAll(`.row-subtaak[data-parent-taak="${tId}"]`).forEach(sr => sr.classList.remove('visible'));
+              }
             });
           }
         });
       });
 
-      // Subtaak expand/collapse
-      document.querySelectorAll('.subtaak-has-children').forEach(el => {
+      // Taak expand/collapse (for tasks with subtaken)
+      document.querySelectorAll('.clickable[data-taak-id]').forEach(el => {
         el.addEventListener('click', (e) => {
-          if (e.target.closest('.editable-cell') || e.target.closest('input') || e.target.closest('select')) return;
+          if (e.target.closest('.editable')) return;
           e.stopPropagation();
-          const subId = el.dataset.subtaakId;
+          const tId = el.dataset.taakId;
           const chevron = el.querySelector('.chevron');
-          chevron.classList.toggle('open');
           const isOpen = chevron.classList.contains('open');
-          document.querySelectorAll(`.row-subsubtaak[data-parent-sub="${subId}"]`).forEach(ssr => {
-            ssr.classList.toggle('visible', isOpen);
+          chevron.classList.toggle('open');
+          document.querySelectorAll(`.row-subtaak[data-parent-taak="${tId}"]`).forEach(r => {
+            r.classList.toggle('visible', !isOpen);
           });
         });
       });
 
-      // Inline editing
-      document.querySelectorAll('.editable-cell[data-table]').forEach(cell => {
-        cell.addEventListener('click', (e) => {
-          e.stopPropagation();
-          startEdit(cell);
-        });
-      });
-
-      // Subtaak checkbox
-      document.querySelectorAll('.checkbox[data-sub-id]').forEach(cb => {
+      // Checkboxes
+      document.querySelectorAll('.checkbox:not(.checked)').forEach(cb => {
         cb.addEventListener('click', async (e) => {
           e.stopPropagation();
-          const id = cb.dataset.subId;
+          const id = cb.dataset.id;
+          const table = cb.dataset.table;
           cb.classList.add('checked');
-          await patch('subtaken', id, { gedaan: true, gedaan_datum: today() });
-          const sub = subtaken.find(s => s.id === id);
-          if (sub) {
-            const taak = taken.find(t => t.id === sub.taak_id);
-            await postLog(sub.sub_id, sub.tekst, taak ? taak.categorie : null);
+
+          await patch(table, id, {
+            gedaan: true,
+            gedaan_datum: new Date().toISOString().split('T')[0]
+          });
+
+          // If sub_subtaak: check if all siblings done → mark parent subtaak done
+          if (table === 'sub_subtaken') {
+            const ss = subtaken.find(s => s.id === id);
+            // Actually ss is in the subtaken var which holds sub_subtaken data
+            // Let me find the parent
+            const item = subtaken.find(s => s.id === id);
+            // Reload to check
           }
+
           setTimeout(async () => { await loadData(); render(); }, 300);
         });
       });
 
-      // Sub-subtaak checkbox
-      document.querySelectorAll('.checkbox[data-ss-id]:not(.checked)').forEach(cb => {
-        cb.addEventListener('click', async (e) => {
+      // Prio star toggle
+      document.querySelectorAll('.prio-star').forEach(star => {
+        star.addEventListener('click', async (e) => {
           e.stopPropagation();
-          const id = cb.dataset.ssId;
-          cb.classList.add('checked');
-          const textEl = cb.nextElementSibling;
-          if (textEl) textEl.classList.add('done');
+          const id = star.dataset.id;
+          const table = star.dataset.table;
+          const isActive = star.classList.contains('active');
+          star.classList.toggle('active');
 
-          await patch('sub_subtaken', id, { gedaan: true, gedaan_datum: today() });
+          let field = 'prioriteit';
+          let value;
+          if (table === 'taken') {
+            value = isActive ? 'normaal' : 'hoog';
+          } else if (table === 'subtaken') {
+            field = 'prio_ster';
+            value = !isActive;
+          } else {
+            field = 'prioriteit';
+            value = !isActive;
+          }
 
-          const ss = subSubtaken.find(s => s.id === id);
-          if (ss) {
-            const siblings = subSubtaken.filter(s => s.subtaak_id === ss.subtaak_id);
-            if (siblings.every(s => s.id === id ? true : s.gedaan)) {
-              const subtaak = subtaken.find(s => s.id === ss.subtaak_id);
-              if (subtaak) {
-                await patch('subtaken', subtaak.id, { gedaan: true, gedaan_datum: today() });
-                const taak = taken.find(t => t.id === subtaak.taak_id);
-                await postLog(subtaak.sub_id, subtaak.tekst, taak ? taak.categorie : null);
-              }
+          await patch(table, id, { [field]: value });
+          setTimeout(async () => { await loadData(); render(); }, 200);
+        });
+      });
+
+      // Inline edit: text fields
+      document.querySelectorAll('.editable[data-field]').forEach(el => {
+        el.addEventListener('dblclick', (e) => {
+          e.stopPropagation();
+          if (el.querySelector('input')) return;
+          const current = el.textContent.trim();
+          const field = el.dataset.field;
+          const id = el.dataset.id;
+          const table = el.dataset.table;
+
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.value = current;
+          el.textContent = '';
+          el.appendChild(input);
+          input.focus();
+
+          const save = async () => {
+            const val = input.value.trim();
+            el.textContent = val || current;
+            if (val && val !== current) {
+              await patch(table, id, { [field]: val });
             }
-          }
-          setTimeout(async () => { await loadData(); render(); }, 300);
+          };
+          input.addEventListener('blur', save);
+          input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') input.blur(); if (ev.key === 'Escape') { el.textContent = current; } });
+        });
+      });
+
+      // Category toggle
+      document.querySelectorAll('.cat-badge[data-field="categorie"]').forEach(badge => {
+        badge.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = badge.dataset.id;
+          const table = badge.dataset.table;
+          const current = badge.textContent.trim();
+          const newCat = current === 'W' ? 'Privé' : 'Werk';
+          await patch(table, id, { categorie: newCat });
+          setTimeout(async () => { await loadData(); render(); }, 200);
         });
       });
     }
 
-    // ============================================
-    // Filter Logic
-    // ============================================
+    // Combinable filters
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const filter = btn.dataset.filter;
 
         if (filter === 'alles') {
           activeFilters.clear();
-          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          activeFilters.add('alles');
         } else {
-          // Deactiveer "Alles"
-          document.querySelector('.filter-btn[data-filter="alles"]').classList.remove('active');
-
+          activeFilters.delete('alles');
           if (activeFilters.has(filter)) {
             activeFilters.delete(filter);
-            btn.classList.remove('active');
           } else {
             activeFilters.add(filter);
-            btn.classList.add('active');
           }
-
-          // Als geen filters meer actief → activeer "Alles"
-          if (activeFilters.size === 0) {
-            document.querySelector('.filter-btn[data-filter="alles"]').classList.add('active');
+          // If both werk and prive selected, same as alles (for category)
+          if (activeFilters.has('werk') && activeFilters.has('prive')) {
+            activeFilters.delete('werk');
+            activeFilters.delete('prive');
           }
-
-          // Als Werk + Privé allebei actief → is effectief "Alles" (maar laat ze actief)
+          if (activeFilters.size === 0) activeFilters.add('alles');
         }
+
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.classList.toggle('active', activeFilters.has(b.dataset.filter));
+        });
 
         render();
       });
     });
 
-    // ============================================
     // Init
-    // ============================================
     async function init() {
       try {
         await loadData();
-        const meta = await query('meta', 'sleutel=eq.laatste_update');
-        if (meta.length > 0) {
-          document.getElementById('lastUpdate').textContent = `Laatste update: ${meta[0].waarde}`;
-        }
         render();
       } catch (err) {
         document.getElementById('loading').innerHTML = `
           <div class="empty-state">
-            <div class="icon">&#9888;</div>
+            <div class="icon">⚠</div>
             <div>Kan taken niet laden</div>
             <div style="font-size:13px;margin-top:8px;color:var(--text-tertiary);">${err.message}</div>
           </div>`;

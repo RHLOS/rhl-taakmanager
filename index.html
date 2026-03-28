@@ -432,87 +432,7 @@
             <th class="col-context">Context</th>
           </tr>
         </thead>
-        <tbody id="tbody">
-          <!-- Voorbeeld rijen (placeholder, wordt vervangen door Supabase data) -->
-          <tr class="row-project">
-            <td style="text-align:center"><input type="checkbox"></td>
-            <td></td>
-            <td style="text-align:center"><span class="star on">★</span></td>
-            <td><span class="cat w">W</span></td>
-            <td><span class="chev open">▶</span> HSPI project</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr class="row-taak">
-            <td></td>
-            <td></td>
-            <td style="text-align:center"><span class="star off">★</span></td>
-            <td><span class="cat w">W</span></td>
-            <td></td>
-            <td><span class="chev open">▶</span> Bellen reguliere leden</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr class="row-subtaak">
-            <td></td>
-            <td style="text-align:center"><div class="cb"></div></td>
-            <td style="text-align:center"><span class="star off">★</span></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>Auke (RFH)</td>
-            <td></td>
-            <td class="tijd"></td>
-            <td class="tijd"></td>
-            <td></td>
-          </tr>
-          <tr class="row-subtaak">
-            <td></td>
-            <td style="text-align:center"><div class="cb"></div></td>
-            <td style="text-align:center"><span class="star off">★</span></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>Nick (MS)</td>
-            <td></td>
-            <td class="tijd"></td>
-            <td class="tijd"></td>
-            <td></td>
-          </tr>
-          <tr class="row-taak">
-            <td></td>
-            <td style="text-align:center"><div class="cb"></div></td>
-            <td style="text-align:center"><span class="star off">★</span></td>
-            <td><span class="cat w">W</span></td>
-            <td></td>
-            <td>Bellen handelaren</td>
-            <td></td>
-            <td><span class="dl urgent">30-03-2026</span></td>
-            <td class="tijd"></td>
-            <td class="tijd"></td>
-            <td></td>
-          </tr>
-          <tr class="row-project">
-            <td style="text-align:center"><input type="checkbox"></td>
-            <td></td>
-            <td style="text-align:center"><span class="star off">★</span></td>
-            <td><span class="cat p">P</span></td>
-            <td><span class="chev">▶</span> Privé divers</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-        </tbody>
+        <tbody id="tbody"></tbody>
       </table>
     </div>
 
@@ -520,28 +440,169 @@
   </div>
 
   <script>
-    // ── Dropdown filter toggle ──
+    // ═══ Supabase config ═══
+    const SB = 'https://fhkttfzqdjynzmtjbujv.supabase.co';
+    const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoa3R0ZnpxZGp5bnptdGpidWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDg5NjgsImV4cCI6MjA5MDI4NDk2OH0.0p7IK97uPxBcazlUwredncV8EIFuvgjAhe46N9P118I';
+    const hdrs = { 'apikey': KEY, 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' };
+
+    async function api(table, params = '') {
+      const r = await fetch(`${SB}/rest/v1/${table}?${params}`, { headers: hdrs });
+      if (!r.ok) throw new Error(`Fout bij laden ${table}`);
+      return r.json();
+    }
+
+    // ═══ Datum helpers ═══
+    function formatDate(d) {
+      if (!d) return '';
+      const dt = new Date(d);
+      return `${String(dt.getDate()).padStart(2,'0')}-${String(dt.getMonth()+1).padStart(2,'0')}-${dt.getFullYear()}`;
+    }
+    function daysUntil(d) {
+      if (!d) return null;
+      const dt = new Date(d), now = new Date();
+      dt.setHours(0,0,0,0); now.setHours(0,0,0,0);
+      return Math.ceil((dt - now) / 86400000);
+    }
+
+    // ═══ Render helpers ═══
+    function catBadge(cat) {
+      return cat === 'Werk' ? '<span class="cat w">W</span>' : '<span class="cat p">P</span>';
+    }
+    function starHtml(isOn) {
+      return `<span class="star ${isOn ? 'on' : 'off'}">★</span>`;
+    }
+    function deadlineHtml(d) {
+      if (!d) return '';
+      const days = daysUntil(d);
+      const cls = days !== null && days <= 7 ? 'urgent' : 'normal';
+      return `<span class="dl ${cls}">${formatDate(d)}</span>`;
+    }
+    function contextHtml(ctx) {
+      if (!ctx) return '';
+      const arr = Array.isArray(ctx) ? ctx : [ctx];
+      if (arr.length === 0) return '';
+      return `<div class="ctx">${arr.map(c => `<span>${c}</span>`).join('')}</div>`;
+    }
+
+    // ═══ Render tabel ═══
+    function renderProject(project, subtaken, subsubtaken, tbody) {
+      const cat = project.categorie;
+      const isPrio = project.prioriteit === 'hoog';
+      const openSubs = subtaken.filter(s => s.taak_id === project.id && !s.gedaan);
+
+      // Project-rij
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="row-project" data-project-id="${project.id}">
+          <td style="text-align:center"><input type="checkbox"></td>
+          <td></td>
+          <td style="text-align:center">${starHtml(isPrio)}</td>
+          <td>${catBadge(cat)}</td>
+          <td><span class="chev">▶</span> ${project.taak}</td>
+          <td></td>
+          <td></td>
+          <td>${deadlineHtml(project.deadline)}</td>
+          <td class="tijd">${project.tijdsinschatting || ''}</td>
+          <td class="tijd">${project.tijd_uitgevoerd ? project.tijd_uitgevoerd + 'm' : ''}</td>
+          <td>${contextHtml(project.context)}</td>
+        </tr>
+      `);
+
+      // Subtaken (taak-rijen)
+      openSubs.forEach(sub => {
+        const subs = subsubtaken.filter(ss => ss.subtaak_id === sub.id && !ss.gedaan);
+        const hasSubs = subs.length > 0;
+
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="row-taak collapsed" data-parent="${project.id}" data-taak-id="${sub.id}">
+            <td></td>
+            <td style="text-align:center">${!hasSubs ? '<div class="cb"></div>' : ''}</td>
+            <td style="text-align:center">${starHtml(sub.prio_ster)}</td>
+            <td>${catBadge(cat)}</td>
+            <td></td>
+            <td>${hasSubs ? '<span class="chev">▶</span> ' : ''}${sub.tekst}</td>
+            <td></td>
+            <td>${deadlineHtml(sub.deadline)}</td>
+            <td class="tijd">${sub.tijdsinschatting || ''}</td>
+            <td class="tijd">${sub.tijd_uitgevoerd ? sub.tijd_uitgevoerd + 'm' : ''}</td>
+            <td>${contextHtml(sub.context)}</td>
+          </tr>
+        `);
+
+        // Sub-subtaken
+        subs.forEach(ss => {
+          tbody.insertAdjacentHTML('beforeend', `
+            <tr class="row-subtaak collapsed" data-parent-taak="${sub.id}">
+              <td></td>
+              <td style="text-align:center"><div class="cb"></div></td>
+              <td style="text-align:center">${starHtml(ss.prioriteit)}</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>${ss.tekst}</td>
+              <td>${deadlineHtml(ss.deadline)}</td>
+              <td class="tijd">${ss.tijdsinschatting || ''}</td>
+              <td class="tijd">${ss.tijd_uitgevoerd ? ss.tijd_uitgevoerd + 'm' : ''}</td>
+              <td>${contextHtml(ss.context)}</td>
+            </tr>
+          `);
+        });
+      });
+    }
+
+    // ═══ Init ═══
+    async function init() {
+      try {
+        // Laad alleen HSPI project (nr=8 in de originele data, maar hernummerd)
+        // We laden alles en filteren op 'HSPI project'
+        const [projecten, subtaken, subsubtaken] = await Promise.all([
+          api('taken', 'gedaan=eq.false&order=nr.asc'),
+          api('subtaken', 'gedaan=eq.false&order=volgorde.asc'),
+          api('sub_subtaken', 'gedaan=eq.false&order=volgorde.asc')
+        ]);
+
+        const tbody = document.getElementById('tbody');
+        tbody.innerHTML = '';
+
+        // Stap 2a: alleen HSPI project renderen
+        const hspi = projecten.find(p => p.taak.toLowerCase().includes('hspi'));
+        if (hspi) {
+          renderProject(hspi, subtaken, subsubtaken, tbody);
+        }
+
+        // Metrics (voorlopig op basis van wat geladen is)
+        document.getElementById('mTotal').textContent = projecten.length;
+        const openCount = subtaken.length;
+        document.getElementById('mOpen').textContent = openCount;
+        document.getElementById('mWerk').textContent = projecten.filter(p => p.categorie === 'Werk').length;
+        document.getElementById('mPrio').textContent = projecten.filter(p => p.prioriteit === 'hoog').length;
+
+      } catch (err) {
+        document.getElementById('tbody').innerHTML = `
+          <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
+            Fout bij laden: ${err.message}
+          </td></tr>`;
+      }
+    }
+
+    // ═══ Dropdown filter toggle ═══
     document.querySelectorAll('.filter-dd-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const menu = btn.nextElementSibling;
-        // Sluit alle andere menus
         document.querySelectorAll('.filter-dd-menu.open').forEach(m => {
           if (m !== menu) m.classList.remove('open');
         });
         menu.classList.toggle('open');
       });
     });
-
-    // Sluit dropdown bij klik buiten
     document.addEventListener('click', () => {
       document.querySelectorAll('.filter-dd-menu.open').forEach(m => m.classList.remove('open'));
     });
-
-    // Voorkom sluiten bij klik in menu
     document.querySelectorAll('.filter-dd-menu').forEach(menu => {
       menu.addEventListener('click', (e) => e.stopPropagation());
     });
+
+    init();
   </script>
 </body>
 </html>

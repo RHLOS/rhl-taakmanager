@@ -1,0 +1,222 @@
+{
+  "meta": {
+    "versie": "1.0",
+    "datum": "27-03-2026",
+    "volgend_nr": 33
+  },
+  "taken": [
+    {
+      "nr": 8,
+      "prioriteit": "hoog",
+      "categorie": "Werk",
+      "taak": "HSPI project",
+      "deadline": "",
+      "subtaken": [
+        { "id": "8a", "tekst": "Notulen verwerken", "gedaan": true, "deadline": "" },
+        { "id": "8b", "tekst": "Gesprekken nieuwe leden: Newwen (ingepland), Poppelman (ingepland), Pagter (wachten op reactie)", "gedaan": true, "deadline": "" },
+        { "id": "8c", "tekst": "Bellen reguliere leden 6x: Auke (RFH), Nick (MS), Sean (JBB), Mark (FL), Jaap (CPA), Herman (AL)", "gedaan": false, "deadline": "" },
+        { "id": "8d", "tekst": "Datumprikker verstuurd. Reactie: Ralph, Wouter, Robert. Wacht nog op: Desiree, Nora, Eveline.", "gedaan": false, "deadline": "" },
+        { "id": "8e", "tekst": "AI overzichtsdocument", "gedaan": true, "deadline": "" },
+        { "id": "8f", "tekst": "Contract Herold: goedgekeurd", "gedaan": true, "deadline": "" },
+        { "id": "8g", "tekst": "Presentatie kennismakingsmeetings gemaakt", "gedaan": true, "deadline": "" },
+        { "id": "8h", "tekst": "Bellen handelaren 4x: RL (gedaan), FMG (gedaan), VDP (maandag), DFG (maandag)", "gedaan": false, "deadline": "30-03-2026" }
+      ]
+    },
+    {
+      "nr": 10,
+      "prioriteit": "normaal",
+      "categorie": "Privé",
+      "taak": "Privé divers",
+      "deadline": "",
+      "subtaken": [
+        { "id": "10a", "tekst": "Retour SugarCity", "gedaan": false, "deadline": "" },
+        { "id": "10b", "tekst": "Paspoort verlengen", "gedaan": false, "deadline": "" },
+        { "id": "10c", "tekst": "NordVPN op andere apparaten installeren", "gedaan": false, "deadline": "" },
+        { "id": "10d", "tekst": "Andere mogelijkheden NordVPN verkennen", "gedaan": false, "deadline": "" },
+        { "id": "10e", "tekst": "Belastingdocumenten verzamelen — nog te doen: Jaarruimte berekening, DG, RABO, SAXO, UPO (gedaan: ASN, DFG, ING, KNAB, NN, RAISIN)", "gedaan": false, "deadline": "29-03-2026" },
+        { "id": "10f", "tekst": "Noodpakket aanvullen: €300 + vochtige doekjes", "gedaan": false, "deadline": "" },
+        { "id": "10g", "tekst": "2x webinar AI-Report kijken", "gedaan": false, "deadline": "" },
+        { "id": "10h", "tekst": "Boeken op MacBook sorteren naar ext. HD", "gedaan": false, "deadline": "" },
+        { "id": "10i", "tekst": "Inplannen langs camping Loman", "gedaan": false, "deadline": "" },
+        { "id": "10j", "tekst": "ChatGPT afsluiten & Gemini openen", "gedaan": false, "deadline": "" },
+        { "id": "10k", "tekst": "Follow-up Antonio (scheiding & morning routine)", "gedaan": false, "deadline": "29-03-2026" },
+        { "id": "10l", "tekst": "Overhemden SS kopen", "gedaan": false, "deadline": "" },
+        { "id": "10m", "tekst": "Notion gekoppeld aan Claude", "gedaan": true, "deadline": "" },
+        { "id": "10n", "tekst": "Salaris overgemaakt", "gedaan": true, "deadline": "" },
+        { "id": "10o", "tekst": "Agenda shortcuts instellen", "gedaan": false, "deadline": "" },
+        { "id": "10p", "tekst": "Wandelschoenen schoonmaken", "gedaan": false, "deadline": "28-03-2026" },
+        { "id": "10q", "tekst": "Whisky Harold uitzoeken", "gedaan": false, "deadline": "28-03-2026" },
+        { "id": "10r", "tekst": "Bellen Roos (niet opgenomen)", "gedaan": false, "deadline": "30-03-2026" },
+        { "id": "10s", "tekst": "Bellen Marjolein (niet opgenomen)", "gedaan": false, "deadline": "30-03-2026" },
+        { "id": "10t", "tekst": "Alle AI dumps op 1 plek (Notion?)", "gedaan": false, "deadline": "" },
+        { "id": "10u", "tekst": "Alle bookmarks uit Safari in Notion", "gedaan": false, "deadline": "" },
+        { "id": "10v", "tekst": "Alle leeslijst en linkjes voortaan in CC?", "gedaan": false, "deadline": "" }
+      ]
+    },
+    {
+      "nr": 11,
+      "prioriteit": "normaal",
+      "categorie": "Privé",
+      "taak": "NGSJ — openstaande taken",
+      "deadline": "",
+      "subtaken": [
+        { "id": "11a", "tekst": "Welkomstbrief nieuwe leden updaten & versturen", "gedaan": false, "deadline": "" },
+        { "id": "11b", "tekst": "Kaartje Jubilea (25 jr)", "gedaan": false, "deadline": "" },
+        { "id": "11c", "tekst": "Contact Gabriel (deel 3 pelgrimsverhaal)", "gedaan": false, "deadline": "" },
+        { "id": "11d", "tekst": "Zoeken naar andere locaties café & presentaties", "gedaan": false, "deadline": "" }
+      ]
+    },
+    {
+      "nr": 12,
+      "prioriteit": "normaal",
+      "categorie": "Werk",
+      "taak": "Financieel maandoverzicht zakelijk",
+      "deadline": "",
+      "subtaken": [
+        { "id": "12a", "tekst": "Overzicht invullen", "gedaan": false, "deadline": "" },
+        { "id": "12b", "tekst": "Analyse maken", "gedaan": false, "deadline": "" }
+      ]
+    },
+    {
+      "nr": 15,
+      "prioriteit": "normaal",
+      "categorie": "Werk",
+      "taak": "Werk divers",
+      "deadline": "",
+      "subtaken": [
+        { "id": "15a", "tekst": "Lunch met Rico inplannen", "gedaan": false, "deadline": "" },
+        { "id": "15b", "tekst": "Leeslijst Chrome leegmaken", "gedaan": false, "deadline": "" },
+        { "id": "15c", "tekst": "Oefenen met PowerPoint via Claude", "gedaan": true, "deadline": "" },
+        { "id": "15d", "tekst": "Broodfonds/Schenkkring regelen", "gedaan": true, "deadline": "" },
+        { "id": "15e", "tekst": "Bij Henri nagaan wanneer de PPWR tool kijken", "gedaan": false, "deadline": "30-03-2026" },
+        { "id": "15f", "tekst": "Afspraak Lisa inplannen", "gedaan": true, "deadline": "" },
+        { "id": "15g", "tekst": "Omzetbelasting betalen", "gedaan": true, "deadline": "" },
+        { "id": "15h", "tekst": "Transcriptie maken met AI van twee gesprekken", "gedaan": false, "deadline": "" },
+        { "id": "15i", "tekst": "Terugbellen Remco Jansen", "gedaan": true, "deadline": "" },
+        { "id": "15j", "tekst": "f.u. Newwen met info over PPWR", "gedaan": true, "deadline": "" },
+        { "id": "15k", "tekst": "Fotograaf en Vormgever/Website", "gedaan": false, "deadline": "" }
+      ]
+    },
+    {
+      "nr": 18,
+      "prioriteit": "normaal",
+      "categorie": "Werk",
+      "taak": "Commercie",
+      "deadline": "",
+      "subtaken": [
+        { "id": "18a", "tekst": "MPS over residu & uitgangsmateriaal", "gedaan": false, "deadline": "" },
+        { "id": "18b", "tekst": "FSI over specifieke projecten", "gedaan": false, "deadline": "" },
+        { "id": "18c", "tekst": "HSPI/GPA over certificering icm FSI", "gedaan": false, "deadline": "" },
+        { "id": "18d", "tekst": "PM (nader in te vullen)", "gedaan": false, "deadline": "" },
+        { "id": "18e", "tekst": "Artikel voor Manual Master", "gedaan": false, "deadline": "" },
+        { "id": "18f", "tekst": "LinkedIn slider aanstaande wetgeving", "gedaan": false, "deadline": "" },
+        { "id": "18g", "tekst": "Vanaf 1/8 concurrenten DFG benaderen: contactpersonen directieniveau, aangepast profiel (SSS, SBTi, CSRD, etc.)", "gedaan": false, "deadline": "01-08-2026" }
+      ]
+    },
+    {
+      "nr": 26,
+      "prioriteit": "normaal",
+      "categorie": "Werk",
+      "taak": "Leeslijst",
+      "deadline": "",
+      "subtaken": [
+        { "id": "26a", "tekst": "IDH rapport", "gedaan": true, "deadline": "" },
+        { "id": "26b", "tekst": "AH impactverslag", "gedaan": false, "deadline": "" },
+        { "id": "26c", "tekst": "Boek Marlot", "gedaan": false, "deadline": "" },
+        { "id": "26d", "tekst": "Stuk Merieux", "gedaan": false, "deadline": "" },
+        { "id": "26e", "tekst": "Intentioneel leven", "gedaan": false, "deadline": "" },
+        { "id": "26f", "tekst": "Me, myself and AI", "gedaan": false, "deadline": "" },
+        { "id": "26g", "tekst": "Obsidian", "gedaan": false, "deadline": "" },
+        { "id": "26h", "tekst": "Verbaal meesterschap", "gedaan": false, "deadline": "" },
+        { "id": "26i", "tekst": "Omdenken werk", "gedaan": false, "deadline": "" },
+        { "id": "26j", "tekst": "Overtuigend debateren", "gedaan": false, "deadline": "" },
+        { "id": "26k", "tekst": "Je podium pakken", "gedaan": false, "deadline": "" },
+        { "id": "26l", "tekst": "101 beïnvloedingstechnieken", "gedaan": false, "deadline": "" },
+        { "id": "26m", "tekst": "Einde vd strategie", "gedaan": false, "deadline": "" },
+        { "id": "26n", "tekst": "IMPACT herlezen", "gedaan": false, "deadline": "" },
+        { "id": "26o", "tekst": "The devil has a name", "gedaan": false, "deadline": "" },
+        { "id": "26p", "tekst": "Brother(s)", "gedaan": false, "deadline": "" },
+        { "id": "26q", "tekst": "Chasing the sun", "gedaan": false, "deadline": "" }
+      ]
+    },
+    {
+      "nr": 28,
+      "prioriteit": "normaal",
+      "categorie": "Privé",
+      "taak": "Natasja",
+      "deadline": "",
+      "subtaken": [
+        { "id": "28a", "tekst": "Autoverzekering", "gedaan": false, "deadline": "" },
+        { "id": "28b", "tekst": "Auto wassen", "gedaan": false, "deadline": "" },
+        { "id": "28c", "tekst": "VR experience", "gedaan": false, "deadline": "" },
+        { "id": "28d", "tekst": "Cabiner", "gedaan": false, "deadline": "" }
+      ]
+    },
+    {
+      "nr": 31,
+      "prioriteit": "hoog",
+      "categorie": "Werk",
+      "taak": "Follow up commercial leads",
+      "deadline": "",
+      "subtaken": [
+        { "id": "31a", "tekst": "Nabellen Mark-Jan Terwindt", "gedaan": false, "deadline": "30-03-2026" },
+        { "id": "31b", "tekst": "Nabellen Merthus Bezemer", "gedaan": false, "deadline": "10-04-2026" },
+        { "id": "31c", "tekst": "Nabellen Mindpact", "gedaan": false, "deadline": "30-03-2026" },
+        { "id": "31d", "tekst": "Nutreco: terugbellen indien geen bericht", "gedaan": false, "deadline": "10-04-2026" }
+      ]
+    }
+  ],
+  "laag": [
+    {
+      "nr": 29,
+      "categorie": "Werk",
+      "taak": "Kijklijst",
+      "items": [
+        "Down the road",
+        "Pointer (elektrolyten, bloemen)",
+        "F1",
+        "The North",
+        "I'll push you"
+      ]
+    },
+    {
+      "nr": 30,
+      "categorie": "Privé",
+      "taak": "Shoplijst",
+      "items": [
+        "New Balance 9060",
+        "Abisko Winter Stretch Trousers M, EU52/R, 550/Black"
+      ]
+    },
+    {
+      "nr": 32,
+      "categorie": "Privé",
+      "taak": "Nice to do",
+      "items": [
+        "Stadsplattegronden van Apeldoorn, Delft, Amsterdam, Uithoorn",
+        "Bushcraft / Wildernis training / Outdoor-survival (re-wild.nl)",
+        "Stamboom — Coda Archief Apeldoorn?",
+        "Eigen planner maken (en laten drukken als relatiegeschenk)"
+      ]
+    }
+  ],
+  "afgerond": [
+    { "nr": 20, "datum": "25-03-2026", "categorie": "Werk", "taak": "Facturen Q3 opzoeken", "notities": "a. Parool · b. AI Report" },
+    { "nr": 27, "datum": "25-03-2026", "categorie": "Werk", "taak": "Commerciële promotie", "notities": "Samengevoegd met #18 Commercie" },
+    { "nr": "8a", "datum": "25-03-2026", "categorie": "Werk", "taak": "HSPI: Notulen verwerken", "notities": "" },
+    { "nr": "8b", "datum": "26-03-2026", "categorie": "Werk", "taak": "HSPI: Gesprekken nieuwe leden", "notities": "Newwen, Poppelman, Pagter allen benaderd" },
+    { "nr": "8d", "datum": "25-03-2026", "categorie": "Werk", "taak": "HSPI: Datumprikker werkgroepsessie", "notities": "Verstuurd, wacht op reacties" },
+    { "nr": "8e", "datum": "25-03-2026", "categorie": "Werk", "taak": "HSPI: AI overzichtsdocument", "notities": "" },
+    { "nr": "8f", "datum": "26-03-2026", "categorie": "Werk", "taak": "HSPI: Contract Herold goedgekeurd", "notities": "" },
+    { "nr": "8g", "datum": "25-03-2026", "categorie": "Werk", "taak": "HSPI: Presentatie kennismakingsmeetings", "notities": "" },
+    { "nr": "10m", "datum": "25-03-2026", "categorie": "Privé", "taak": "Notion gekoppeld aan Claude", "notities": "" },
+    { "nr": "10n", "datum": "25-03-2026", "categorie": "Privé", "taak": "Salaris overgemaakt", "notities": "" },
+    { "nr": "15c", "datum": "26-03-2026", "categorie": "Werk", "taak": "Oefenen met PowerPoint via Claude", "notities": "" },
+    { "nr": "15d", "datum": "25-03-2026", "categorie": "Werk", "taak": "Broodfonds/Schenkkring regelen", "notities": "" },
+    { "nr": "15f", "datum": "27-03-2026", "categorie": "Werk", "taak": "Afspraak Lisa inplannen", "notities": "" },
+    { "nr": "15g", "datum": "26-03-2026", "categorie": "Werk", "taak": "Omzetbelasting betalen", "notities": "" },
+    { "nr": "15i", "datum": "26-03-2026", "categorie": "Werk", "taak": "Terugbellen Remco Jansen", "notities": "" },
+    { "nr": "15j", "datum": "26-03-2026", "categorie": "Werk", "taak": "f.u. Newwen met info over PPWR", "notities": "" },
+    { "nr": "26a", "datum": "27-03-2026", "categorie": "Werk", "taak": "IDH rapport lezen", "notities": "" }
+  ]
+}

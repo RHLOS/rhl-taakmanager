@@ -45,7 +45,7 @@
     body {
       min-height: 100dvh;
       padding: var(--safe-top) 16px var(--safe-bottom) 16px;
-      max-width: 700px;
+      max-width: 960px;
       margin: 0 auto;
     }
 
@@ -79,11 +79,7 @@
       display: flex;
       gap: 8px;
       margin: 16px 0;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
     }
-    .metrics::-webkit-scrollbar { display: none; }
 
     .metric-card {
       flex: 1;
@@ -145,103 +141,95 @@
     }
 
     /* ============================================
-       Section Headers
+       Table
        ============================================ */
-    .section-header {
-      font-size: 20px;
-      font-weight: 700;
-      margin: var(--section-spacing) 0 10px;
+    .task-table {
+      width: 100%;
+      background: var(--card-bg);
+      border-radius: var(--card-radius);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      overflow: hidden;
+      border-collapse: collapse;
+    }
+
+    .task-table thead th {
+      text-align: left;
+      padding: 12px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--separator);
+      background: var(--card-bg);
+      position: sticky;
+      top: 60px;
+      z-index: 10;
+    }
+
+    .task-table thead th:last-child {
+      text-align: right;
+    }
+
+    .col-nr { width: 50px; }
+    .col-hoofdtaak { width: 25%; }
+    .col-subtaak { width: 30%; }
+    .col-subsubtaak { width: auto; }
+    .col-deadline { width: 90px; }
+
+    /* ============================================
+       Hoofdtaak Row
+       ============================================ */
+    .row-hoofdtaak td {
+      padding: 12px 14px;
+      border-top: 1px solid var(--separator);
+      vertical-align: top;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .row-hoofdtaak:first-child td {
+      border-top: none;
+    }
+
+    .row-hoofdtaak:hover td {
+      background: rgba(0,0,0,0.02);
+    }
+
+    .row-hoofdtaak td:active {
+      background: rgba(0,0,0,0.04);
+    }
+
+    .hoofdtaak-content {
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .section-header .count {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-
-    /* ============================================
-       Task Cards
-       ============================================ */
-    .task-card {
-      background: var(--card-bg);
-      border-radius: var(--card-radius);
-      margin-bottom: 10px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      border-left: 4px solid transparent;
-      transition: all 0.2s;
-    }
-
-    .task-card.prio {
-      border-left-color: var(--red);
-    }
-
-    .task-card.laag {
-      border-left-color: var(--grey);
-    }
-
-    .task-header {
-      display: flex;
-      align-items: center;
-      padding: 14px 16px;
-      cursor: pointer;
-      gap: 12px;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-
-    .task-header:active {
-      background: rgba(0,0,0,0.03);
-    }
-
-    .task-chevron {
-      font-size: 13px;
+    .chevron {
+      font-size: 12px;
       color: var(--text-tertiary);
       transition: transform 0.25s ease;
       flex-shrink: 0;
     }
 
-    .task-card.open .task-chevron {
+    .chevron.open {
       transform: rotate(90deg);
     }
 
-    .task-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .task-title {
-      font-size: 16px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .task-title .nr {
-      color: var(--text-secondary);
-      font-weight: 500;
-      font-size: 14px;
-    }
-
-    .task-meta {
-      display: flex;
-      gap: 8px;
-      margin-top: 4px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
     .badge {
-      font-size: 11px;
+      display: inline-block;
+      font-size: 10px;
       font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 6px;
+      padding: 2px 7px;
+      border-radius: 5px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
+      vertical-align: middle;
+      margin-left: 6px;
     }
 
     .badge.prio {
@@ -264,49 +252,67 @@
       color: var(--grey);
     }
 
-    .task-deadline {
-      font-size: 13px;
-      font-weight: 500;
-      white-space: nowrap;
-      flex-shrink: 0;
+    .prio-bar {
+      border-left: 4px solid var(--red);
     }
 
-    .task-deadline.urgent {
-      color: var(--red);
+    .laag-bar {
+      border-left: 4px solid var(--grey);
     }
 
-    .task-deadline.normal {
-      color: var(--text-tertiary);
-    }
-
-    .subtask-count {
-      font-size: 13px;
+    .subtask-count-label {
+      font-size: 12px;
+      font-weight: 400;
       color: var(--text-secondary);
+      margin-left: 4px;
     }
 
     /* ============================================
-       Subtasks
+       Subtaak Row
        ============================================ */
-    .subtask-list {
+    .row-subtaak {
       display: none;
-      padding: 0 16px 12px 16px;
     }
 
-    .task-card.open .subtask-list {
-      display: block;
+    .row-subtaak.visible {
+      display: table-row;
     }
 
-    .subtask {
+    .row-subtaak td {
+      padding: 9px 14px;
+      vertical-align: top;
+      font-size: 14px;
+      border-top: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .subtaak-content {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
-      padding: 10px 0;
-      border-top: 1px solid var(--separator);
+      gap: 8px;
     }
 
-    .subtask-checkbox {
-      width: 22px;
-      height: 22px;
+    .subtaak-has-children {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .subtaak-has-children:hover {
+      color: var(--accent);
+    }
+
+    .sub-id {
+      color: var(--text-secondary);
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    /* ============================================
+       Checkbox
+       ============================================ */
+    .checkbox {
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       border: 2px solid var(--separator);
       flex-shrink: 0;
@@ -318,111 +324,77 @@
       margin-top: 1px;
     }
 
-    .subtask-checkbox:hover {
+    .checkbox:hover {
       border-color: var(--accent);
     }
 
-    .subtask-checkbox.checked {
-      background: var(--accent);
-      border-color: var(--accent);
+    .checkbox.checked {
+      background: var(--green);
+      border-color: var(--green);
+      pointer-events: none;
     }
 
-    .subtask-checkbox.checked::after {
+    .checkbox.checked::after {
       content: '✓';
       color: white;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-    }
-
-    .subtask-text {
-      flex: 1;
-      font-size: 15px;
-      line-height: 1.4;
-    }
-
-    .subtask-text .sub-id {
-      color: var(--text-secondary);
-      font-weight: 500;
-      margin-right: 4px;
-    }
-
-    .subtask .deadline-badge {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 5px;
-      white-space: nowrap;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    .deadline-badge.urgent {
-      background: rgba(255, 59, 48, 0.12);
-      color: var(--red);
-    }
-
-    .deadline-badge.normal {
-      background: rgba(142, 142, 147, 0.12);
-      color: var(--text-secondary);
     }
 
     /* ============================================
-       Sub-subtaken
+       Sub-subtaak Row
        ============================================ */
-    .sub-subtask-list {
-      margin: 6px 0 4px 32px;
+    .row-subsubtaak {
+      display: none;
     }
 
-    .sub-subtask {
+    .row-subsubtaak.visible {
+      display: table-row;
+    }
+
+    .row-subsubtaak td {
+      padding: 6px 14px;
+      vertical-align: top;
+      font-size: 13px;
+      border-top: 1px solid rgba(0,0,0,0.03);
+    }
+
+    .subsubtaak-content {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 5px 0;
     }
 
-    .sub-subtask-checkbox {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 2px solid var(--separator);
-      flex-shrink: 0;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .sub-subtask-checkbox:hover {
-      border-color: var(--accent);
-    }
-
-    .sub-subtask-checkbox.checked {
-      background: var(--green);
-      border-color: var(--green);
-    }
-
-    .sub-subtask-checkbox.checked::after {
-      content: '✓';
-      color: white;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .sub-subtask-text {
-      font-size: 14px;
-      color: var(--text);
-    }
-
-    .sub-subtask-text.done {
+    .subsubtaak-text.done {
       color: var(--text-tertiary);
       text-decoration: line-through;
     }
 
     /* ============================================
-       Lage Prioriteit Section
+       Deadline
        ============================================ */
-    .section-toggle {
+    .deadline {
+      font-size: 12px;
+      font-weight: 600;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .deadline.urgent {
+      color: var(--red);
+    }
+
+    .deadline.normal {
+      color: var(--text-tertiary);
+    }
+
+    /* ============================================
+       Section Headers
+       ============================================ */
+    .section-header {
+      font-size: 20px;
+      font-weight: 700;
+      margin: var(--section-spacing) 0 10px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -431,42 +403,18 @@
       user-select: none;
     }
 
-    .section-toggle .section-chevron {
+    .section-header .section-chevron {
       font-size: 13px;
       color: var(--text-tertiary);
       transition: transform 0.25s ease;
     }
 
-    .section-toggle.open .section-chevron {
+    .section-header.open .section-chevron {
       transform: rotate(90deg);
     }
 
-    .laag-section {
-      display: none;
-    }
-
-    .section-toggle.open + .laag-section {
-      display: block;
-    }
-
     /* ============================================
-       Laag Items
-       ============================================ */
-    .laag-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 0;
-      border-top: 1px solid var(--separator);
-    }
-
-    .laag-item-text {
-      font-size: 15px;
-      flex: 1;
-    }
-
-    /* ============================================
-       Empty State
+       Empty State & Loading
        ============================================ */
     .empty-state {
       text-align: center;
@@ -479,9 +427,6 @@
       margin-bottom: 12px;
     }
 
-    /* ============================================
-       Loading
-       ============================================ */
     .loading {
       text-align: center;
       padding: 48px 16px;
@@ -510,15 +455,6 @@
       padding: 24px 0 16px;
       font-size: 12px;
       color: var(--text-tertiary);
-    }
-
-    /* ============================================
-       Responsive
-       ============================================ */
-    @media (max-width: 390px) {
-      .header h1 { font-size: 28px; }
-      .metric-card { padding: 10px 8px; }
-      .metric-card .number { font-size: 20px; }
     }
   </style>
 </head>
@@ -564,16 +500,41 @@
     <div>Taken laden...</div>
   </div>
 
-  <!-- Task List -->
-  <div id="taskList" style="display:none;"></div>
+  <!-- Task Table -->
+  <div id="taskTableContainer" style="display:none;">
+    <table class="task-table">
+      <thead>
+        <tr>
+          <th class="col-nr">#</th>
+          <th class="col-hoofdtaak">Hoofdtaak</th>
+          <th class="col-subtaak">Subtaak</th>
+          <th class="col-subsubtaak">Sub-subtaak</th>
+          <th class="col-deadline">Deadline</th>
+        </tr>
+      </thead>
+      <tbody id="taskBody"></tbody>
+    </table>
+  </div>
 
   <!-- Lage Prioriteit -->
   <div id="laagContainer" style="display:none;">
-    <div class="section-toggle" id="laagToggle">
+    <div class="section-header" id="laagToggle">
       <span class="section-chevron">&#9656;</span>
-      <div class="section-header" style="margin:0;">Lage prioriteit</div>
+      Lage prioriteit
     </div>
-    <div class="laag-section" id="laagSection"></div>
+    <div id="laagTableContainer" style="display:none;">
+      <table class="task-table">
+        <thead>
+          <tr>
+            <th class="col-nr">#</th>
+            <th class="col-hoofdtaak">Lijst</th>
+            <th colspan="2">Item</th>
+            <th class="col-deadline"></th>
+          </tr>
+        </thead>
+        <tbody id="laagBody"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Footer -->
@@ -684,20 +645,22 @@
     // Rendering
     // ============================================
     function render() {
-      const list = document.getElementById('taskList');
       const loading = document.getElementById('loading');
+      const tableContainer = document.getElementById('taskTableContainer');
       const laagContainer = document.getElementById('laagContainer');
+      const tbody = document.getElementById('taskBody');
 
       loading.style.display = 'none';
-      list.style.display = 'block';
+      tableContainer.style.display = 'block';
 
-      // Filter normale taken (type = normaal, niet volledig gedaan)
+      // Filter normale taken
       let normaleTaken = taken.filter(t => t.type === 'normaal');
 
-      // Voeg subtaken toe per taak en filter afgeronde subtaken
+      // Voeg subtaken toe per taak
       normaleTaken = normaleTaken.map(t => {
-        const subs = subtaken.filter(s => s.taak_id === t.id && !s.gedaan);
-        return { ...t, openSubtaken: subs, alleSubtaken: subtaken.filter(s => s.taak_id === t.id) };
+        const alleSubs = subtaken.filter(s => s.taak_id === t.id);
+        const openSubs = alleSubs.filter(s => !s.gedaan);
+        return { ...t, openSubtaken: openSubs, alleSubtaken: alleSubs };
       });
 
       // Verberg taken zonder open subtaken
@@ -728,15 +691,15 @@
       document.getElementById('metricWerk').textContent = normaleTaken.filter(t => t.categorie === 'Werk').length;
       document.getElementById('metricPrio').textContent = normaleTaken.filter(t => t.isPrio).length;
 
-      // Render taken
+      // Render tabel
       if (gefilterd.length === 0) {
-        list.innerHTML = `
+        tableContainer.innerHTML = `
           <div class="empty-state">
             <div class="icon">&#10003;</div>
             <div>Geen taken gevonden</div>
           </div>`;
       } else {
-        list.innerHTML = gefilterd.map(t => renderTask(t)).join('');
+        tbody.innerHTML = gefilterd.map(t => renderTaskRows(t)).join('');
       }
 
       // Render lage prioriteit
@@ -747,7 +710,7 @@
 
         if (laagGefilterd.length > 0) {
           laagContainer.style.display = 'block';
-          document.getElementById('laagSection').innerHTML = laagGefilterd.map(l => renderLaagLijst(l)).join('');
+          document.getElementById('laagBody').innerHTML = laagGefilterd.map(l => renderLaagRows(l)).join('');
         } else {
           laagContainer.style.display = 'none';
         }
@@ -755,132 +718,204 @@
         laagContainer.style.display = 'none';
       }
 
-      // Event listeners
       attachEventListeners();
     }
 
-    function renderTask(t) {
-      const prioClass = t.isPrio ? 'prio' : '';
+    function renderTaskRows(t) {
+      const prioClass = t.isPrio ? 'prio-bar' : '';
       const catClass = t.categorie === 'Werk' ? 'werk' : 'prive';
-      const deadline = t.openSubtaken.reduce((earliest, s) => {
+      const openCount = t.openSubtaken.length;
+
+      // Vroegste deadline van open subtaken
+      const earliestDeadline = t.openSubtaken.reduce((earliest, s) => {
         if (!s.deadline) return earliest;
         if (!earliest) return s.deadline;
         return s.deadline < earliest ? s.deadline : earliest;
       }, t.deadline);
 
-      const deadlineHtml = deadline ? `
-        <span class="task-deadline ${isUrgent(deadline) ? 'urgent' : 'normal'}">
-          ${formatDeadline(deadline)}
-        </span>` : '';
+      const deadlineHtml = earliestDeadline
+        ? `<span class="deadline ${isUrgent(earliestDeadline) ? 'urgent' : 'normal'}">${formatDeadline(earliestDeadline)}</span>`
+        : '';
 
-      return `
-        <div class="task-card ${prioClass}" data-id="${t.id}">
-          <div class="task-header">
-            <span class="task-chevron">&#9656;</span>
-            <div class="task-info">
-              <div class="task-title">
-                <span class="nr">#${t.nr}</span>
-                ${t.taak}
-              </div>
-              <div class="task-meta">
-                ${t.isPrio ? '<span class="badge prio">Prioriteit</span>' : ''}
-                <span class="badge ${catClass}">${t.categorie}</span>
-                <span class="subtask-count">${t.openSubtaken.length} open</span>
-              </div>
+      let rows = `
+        <tr class="row-hoofdtaak ${prioClass}" data-taak-id="${t.id}">
+          <td>${t.nr}</td>
+          <td>
+            <div class="hoofdtaak-content">
+              <span class="chevron" data-taak-id="${t.id}">&#9656;</span>
+              ${t.taak}
             </div>
-            ${deadlineHtml}
-          </div>
-          <div class="subtask-list">
-            ${t.openSubtaken.map(s => renderSubtask(s)).join('')}
-          </div>
-        </div>`;
+            ${t.isPrio ? '<span class="badge prio">Prioriteit</span>' : ''}
+            <span class="badge ${catClass}">${t.categorie}</span>
+            <span class="subtask-count-label">${openCount} open</span>
+          </td>
+          <td></td>
+          <td></td>
+          <td class="deadline">${deadlineHtml}</td>
+        </tr>`;
+
+      // Subtaak rijen
+      t.openSubtaken.forEach(s => {
+        const subs = subSubtaken.filter(ss => ss.subtaak_id === s.id);
+        const hasChildren = subs.length > 0;
+
+        const subDeadlineHtml = s.deadline
+          ? `<span class="deadline ${isUrgent(s.deadline) ? 'urgent' : 'normal'}">${formatDeadline(s.deadline)}</span>`
+          : '';
+
+        if (hasChildren) {
+          // Subtaak met sub-subtaken: klikbaar, geen checkbox
+          rows += `
+            <tr class="row-subtaak" data-parent="${t.id}">
+              <td></td>
+              <td></td>
+              <td>
+                <div class="subtaak-content subtaak-has-children" data-subtaak-id="${s.id}">
+                  <span class="chevron" data-subtaak-id="${s.id}">&#9656;</span>
+                  <span class="sub-id">${s.sub_id}.</span>
+                  ${s.tekst}
+                </div>
+              </td>
+              <td></td>
+              <td class="deadline">${subDeadlineHtml}</td>
+            </tr>`;
+
+          // Sub-subtaak rijen (altijd tonen, ook afgevinkte)
+          subs.forEach(ss => {
+            const doneClass = ss.gedaan ? 'done' : '';
+            const checkedClass = ss.gedaan ? 'checked' : '';
+
+            rows += `
+              <tr class="row-subsubtaak" data-parent-sub="${s.id}">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                  <div class="subsubtaak-content">
+                    <div class="checkbox ${checkedClass}" data-ss-id="${ss.id}"></div>
+                    <span class="subsubtaak-text ${doneClass}">${ss.tekst}</span>
+                  </div>
+                </td>
+                <td></td>
+              </tr>`;
+          });
+        } else {
+          // Subtaak zonder sub-subtaken: checkbox direct
+          rows += `
+            <tr class="row-subtaak" data-parent="${t.id}">
+              <td></td>
+              <td></td>
+              <td>
+                <div class="subtaak-content">
+                  <div class="checkbox" data-sub-id="${s.id}"></div>
+                  <span class="sub-id">${s.sub_id}.</span>
+                  ${s.tekst}
+                </div>
+              </td>
+              <td></td>
+              <td class="deadline">${subDeadlineHtml}</td>
+            </tr>`;
+        }
+      });
+
+      return rows;
     }
 
-    function renderSubtask(s) {
-      const deadlineHtml = s.deadline ? `
-        <span class="deadline-badge ${isUrgent(s.deadline) ? 'urgent' : 'normal'}">
-          ${formatDeadline(s.deadline)}
-        </span>` : '';
-
-      // Sub-subtaken voor deze subtaak (altijd allemaal tonen, ook afgevinkte)
-      const subs = subSubtaken.filter(ss => ss.subtaak_id === s.id);
-      const hasSubSubs = subs.length > 0;
-
-      const subSubHtml = hasSubSubs ? `
-        <div class="sub-subtask-list">
-          ${subs.map(ss => `
-            <div class="sub-subtask" data-ss-id="${ss.id}">
-              <div class="sub-subtask-checkbox ${ss.gedaan ? 'checked' : ''}" data-ss-id="${ss.id}"></div>
-              <span class="sub-subtask-text ${ss.gedaan ? 'done' : ''}">${ss.tekst}</span>
-            </div>
-          `).join('')}
-        </div>` : '';
-
-      // Als er sub-subtaken zijn, toon geen checkbox op subtaak-niveau
-      // (subtaak wordt pas afgerond als alle sub-subtaken klaar zijn)
-      const checkboxHtml = hasSubSubs
-        ? `<div style="width:22px;flex-shrink:0;"></div>`
-        : `<div class="subtask-checkbox" data-id="${s.id}"></div>`;
-
-      return `
-        <div class="subtask" data-sub-id="${s.id}">
-          ${checkboxHtml}
-          <div class="subtask-text">
-            <span class="sub-id">${s.sub_id}.</span>
-            ${s.tekst}
-            ${deadlineHtml}
-            ${subSubHtml}
-          </div>
-        </div>`;
-    }
-
-    function renderLaagLijst(l) {
+    function renderLaagRows(l) {
       const items = laagItems.filter(i => i.lijst_id === l.id && !i.gedaan);
       const catClass = l.categorie === 'Werk' ? 'werk' : 'prive';
 
-      return `
-        <div class="task-card laag" data-id="${l.id}">
-          <div class="task-header">
-            <span class="task-chevron">&#9656;</span>
-            <div class="task-info">
-              <div class="task-title">
-                <span class="nr">#${l.nr}</span>
-                ${l.taak}
-              </div>
-              <div class="task-meta">
-                <span class="badge laag">Laag</span>
-                <span class="badge ${catClass}">${l.categorie}</span>
-                <span class="subtask-count">${items.length} items</span>
-              </div>
+      let rows = `
+        <tr class="row-hoofdtaak laag-bar" data-taak-id="laag-${l.id}">
+          <td>${l.nr}</td>
+          <td>
+            <div class="hoofdtaak-content">
+              <span class="chevron" data-taak-id="laag-${l.id}">&#9656;</span>
+              ${l.taak}
             </div>
-          </div>
-          <div class="subtask-list">
-            ${items.map(i => `
-              <div class="laag-item">
-                <div class="subtask-checkbox" data-laag-id="${i.id}"></div>
-                <div class="laag-item-text">${i.tekst}</div>
+            <span class="badge laag">Laag</span>
+            <span class="badge ${catClass}">${l.categorie}</span>
+            <span class="subtask-count-label">${items.length} items</span>
+          </td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>`;
+
+      items.forEach(i => {
+        rows += `
+          <tr class="row-subtaak" data-parent="laag-${l.id}">
+            <td></td>
+            <td></td>
+            <td colspan="2">
+              <div class="subtaak-content">
+                <div class="checkbox" data-laag-id="${i.id}"></div>
+                ${i.tekst}
               </div>
-            `).join('')}
-          </div>
-        </div>`;
+            </td>
+            <td></td>
+          </tr>`;
+      });
+
+      return rows;
     }
 
     // ============================================
     // Event Listeners
     // ============================================
     function attachEventListeners() {
-      // Task expand/collapse
-      document.querySelectorAll('.task-header').forEach(header => {
-        header.addEventListener('click', () => {
-          header.parentElement.classList.toggle('open');
+      // Hoofdtaak expand/collapse
+      document.querySelectorAll('.row-hoofdtaak').forEach(row => {
+        row.addEventListener('click', () => {
+          const taakId = row.dataset.taakId;
+          const chevron = row.querySelector('.chevron');
+          const isOpen = chevron.classList.contains('open');
+
+          chevron.classList.toggle('open');
+
+          // Toggle subtaak rijen
+          document.querySelectorAll(`.row-subtaak[data-parent="${taakId}"]`).forEach(sr => {
+            sr.classList.toggle('visible', !isOpen);
+          });
+
+          // Als we dichtklappen, ook sub-subtaken verbergen
+          if (isOpen) {
+            document.querySelectorAll(`.row-subtaak[data-parent="${taakId}"]`).forEach(sr => {
+              const subtaakContent = sr.querySelector('.subtaak-has-children');
+              if (subtaakContent) {
+                const subId = subtaakContent.dataset.subtaakId;
+                const subChevron = subtaakContent.querySelector('.chevron');
+                if (subChevron) subChevron.classList.remove('open');
+                document.querySelectorAll(`.row-subsubtaak[data-parent-sub="${subId}"]`).forEach(ssr => {
+                  ssr.classList.remove('visible');
+                });
+              }
+            });
+          }
         });
       });
 
-      // Subtask checkboxes
-      document.querySelectorAll('.subtask-checkbox[data-id]').forEach(cb => {
+      // Subtaak met sub-subtaken expand/collapse
+      document.querySelectorAll('.subtaak-has-children').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const subId = el.dataset.subtaakId;
+          const chevron = el.querySelector('.chevron');
+          const isOpen = chevron.classList.contains('open');
+
+          chevron.classList.toggle('open');
+
+          document.querySelectorAll(`.row-subsubtaak[data-parent-sub="${subId}"]`).forEach(ssr => {
+            ssr.classList.toggle('visible', !isOpen);
+          });
+        });
+      });
+
+      // Subtaak checkbox (geen sub-subtaken)
+      document.querySelectorAll('.checkbox[data-sub-id]').forEach(cb => {
         cb.addEventListener('click', async (e) => {
           e.stopPropagation();
-          const id = cb.dataset.id;
+          const id = cb.dataset.subId;
           cb.classList.add('checked');
 
           await patch('subtaken', id, {
@@ -888,7 +923,6 @@
             gedaan_datum: new Date().toISOString().split('T')[0]
           });
 
-          // Log naar afgerond
           const sub = subtaken.find(s => s.id === id);
           if (sub) {
             const taak = taken.find(t => t.id === sub.taak_id);
@@ -911,8 +945,8 @@
         });
       });
 
-      // Sub-subtask checkboxes
-      document.querySelectorAll('.sub-subtask-checkbox:not(.checked)').forEach(cb => {
+      // Sub-subtaak checkbox
+      document.querySelectorAll('.checkbox[data-ss-id]:not(.checked)').forEach(cb => {
         cb.addEventListener('click', async (e) => {
           e.stopPropagation();
           const id = cb.dataset.ssId;
@@ -924,14 +958,13 @@
             gedaan_datum: new Date().toISOString().split('T')[0]
           });
 
-          // Check of alle sub-subtaken van deze subtaak nu gedaan zijn
+          // Check of alle sub-subtaken klaar zijn
           const ss = subSubtaken.find(s => s.id === id);
           if (ss) {
             const siblings = subSubtaken.filter(s => s.subtaak_id === ss.subtaak_id);
             const alleDone = siblings.every(s => s.id === id ? true : s.gedaan);
 
             if (alleDone) {
-              // Subtaak ook als gedaan markeren
               const subtaak = subtaken.find(s => s.id === ss.subtaak_id);
               if (subtaak) {
                 await patch('subtaken', subtaak.id, {
@@ -939,7 +972,6 @@
                   gedaan_datum: new Date().toISOString().split('T')[0]
                 });
 
-                // Log naar afgerond
                 const taak = taken.find(t => t.id === subtaak.taak_id);
                 await fetch(`${SUPABASE_URL}/rest/v1/afgerond_log`, {
                   method: 'POST',
@@ -962,8 +994,8 @@
         });
       });
 
-      // Laag items checkboxes
-      document.querySelectorAll('.subtask-checkbox[data-laag-id]').forEach(cb => {
+      // Laag items checkbox
+      document.querySelectorAll('.checkbox[data-laag-id]').forEach(cb => {
         cb.addEventListener('click', async (e) => {
           e.stopPropagation();
           const id = cb.dataset.laagId;
@@ -994,7 +1026,10 @@
 
     // Lage prioriteit toggle
     document.getElementById('laagToggle').addEventListener('click', () => {
-      document.getElementById('laagToggle').classList.toggle('open');
+      const toggle = document.getElementById('laagToggle');
+      const container = document.getElementById('laagTableContainer');
+      toggle.classList.toggle('open');
+      container.style.display = toggle.classList.contains('open') ? 'block' : 'none';
     });
 
     // ============================================

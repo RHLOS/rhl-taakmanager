@@ -660,46 +660,12 @@
           api('sub_subtaken', 'order=volgorde.asc')
         ]);
 
-        const tbody = document.getElementById('tbody');
-        tbody.innerHTML = '';
+        // Sla data globaal op voor filter/sort
+        allProjecten = projecten;
+        allSubtaken = subtaken;
+        allSubsubtaken = subsubtaken;
 
-        // Debug info boven de tabel
-        const debugInfo = document.createElement('tr');
-        debugInfo.innerHTML = `<td colspan="11" style="padding:8px 10px;background:#f0f8ff;font-size:11px;color:var(--text-2);">
-          DEBUG: ${projecten.length} projecten, ${subtaken.length} subtaken, ${subsubtaken.length} sub-subtaken geladen
-        </td>`;
-        tbody.appendChild(debugInfo);
-
-        const openProjecten = projecten.filter(p => !p.gedaan);
-
-        if (openProjecten.length === 0) {
-          tbody.innerHTML += `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
-            Geen open projecten gevonden.
-          </td></tr>`;
-          return;
-        }
-
-        // Stap 2b: render HSPI, Privé divers, Follow up commercial leads
-        const targets = ['hspi', 'privé divers', 'follow up'];
-        openProjecten
-          .filter(p => targets.some(t => p.taak.toLowerCase().includes(t)))
-          .forEach(p => renderProject(p, subtaken, subsubtaken, tbody));
-
-        // Metrics
-        document.getElementById('mTotal').textContent = openProjecten.length;
-        document.getElementById('mOpen').textContent = subtaken.filter(s => !s.gedaan).length;
-        document.getElementById('mWerk').textContent = openProjecten.filter(p => p.categorie === 'Werk').length;
-        document.getElementById('mPrio').textContent = openProjecten.filter(p => p.prioriteit === 'hoog').length;
-
-        attachToggle();
-        attachCheckboxes();
-        attachStars();
-        attachEditable();
-        attachDeadlines();
-        attachWerkelijk();
-        attachSelects();
-        attachAddButtons();
-        attachDeleteButtons();
+        renderAll();
 
       } catch (err) {
         debugEl.innerHTML = `
@@ -765,16 +731,22 @@
     });
 
     // ═══ Kolom-header filter/sort popups ═══
-    const COL_CONFIG = {
-      prio:     { label: 'Prioriteit', sort: true, filter: ['★ Prioriteit', '☆ Normaal'] },
-      cat:      { label: 'Categorie', sort: true, filter: ['Werk', 'Privé'] },
-      project:  { label: 'Project', sort: true, filter: null },
-      taak:     { label: 'Taak', sort: true, filter: null },
-      deadline: { label: 'Deadline', sort: true, filter: ['Vandaag', 'Deze week', 'Geen deadline'] },
-      geschat:  { label: 'Geschat', sort: true, filter: GESCHAT_OPTIES.filter(o => o) },
-      context:  { label: 'Context', sort: false, filter: CONTEXT_OPTIES }
-    };
-    let currentSort = null; // { col, dir }
+    let allProjecten = [], allSubtaken = [], allSubsubtaken = [];
+    let currentSort = null;
+    let activeFilters = {}; // { col: Set of selected values }
+
+    function getFilterOptions(col) {
+      switch(col) {
+        case 'prio': return ['★ Prioriteit', '☆ Normaal'];
+        case 'cat': return ['Werk', 'Privé'];
+        case 'project': return [...new Set(allProjecten.filter(p => !p.gedaan).map(p => p.taak))].sort();
+        case 'taak': return [...new Set(allSubtaken.filter(s => !s.gedaan).map(s => s.tekst))].sort();
+        case 'deadline': return ['Vandaag', 'Deze week', 'Heeft deadline', 'Geen deadline'];
+        case 'geschat': return GESCHAT_OPTIES.filter(o => o);
+        case 'context': return CONTEXT_OPTIES;
+        default: return [];
+      }
+    }
 
     function closePopups() {
       document.querySelectorAll('.col-popup').forEach(p => p.remove());
@@ -786,50 +758,90 @@
         closePopups();
 
         const col = th.dataset.col;
-        const cfg = COL_CONFIG[col];
-        if (!cfg) return;
+        const options = getFilterOptions(col);
+        const currentFilter = activeFilters[col];
 
         const popup = document.createElement('div');
         popup.className = 'col-popup';
 
         // Sorteren
-        if (cfg.sort) {
-          popup.innerHTML += `<div class="col-popup-title">Sorteren</div>`;
-          const sortAsc = document.createElement('button');
-          sortAsc.className = 'col-popup-btn' + (currentSort?.col === col && currentSort?.dir === 'asc' ? ' active' : '');
-          sortAsc.textContent = '↑ Oplopend';
-          sortAsc.addEventListener('click', () => { currentSort = { col, dir: 'asc' }; closePopups(); init(); });
-          popup.appendChild(sortAsc);
+        popup.innerHTML = `<div class="col-popup-title">Sorteren</div>`;
+        const sortAsc = document.createElement('button');
+        sortAsc.className = 'col-popup-btn' + (currentSort?.col === col && currentSort?.dir === 'asc' ? ' active' : '');
+        sortAsc.textContent = '↑ Oplopend';
+        sortAsc.addEventListener('click', () => { currentSort = { col, dir: 'asc' }; closePopups(); renderAll(); });
+        popup.appendChild(sortAsc);
 
-          const sortDesc = document.createElement('button');
-          sortDesc.className = 'col-popup-btn' + (currentSort?.col === col && currentSort?.dir === 'desc' ? ' active' : '');
-          sortDesc.textContent = '↓ Aflopend';
-          sortDesc.addEventListener('click', () => { currentSort = { col, dir: 'desc' }; closePopups(); init(); });
-          popup.appendChild(sortDesc);
-        }
+        const sortDesc = document.createElement('button');
+        sortDesc.className = 'col-popup-btn' + (currentSort?.col === col && currentSort?.dir === 'desc' ? ' active' : '');
+        sortDesc.textContent = '↓ Aflopend';
+        sortDesc.addEventListener('click', () => { currentSort = { col, dir: 'desc' }; closePopups(); renderAll(); });
+        popup.appendChild(sortDesc);
+
+        // Scheiding
+        const sep = document.createElement('div');
+        sep.className = 'col-popup-sep';
+        popup.appendChild(sep);
 
         // Filter
-        if (cfg.filter) {
-          const sep = document.createElement('div');
-          sep.className = 'col-popup-sep';
-          popup.appendChild(sep);
-          popup.innerHTML += `<div class="col-popup-title">Filter</div>`;
+        const filterTitle = document.createElement('div');
+        filterTitle.className = 'col-popup-title';
+        filterTitle.textContent = 'Filter';
+        popup.appendChild(filterTitle);
 
-          cfg.filter.forEach(opt => {
-            const label = document.createElement('label');
-            const cb = document.createElement('input');
-            cb.type = 'checkbox';
-            cb.value = opt;
-            cb.checked = true;
-            label.appendChild(cb);
-            label.appendChild(document.createTextNode(opt));
-            popup.appendChild(label);
-          });
-        }
+        const checkboxes = [];
+        options.forEach(opt => {
+          const label = document.createElement('label');
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.value = opt;
+          cb.checked = !currentFilter || currentFilter.has(opt);
+          checkboxes.push(cb);
+          label.appendChild(cb);
+          label.appendChild(document.createTextNode(opt));
+          popup.appendChild(label);
+        });
+
+        // Scheiding
+        const sep2 = document.createElement('div');
+        sep2.className = 'col-popup-sep';
+        popup.appendChild(sep2);
+
+        // Actieknoppen
+        const actions = document.createElement('div');
+        actions.className = 'col-popup-actions';
+
+        const clearBtn = document.createElement('button');
+        clearBtn.textContent = 'Filter wissen';
+        clearBtn.addEventListener('click', () => {
+          delete activeFilters[col];
+          th.classList.remove('active');
+          closePopups();
+          renderAll();
+        });
+        actions.appendChild(clearBtn);
+
+        const applyBtn = document.createElement('button');
+        applyBtn.className = 'primary';
+        applyBtn.textContent = 'Toepassen';
+        applyBtn.addEventListener('click', () => {
+          const selected = new Set(checkboxes.filter(cb => cb.checked).map(cb => cb.value));
+          if (selected.size === options.length) {
+            delete activeFilters[col];
+            th.classList.remove('active');
+          } else {
+            activeFilters[col] = selected;
+            th.classList.add('active');
+          }
+          closePopups();
+          renderAll();
+        });
+        actions.appendChild(applyBtn);
+        popup.appendChild(actions);
 
         // Positioneer
         const rect = th.getBoundingClientRect();
-        popup.style.left = rect.left + 'px';
+        popup.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
         popup.style.top = (rect.bottom + 4) + 'px';
         document.body.appendChild(popup);
         popup.addEventListener('click', (ev) => ev.stopPropagation());
@@ -837,6 +849,88 @@
     });
 
     document.addEventListener('click', closePopups);
+
+    // ═══ Render met filters/sort ═══
+    function projectMatchesFilter(project) {
+      for (const [col, selected] of Object.entries(activeFilters)) {
+        switch(col) {
+          case 'cat':
+            if (!selected.has(project.categorie)) return false;
+            break;
+          case 'prio':
+            const isPrio = project.prioriteit === 'hoog';
+            const label = isPrio ? '★ Prioriteit' : '☆ Normaal';
+            if (!selected.has(label)) return false;
+            break;
+          case 'project':
+            if (!selected.has(project.taak)) return false;
+            break;
+          case 'deadline':
+            const hasDl = !!project.deadline;
+            const days = hasDl ? daysUntil(project.deadline) : null;
+            let match = false;
+            if (selected.has('Heeft deadline') && hasDl) match = true;
+            if (selected.has('Geen deadline') && !hasDl) match = true;
+            if (selected.has('Vandaag') && days === 0) match = true;
+            if (selected.has('Deze week') && days !== null && days >= 0 && days <= 7) match = true;
+            if (!match) return false;
+            break;
+        }
+      }
+      return true;
+    }
+
+    function sortProjecten(projects) {
+      if (!currentSort) return projects;
+      const s = [...projects];
+      const dir = currentSort.dir === 'asc' ? 1 : -1;
+      s.sort((a, b) => {
+        let va, vb;
+        switch(currentSort.col) {
+          case 'project': va = a.taak.toLowerCase(); vb = b.taak.toLowerCase(); break;
+          case 'cat': va = a.categorie; vb = b.categorie; break;
+          case 'prio': va = a.prioriteit === 'hoog' ? 0 : 1; vb = b.prioriteit === 'hoog' ? 0 : 1; break;
+          case 'deadline':
+            va = a.deadline || '9999-12-31'; vb = b.deadline || '9999-12-31'; break;
+          default: va = a.nr; vb = b.nr;
+        }
+        if (va < vb) return -1 * dir;
+        if (va > vb) return 1 * dir;
+        return 0;
+      });
+      return s;
+    }
+
+    function renderAll() {
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = '';
+
+      let filtered = allProjecten.filter(p => !p.gedaan && projectMatchesFilter(p));
+      filtered = sortProjecten(filtered);
+
+      // Stap 2: alleen bepaalde projecten (wordt later alle)
+      const targets = ['hspi', 'privé divers', 'follow up'];
+      filtered = filtered.filter(p => targets.some(t => p.taak.toLowerCase().includes(t)));
+
+      filtered.forEach(p => renderProject(p, allSubtaken, allSubsubtaken, tbody));
+
+      // Metrics
+      const openAll = allProjecten.filter(p => !p.gedaan);
+      document.getElementById('mTotal').textContent = openAll.length;
+      document.getElementById('mOpen').textContent = allSubtaken.filter(s => !s.gedaan).length;
+      document.getElementById('mWerk').textContent = openAll.filter(p => p.categorie === 'Werk').length;
+      document.getElementById('mPrio').textContent = openAll.filter(p => p.prioriteit === 'hoog').length;
+
+      attachToggle();
+      attachCheckboxes();
+      attachStars();
+      attachEditable();
+      attachDeadlines();
+      attachWerkelijk();
+      attachSelects();
+      attachAddButtons();
+      attachDeleteButtons();
+    }
 
     // ═══ Tekstvelden: klik om te bewerken ═══
     function attachEditable() {

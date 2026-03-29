@@ -243,6 +243,18 @@
     .cb:hover { color: var(--accent); }
     .cb.done { color: var(--green); }
 
+    /* Editable */
+    .editable {
+      cursor: pointer; border-radius: 4px; padding: 2px 4px; margin: -2px -4px;
+      transition: background .15s;
+    }
+    .editable:hover { background: rgba(0,122,255,.06); }
+    .edit-input {
+      width: 100%; border: 1px solid var(--accent); border-radius: 4px;
+      padding: 3px 6px; font-size: inherit; font-family: inherit;
+      background: #fff; outline: none;
+    }
+
     /* Deadline */
     .dl { font-size: 12px; font-weight: 500; white-space: nowrap; }
     .dl.urgent { color: var(--red); }
@@ -512,7 +524,7 @@
           <td class="cd"></td>
           <td class="cp">${starHtmlData(isPrio, project.id, 'taken', 'prioriteit')}</td>
           <td>${catBadge(cat)}</td>
-          <td><span class="chev">▶</span> ${project.taak}</td>
+          <td><span class="chev">▶</span> <span class="editable" data-id="${project.id}" data-table="taken" data-field="taak">${project.taak}</span></td>
           <td></td>
           <td></td>
           <td>${deadlineHtml(project.deadline)}</td>
@@ -533,7 +545,7 @@
             <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
             <td>${catBadge(cat)}</td>
             <td></td>
-            <td>${hasSubs ? '<span class="chev">▶</span> ' : ''}${sub.tekst}</td>
+            <td>${hasSubs ? '<span class="chev">▶</span> ' : ''}<span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${sub.tekst}</span></td>
             <td></td>
             <td>${deadlineHtml(sub.deadline)}</td>
             <td class="tijd">${sub.tijdsinschatting || ''}</td>
@@ -551,7 +563,7 @@
               <td></td>
               <td></td>
               <td></td>
-              <td>${ss.tekst}</td>
+              <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${ss.tekst}</span></td>
               <td>${deadlineHtml(ss.deadline)}</td>
               <td class="tijd">${ss.tijdsinschatting || ''}</td>
               <td class="tijd">${ss.tijd_uitgevoerd ? ss.tijd_uitgevoerd + 'm' : ''}</td>
@@ -625,6 +637,7 @@
         attachToggle();
         attachCheckboxes();
         attachStars();
+        attachEditable();
 
       } catch (err) {
         debugEl.innerHTML = `
@@ -707,6 +720,49 @@
     document.querySelectorAll('.filter-dd-menu').forEach(menu => {
       menu.addEventListener('click', (e) => e.stopPropagation());
     });
+
+    // ═══ Tekstvelden: klik om te bewerken ═══
+    function attachEditable() {
+      document.querySelectorAll('.editable').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (el.querySelector('.edit-input')) return;
+
+          const current = el.textContent.trim();
+          const id = el.dataset.id;
+          const table = el.dataset.table;
+          const field = el.dataset.field;
+
+          const input = document.createElement('input');
+          input.className = 'edit-input';
+          input.type = 'text';
+          input.value = current;
+          el.textContent = '';
+          el.appendChild(input);
+          input.focus();
+          input.select();
+
+          const save = async () => {
+            const val = input.value.trim();
+            el.textContent = val || current;
+            if (val && val !== current) {
+              try {
+                await patch(table, id, { [field]: val });
+              } catch (err) {
+                el.textContent = current;
+                alert('Opslaan mislukt: ' + err.message);
+              }
+            }
+          };
+
+          input.addEventListener('blur', save);
+          input.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') input.blur();
+            if (ev.key === 'Escape') { el.textContent = current; }
+          });
+        });
+      });
+    }
 
     // ═══ Checkboxes: afvinken ═══
     function attachCheckboxes() {

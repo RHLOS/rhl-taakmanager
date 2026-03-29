@@ -388,13 +388,19 @@
     </div>
 
     <div class="sidebar-section">
-      <div class="sidebar-title">Projecten</div>
-      <div id="sidebarProjecten"></div>
+      <div class="sidebar-title" id="projectenToggle" style="cursor:pointer;user-select:none;">
+        <span class="chev" id="projectenChev" style="font-size:9px;margin-right:4px;">▶</span>Projecten
+      </div>
+      <div id="sidebarProjecten" style="display:none;"></div>
     </div>
 
     <div style="flex:1"></div>
 
     <div class="sidebar-section">
+      <div class="sidebar-item" data-view="prullenmand">
+        <span class="icon">🗑</span> Prullenmand
+        <span class="badge" id="badgePrullenmand"></span>
+      </div>
       <div class="sidebar-item" data-view="beheer" style="opacity:.5;cursor:default;">
         <span class="icon">⚙️</span> Beheer
       </div>
@@ -482,10 +488,16 @@
       return r.json();
     }
 
-    async function del(table, id) {
-      const r = await fetch(`${SB}/rest/v1/${table}?id=eq.${id}`, {
-        method: 'DELETE', headers: hdrs
-      });
+    async function del(tableAndFilter) {
+      // Kan aangeroepen worden als del('taken', 'uuid') of del('taken&filter=waarde')
+      const args = arguments;
+      let url;
+      if (args.length === 2) {
+        url = `${SB}/rest/v1/${args[0]}?id=eq.${args[1]}`;
+      } else {
+        url = `${SB}/rest/v1/${args[0]}`;
+      }
+      const r = await fetch(url, { method: 'DELETE', headers: hdrs });
       if (!r.ok) throw new Error('Fout bij verwijderen');
     }
 
@@ -564,7 +576,7 @@
     function renderProject(project, subtaken, subsubtaken, tbody) {
       const cat = project.categorie;
       const isPrio = project.prioriteit === 'hoog';
-      const openSubs = subtaken.filter(s => s.taak_id === project.id && !s.gedaan);
+      const openSubs = subtaken.filter(s => s.taak_id === project.id && !s.gedaan && isActief(s));
 
       // Project-rij
       tbody.insertAdjacentHTML('beforeend', `
@@ -585,7 +597,7 @@
 
       // Subtaken (taak-rijen)
       openSubs.forEach(sub => {
-        const subs = subsubtaken.filter(ss => ss.subtaak_id === sub.id && !ss.gedaan);
+        const subs = subsubtaken.filter(ss => ss.subtaak_id === sub.id && !ss.gedaan && isActief(ss));
         const hasSubs = subs.length > 0;
 
         tbody.insertAdjacentHTML('beforeend', `
@@ -626,6 +638,30 @@
     }
 
     // ═══ Init ═══
+    async function reloadData() {
+      const [projecten, subtaken, subsubtaken] = await Promise.all([
+        api('taken', 'order=nr.asc'),
+        api('subtaken', 'order=volgorde.asc'),
+        api('sub_subtaken', 'order=volgorde.asc')
+      ]);
+      allProjecten = projecten;
+      allSubtaken = subtaken;
+      allSubsubtaken = subsubtaken;
+    }
+
+    async function cleanupPrullenmand() {
+      const zevenDagenGeleden = new Date(Date.now() - 7 * 86400000).toISOString();
+      try {
+        await del('sub_subtaken&verwijderd_op=lt.' + zevenDagenGeleden);
+        await del('subtaken&verwijderd_op=lt.' + zevenDagenGeleden);
+        await del('taken&verwijderd_op=lt.' + zevenDagenGeleden);
+      } catch(e) { /* stil negeren als er niks te verwijderen is */ }
+    }
+
+    // Helper: is item niet verwijderd?
+    function isActief(item) { return !item.verwijderd_op; }
+    function isVerwijderd(item) { return !!item.verwijderd_op; }
+
     async function init() {
       const debugEl = document.getElementById('tbody');
       debugEl.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--text-2);font-size:12px;">Verbinden met Supabase...</td></tr>`;
@@ -654,10 +690,13 @@
           api('sub_subtaken', 'order=volgorde.asc')
         ]);
 
-        // Sla data globaal op voor filter/sort
+        // Sla data globaal op
         allProjecten = projecten;
         allSubtaken = subtaken;
         allSubsubtaken = subsubtaken;
+
+        // Auto-cleanup: verwijder items ouder dan 7 dagen uit prullenmand
+        await cleanupPrullenmand();
 
         renderAll();
 
@@ -934,10 +973,13 @@
 
     function getViewProjects() {
       if (currentView === 'voltooid') {
-        return allProjecten.filter(p => p.gedaan);
+        return allProjecten.filter(p => p.gedaan && isActief(p));
+      }
+      if (currentView === 'prullenmand') {
+        return []; // prullenmand heeft eigen render
       }
 
-      let projects = allProjecten.filter(p => !p.gedaan);
+      let projects = allProjecten.filter(p => !p.gedaan && isActief(p));
 
       if (currentView === 'inbox') {
         projects = projects.filter(p => projectHasInbox(p));
@@ -986,7 +1028,11 @@
       el('badgeVandaag', open.filter(p => projectHasDeadline(p, 'vandaag')).length || '');
       el('badgeWeek', open.filter(p => projectHasDeadline(p, 'week')).length || '');
       el('badgePrio', open.filter(p => projectIsPrio(p)).length || '');
-      el('badgeVoltooid', allProjecten.filter(p => p.gedaan).length || '');
+      el('badgeVoltooid', allProjecten.filter(p => p.gedaan && isActief(p)).length || '');
+      const prullenmandCount = allProjecten.filter(isVerwijderd).length +
+        allSubtaken.filter(isVerwijderd).length +
+        allSubsubtaken.filter(isVerwijderd).length;
+      el('badgePrullenmand', prullenmandCount || '');
 
       // Active state
       document.querySelectorAll('.sidebar-item[data-view]').forEach(item => {
@@ -997,7 +1043,7 @@
       const container = document.getElementById('sidebarProjecten');
       container.innerHTML = '';
       open.forEach(p => {
-        const count = allSubtaken.filter(s => s.taak_id === p.id && !s.gedaan).length;
+        const count = allSubtaken.filter(s => s.taak_id === p.id && !s.gedaan && isActief(s)).length;
         const isActive = currentView === `project:${p.id}`;
         const div = document.createElement('div');
         div.className = 'sidebar-item' + (isActive ? ' active' : '');
@@ -1092,6 +1138,50 @@
       });
     }
 
+    function renderPrullenmand(tbody) {
+      const verwijderd = [
+        ...allProjecten.filter(isVerwijderd).map(p => ({ ...p, _table: 'taken', _label: p.taak, _type: 'project' })),
+        ...allSubtaken.filter(isVerwijderd).map(s => {
+          const p = allProjecten.find(pr => pr.id === s.taak_id);
+          return { ...s, _table: 'subtaken', _label: s.tekst, _type: 'taak', _project: p?.taak || '?' };
+        }),
+        ...allSubsubtaken.filter(isVerwijderd).map(ss => {
+          const s = allSubtaken.find(su => su.id === ss.subtaak_id);
+          return { ...ss, _table: 'sub_subtaken', _label: ss.tekst, _type: 'subtaak', _project: s?.tekst || '?' };
+        })
+      ];
+
+      // Filter: alleen top-level verwijderde items tonen (niet items die mee-verwijderd zijn met hun parent)
+      if (verwijderd.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
+          Prullenmand is leeg
+        </td></tr>`;
+        return;
+      }
+
+      verwijderd.forEach(item => {
+        const verwijderdDatum = formatDate(item.verwijderd_op);
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="row-taak">
+            <td class="cd"></td>
+            <td class="cp"></td>
+            <td></td>
+            <td><span style="color:var(--text-3);font-size:11px;">${item._project || item._type}</span></td>
+            <td>${item._label}</td>
+            <td></td>
+            <td><span class="dl normal">${verwijderdDatum}</span></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="col-add">
+              <button class="add-btn restore-btn" data-restore-id="${item.id}" data-restore-table="${item._table}" title="Herstellen">↩</button>
+              <button class="del-btn permanent-del-btn" data-perm-id="${item.id}" data-perm-table="${item._table}" title="Definitief verwijderen" style="opacity:1;">🗑</button>
+            </td>
+          </tr>
+        `);
+      });
+    }
+
     function renderAll() {
       const tbody = document.getElementById('tbody');
       tbody.innerHTML = '';
@@ -1099,7 +1189,9 @@
       let filtered = getViewProjects().filter(p => projectMatchesFilter(p));
       filtered = sortProjecten(filtered);
 
-      if (currentView === 'inbox') {
+      if (currentView === 'prullenmand') {
+        renderPrullenmand(tbody);
+      } else if (currentView === 'inbox') {
         renderInbox(tbody);
       } else if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
@@ -1127,6 +1219,7 @@
       attachSelects();
       attachAddButtons();
       attachDeleteButtons();
+      attachPrullenmandButtons();
     }
 
     // ═══ Tekstvelden: klik om te bewerken ═══
@@ -1452,23 +1545,69 @@
           const id = btn.dataset.delId;
           const table = btn.dataset.delTable;
 
-          const bevestig = confirm('Weet je zeker dat je dit wilt verwijderen?');
+          const bevestig = confirm('Naar prullenmand verplaatsen?');
           if (!bevestig) return;
 
           try {
-            await del(table, id);
-            // Verwijder rij + onderliggende rijen
-            const row = btn.closest('tr');
+            // Soft delete: zet verwijderd_op timestamp
+            await patch(table, id, { verwijderd_op: new Date().toISOString() });
+
+            // Ook onderliggende items soft-deleten
             if (table === 'taken') {
-              document.querySelectorAll(`[data-parent="${id}"]`).forEach(r => {
-                const tId = r.dataset.taakId;
-                if (tId) document.querySelectorAll(`[data-parent-taak="${tId}"]`).forEach(sr => sr.remove());
-                r.remove();
-              });
+              const subs = allSubtaken.filter(s => s.taak_id === id);
+              for (const sub of subs) {
+                await patch('subtaken', sub.id, { verwijderd_op: new Date().toISOString() });
+                const subsubs = allSubsubtaken.filter(ss => ss.subtaak_id === sub.id);
+                for (const ss of subsubs) {
+                  await patch('sub_subtaken', ss.id, { verwijderd_op: new Date().toISOString() });
+                }
+              }
             } else if (table === 'subtaken') {
-              document.querySelectorAll(`[data-parent-taak="${id}"]`).forEach(r => r.remove());
+              const subsubs = allSubsubtaken.filter(ss => ss.subtaak_id === id);
+              for (const ss of subsubs) {
+                await patch('sub_subtaken', ss.id, { verwijderd_op: new Date().toISOString() });
+              }
             }
-            row.remove();
+
+            // Herlaad data en render
+            await reloadData();
+            renderAll();
+          } catch (err) {
+            alert('Verwijderen mislukt: ' + err.message);
+          }
+        });
+      });
+    }
+
+    // ═══ Prullenmand: herstellen en definitief verwijderen ═══
+    function attachPrullenmandButtons() {
+      // Herstellen
+      document.querySelectorAll('.restore-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.restoreId;
+          const table = btn.dataset.restoreTable;
+          try {
+            await patch(table, id, { verwijderd_op: null });
+            await reloadData();
+            renderAll();
+          } catch (err) {
+            alert('Herstellen mislukt: ' + err.message);
+          }
+        });
+      });
+
+      // Definitief verwijderen
+      document.querySelectorAll('.permanent-del-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (!confirm('Definitief verwijderen? Dit kan niet ongedaan worden.')) return;
+          const id = btn.dataset.permId;
+          const table = btn.dataset.permTable;
+          try {
+            await del(table, id);
+            await reloadData();
+            renderAll();
           } catch (err) {
             alert('Verwijderen mislukt: ' + err.message);
           }
@@ -1547,11 +1686,20 @@
 
     // ═══ Sidebar navigatie ═══
     document.querySelectorAll('.sidebar-item[data-view]').forEach(item => {
-      if (item.dataset.view === 'beheer') return; // nog niet actief
+      if (item.dataset.view === 'beheer') return;
       item.addEventListener('click', () => {
         currentView = item.dataset.view;
         renderAll();
       });
+    });
+
+    // Projecten in/uitklappen
+    document.getElementById('projectenToggle').addEventListener('click', () => {
+      const list = document.getElementById('sidebarProjecten');
+      const chev = document.getElementById('projectenChev');
+      const isHidden = list.style.display === 'none';
+      list.style.display = isHidden ? 'block' : 'none';
+      chev.classList.toggle('open', isHidden);
     });
 
     init();

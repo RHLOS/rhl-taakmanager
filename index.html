@@ -10,6 +10,7 @@
   <title>Taakmanager — R.H.L.</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="analyse.css">
 </head>
 <body>
 
@@ -67,6 +68,9 @@
     <div style="flex:1"></div>
 
     <div class="sidebar-section">
+      <div class="sidebar-item" id="sidebarAnalyse">
+        <span class="icon">📊</span> Analyse
+      </div>
       <div class="sidebar-item" data-view="prullenmand">
         <span class="icon">🗑</span> Prullenmand
         <span class="badge" id="badgePrullenmand"></span>
@@ -142,6 +146,71 @@
     <div class="footer">R.H.L. Consultancy · Taakmanager</div>
   </div>
 
+  <!-- ═══ ANALYSE PANEL ═══ -->
+  <div class="analyse-panel" id="analysePanel">
+    <div class="analyse-topbar">
+      <h1>Analyse</h1>
+      <div class="analyse-filters">
+        <button class="analyse-filter-btn active" id="filterWeek">Week</button>
+        <button class="analyse-filter-btn" id="filterMaand">Maand</button>
+        <span style="width:8px;display:inline-block;"></span>
+        <button class="analyse-filter-btn active" id="filterAlles">Alles</button>
+        <button class="analyse-filter-btn" id="filterWerk">Werk</button>
+        <button class="analyse-filter-btn" id="filterPrive">Privé</button>
+      </div>
+    </div>
+
+    <!-- KPI kaarten -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Afgerond deze week</div>
+        <div class="kpi-value" id="kpiDezeWeek">–</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Open taken</div>
+        <div class="kpi-value" id="kpiOpen">–</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Op tijd afgerond</div>
+        <div class="kpi-value" id="kpiOpTijd">–</div>
+        <div class="kpi-sub">van taken met deadline</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Gem. doorlooptijd</div>
+        <div class="kpi-value" id="kpiDoorlooptijd">–</div>
+        <div class="kpi-sub">aangemaakt → afgerond</div>
+      </div>
+    </div>
+
+    <!-- Grafieken -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Productiviteit</div>
+        <div class="chart-canvas-wrap"><canvas id="chartProductiviteit"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Werk / Privé verdeling</div>
+        <div class="chart-canvas-wrap"><canvas id="chartWerkPrive"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Geschat vs Werkelijk</div>
+        <div class="chart-canvas-wrap"><canvas id="chartGeschat"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Deadline compliance</div>
+        <div class="chart-canvas-wrap"><canvas id="chartDeadline"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Context analyse</div>
+        <div class="chart-canvas-wrap"><canvas id="chartContext"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Project voortgang</div>
+        <div class="project-bars" id="projectVoortgang"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ MODAL ═══ -->
   <div class="modal-overlay" id="modal" style="display:none;">
     <div class="modal-box">
@@ -151,9 +220,11 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <script src="ui.js"></script>
   <script src="api.js"></script>
   <script src="render.js"></script>
   <script src="app.js"></script>
+  <script src="analyse.js"></script>
 </body>
 </html>

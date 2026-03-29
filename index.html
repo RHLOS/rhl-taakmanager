@@ -361,6 +361,10 @@
         <span class="icon">📥</span> Alle taken
         <span class="badge" id="badgeAlle"></span>
       </div>
+      <div class="sidebar-item" data-view="inbox">
+        <span class="icon">📬</span> Inbox
+        <span class="badge" id="badgeInbox"></span>
+      </div>
     </div>
 
     <div class="sidebar-section">
@@ -913,6 +917,21 @@
       return subs.some(s => s.prio_ster);
     }
 
+    function projectHasInbox(project) {
+      if (project.inbox) return true;
+      const subs = allSubtaken.filter(s => s.taak_id === project.id && !s.gedaan);
+      if (subs.some(s => s.inbox)) return true;
+      const subIds = subs.map(s => s.id);
+      return allSubsubtaken.some(ss => subIds.includes(ss.subtaak_id) && !ss.gedaan && ss.inbox);
+    }
+
+    function countInbox() {
+      let count = allProjecten.filter(p => !p.gedaan && p.inbox).length;
+      count += allSubtaken.filter(s => !s.gedaan && s.inbox).length;
+      count += allSubsubtaken.filter(s => !s.gedaan && s.inbox).length;
+      return count;
+    }
+
     function getViewProjects() {
       if (currentView === 'voltooid') {
         return allProjecten.filter(p => p.gedaan);
@@ -920,7 +939,9 @@
 
       let projects = allProjecten.filter(p => !p.gedaan);
 
-      if (currentView === 'vandaag') {
+      if (currentView === 'inbox') {
+        projects = projects.filter(p => projectHasInbox(p));
+      } else if (currentView === 'vandaag') {
         projects = projects.filter(p => projectHasDeadline(p, 'vandaag'));
       } else if (currentView === 'week') {
         projects = projects.filter(p => projectHasDeadline(p, 'week'));
@@ -938,6 +959,7 @@
     function getViewTitle() {
       switch(currentView) {
         case 'alle': return 'Alle taken';
+        case 'inbox': return 'Inbox';
         case 'vandaag': return 'Vandaag';
         case 'week': return 'Deze week';
         case 'prioriteit': return 'Prioriteit';
@@ -959,6 +981,8 @@
       // Badges
       const el = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val || ''; };
       el('badgeAlle', openSubs.length);
+      const inboxCount = countInbox();
+      el('badgeInbox', inboxCount || '');
       el('badgeVandaag', open.filter(p => projectHasDeadline(p, 'vandaag')).length || '');
       el('badgeWeek', open.filter(p => projectHasDeadline(p, 'week')).length || '');
       el('badgePrio', open.filter(p => projectIsPrio(p)).length || '');

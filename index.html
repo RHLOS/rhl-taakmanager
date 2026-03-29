@@ -202,7 +202,7 @@
     .col-geschat  { width: 75px; }
     .col-werkelijk { width: 70px; }
     .col-context { width: 100px; }
-    .col-add { width: 32px; text-align: center; }
+    .col-add { width: 52px; text-align: center; white-space: nowrap; }
     .add-btn {
       font-size: 16px; color: var(--text-3); cursor: pointer;
       user-select: none; transition: color .15s; line-height: 1;
@@ -211,6 +211,16 @@
       display: inline-flex; align-items: center; justify-content: center;
     }
     .add-btn:hover { color: var(--accent); background: rgba(0,122,255,.08); }
+    .del-btn {
+      font-size: 12px; color: var(--text-3); cursor: pointer;
+      user-select: none; transition: color .15s; line-height: 1;
+      border: none; background: none; font-family: inherit;
+      padding: 0; width: 20px; height: 20px; border-radius: 4px;
+      display: inline-flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity .15s;
+    }
+    tr:hover .del-btn { opacity: 1; }
+    .del-btn:hover { color: var(--red); background: rgba(255,59,48,.08); }
 
     /* Rij hover */
     tbody tr:hover td { background: rgba(0,122,255,.015); }
@@ -506,6 +516,13 @@
       return r.json();
     }
 
+    async function del(table, id) {
+      const r = await fetch(`${SB}/rest/v1/${table}?id=eq.${id}`, {
+        method: 'DELETE', headers: hdrs
+      });
+      if (!r.ok) throw new Error('Fout bij verwijderen');
+    }
+
     async function patch(table, id, data) {
       const r = await fetch(`${SB}/rest/v1/${table}?id=eq.${id}`, {
         method: 'PATCH', headers: { ...hdrs, 'Prefer': 'return=representation' },
@@ -596,7 +613,7 @@
           <td>${editableGeschat(project.tijdsinschatting, project.id, 'taken')}</td>
           <td>${editableWerkelijk(project.tijd_uitgevoerd, project.id, 'taken')}</td>
           <td>${editableContext(project.context, project.id, 'taken')}</td>
-          <td class="col-add"><button class="add-btn" data-add="subtaak" data-parent-id="${project.id}" data-cat="${cat}" title="Subtaak toevoegen">+</button></td>
+          <td class="col-add"><button class="add-btn" data-add="subtaak" data-parent-id="${project.id}" data-cat="${cat}" title="Taak toevoegen">+</button><button class="del-btn" data-del-id="${project.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
         </tr>
       `);
 
@@ -617,7 +634,7 @@
             <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
             <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
             <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
-            <td class="col-add"><button class="add-btn" data-add="subsubtaak" data-parent-id="${sub.id}" title="Sub-subtaak toevoegen">+</button></td>
+            <td class="col-add"><button class="add-btn" data-add="subsubtaak" data-parent-id="${sub.id}" title="Subtaak toevoegen">+</button><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
 
@@ -635,7 +652,7 @@
               <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
               <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
               <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
-              <td class="col-add"></td>
+              <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
             </tr>
           `);
         });
@@ -710,6 +727,7 @@
         attachWerkelijk();
         attachSelects();
         attachAddButtons();
+        attachDeleteButtons();
 
       } catch (err) {
         debugEl.innerHTML = `
@@ -1044,7 +1062,7 @@
           const type = btn.dataset.add;
           const parentId = btn.dataset.parentId;
 
-          const tekst = prompt(type === 'subtaak' ? 'Nieuwe subtaak:' : 'Nieuwe sub-subtaak:');
+          const tekst = prompt(type === 'subtaak' ? 'Nieuwe taak:' : 'Nieuwe subtaak:');
           if (!tekst || !tekst.trim()) return;
 
           try {
@@ -1105,6 +1123,38 @@
         } catch (err) {
           alert('Toevoegen mislukt: ' + err.message);
         }
+      });
+    }
+
+    // ═══ Verwijder knoppen ═══
+    function attachDeleteButtons() {
+      document.querySelectorAll('.del-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.delId;
+          const table = btn.dataset.delTable;
+
+          const bevestig = confirm('Weet je zeker dat je dit wilt verwijderen?');
+          if (!bevestig) return;
+
+          try {
+            await del(table, id);
+            // Verwijder rij + onderliggende rijen
+            const row = btn.closest('tr');
+            if (table === 'taken') {
+              document.querySelectorAll(`[data-parent="${id}"]`).forEach(r => {
+                const tId = r.dataset.taakId;
+                if (tId) document.querySelectorAll(`[data-parent-taak="${tId}"]`).forEach(sr => sr.remove());
+                r.remove();
+              });
+            } else if (table === 'subtaken') {
+              document.querySelectorAll(`[data-parent-taak="${id}"]`).forEach(r => r.remove());
+            }
+            row.remove();
+          } catch (err) {
+            alert('Verwijderen mislukt: ' + err.message);
+          }
+        });
       });
     }
 

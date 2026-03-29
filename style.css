@@ -75,6 +75,24 @@
     }
     .sidebar-logo span { color: var(--text-2); font-weight: 400; font-size: 12px; display: block; margin-top: 2px; }
 
+    /* Zoekbalk */
+    .search-wrap {
+      position: relative; display: flex; align-items: center;
+    }
+    .search-icon {
+      position: absolute; left: 8px; font-size: 12px;
+      color: var(--text-3); pointer-events: none;
+    }
+    .search-input {
+      width: 100%; padding: 7px 8px 7px 28px;
+      border: 1px solid var(--sep); border-radius: 8px;
+      font-size: 12px; font-family: inherit;
+      background: var(--card); color: var(--text);
+      outline: none; transition: border-color .15s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--text-3); }
+
     /* ═══════════════════════════════════
        MAIN CONTENT
        ═══════════════════════════════════ */

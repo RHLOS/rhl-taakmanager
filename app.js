@@ -288,7 +288,8 @@
     let allProjecten = [], allSubtaken = [], allSubsubtaken = [];
     let currentSort = null;
     let activeFilters = {};
-    let currentView = 'alle'; // alle, vandaag, week, prioriteit, voltooid, project:{id}
+    let currentView = 'alle';
+    let searchQuery = '';
 
     function getFilterOptions(col) {
       switch(col) {
@@ -753,6 +754,16 @@
       tbody.innerHTML = '';
 
       let filtered = getViewProjects().filter(p => projectMatchesFilter(p));
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        filtered = filtered.filter(p => {
+          if (p.taak && p.taak.toLowerCase().includes(q)) return true;
+          const subs = allSubtaken.filter(s => s.taak_id === p.id);
+          if (subs.some(s => s.tekst && s.tekst.toLowerCase().includes(q))) return true;
+          const subIds = subs.map(s => s.id);
+          return allSubsubtaken.some(ss => subIds.includes(ss.subtaak_id) && ss.tekst && ss.tekst.toLowerCase().includes(q));
+        });
+      }
       filtered = sortProjecten(filtered);
 
       if (currentView === 'prullenmand') {
@@ -1263,6 +1274,19 @@
         currentView = item.dataset.view;
         renderAll();
       });
+    });
+
+    // ═══ Zoekfunctie ═══
+    let searchTimeout;
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        searchQuery = e.target.value.trim();
+        if (searchQuery && currentView !== 'alle') {
+          currentView = 'alle'; // zoeken werkt altijd op alle taken
+        }
+        renderAll();
+      }, 200);
     });
 
     // Projecten in/uitklappen

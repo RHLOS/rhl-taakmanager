@@ -127,6 +127,34 @@
       return result === true;
     }
 
+    // ═══ Toast / Undo ═══
+    let activeToast = null;
+    function showToast(message, undoFn) {
+      if (activeToast) activeToast.remove();
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<span>${esc(message)}</span>`;
+      if (undoFn) {
+        const btn = document.createElement('button');
+        btn.className = 'toast-undo';
+        btn.textContent = 'Ongedaan maken';
+        btn.addEventListener('click', async () => {
+          toast.remove();
+          activeToast = null;
+          await undoFn();
+        });
+        toast.appendChild(btn);
+      }
+      document.body.appendChild(toast);
+      activeToast = toast;
+      setTimeout(() => {
+        if (activeToast === toast) {
+          toast.classList.add('hiding');
+          setTimeout(() => { toast.remove(); activeToast = null; }, 300);
+        }
+      }, 5000);
+    }
+
     // ═══ Datum helpers ═══
     function formatDate(d) {
       if (!d) return '';
@@ -1253,8 +1281,26 @@
             // Herlaad data en render
             await reloadData();
             renderAll();
+            showToast('Naar prullenmand verplaatst', async () => {
+              // Undo: verwijderd_op terugzetten
+              await patch(table, id, { verwijderd_op: null });
+              if (table === 'taken') {
+                for (const sub of allSubtaken.filter(s => s.taak_id === id)) {
+                  await patch('subtaken', sub.id, { verwijderd_op: null });
+                  for (const ss of allSubsubtaken.filter(s => s.subtaak_id === sub.id)) {
+                    await patch('sub_subtaken', ss.id, { verwijderd_op: null });
+                  }
+                }
+              } else if (table === 'subtaken') {
+                for (const ss of allSubsubtaken.filter(s => s.subtaak_id === id)) {
+                  await patch('sub_subtaken', ss.id, { verwijderd_op: null });
+                }
+              }
+              await reloadData();
+              renderAll();
+            });
           } catch (err) {
-            alert('Verwijderen mislukt: ' + err.message);
+            showToast('Verwijderen mislukt: ' + err.message);
           }
         });
       });
@@ -1305,27 +1351,27 @@
           const table = cb.dataset.table;
           if (!id || !table) return;
 
-          // Visueel afvinken
           cb.textContent = '✓';
           cb.classList.add('done');
           cb.style.pointerEvents = 'none';
 
-          // Opslaan naar Supabase
           try {
             await patch(table, id, {
               gedaan: true,
               gedaan_datum: new Date().toISOString().split('T')[0]
             });
-            // Lokale data bijwerken en herrenderen na korte delay
-            setTimeout(async () => {
+            await reloadData();
+            renderAll();
+            showToast('Taak afgerond', async () => {
+              await patch(table, id, { gedaan: false, gedaan_datum: null });
               await reloadData();
               renderAll();
-            }, 400);
+            });
           } catch (err) {
             cb.textContent = '○';
             cb.classList.remove('done');
             cb.style.pointerEvents = '';
-            alert('Opslaan mislukt: ' + err.message);
+            showToast('Opslaan mislukt: ' + err.message);
           }
         });
       });

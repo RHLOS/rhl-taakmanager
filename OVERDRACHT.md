@@ -105,6 +105,18 @@ Alle drie hoofdtabellen hebben: `gedaan`, `gedaan_datum`, `inbox`, `verwijderd_o
 
 ---
 
+## Token-verbruik laag houden — KRITIEK
+
+De gebruiker heeft een beperkt maandbudget. Hoog verbruik stopt de doorontwikkeling. Dit zijn de regels:
+
+1. **Model:** stel altijd `/model claude-sonnet-4-6` in bij sessiestart — Opus kost 5× meer
+2. **Nooit hele bestanden lezen** — gebruik `grep` om de juiste sectie te vinden, dan `offset`+`limit` om alleen die regels te lezen
+3. **Nieuwe features in aparte bestanden** — zodat bestaande grote bestanden niet aangeraakt hoeven te worden
+4. **Gebruik `/compact`** als een sessie lang wordt (comprimeert context)
+5. **Denk voor je leest** — weet je al wat er in een bestand staat? Dan niet opnieuw lezen
+
+---
+
 ## Werkafspraken
 
 1. **NOOIT iets bouwen of aanpassen zonder vooraf toestemming**
@@ -114,8 +126,6 @@ Alle drie hoofdtabellen hebben: `gedaan`, `gedaan_datum`, `inbox`, `verwijderd_o
 5. **Gebruiker is een leek** — simpel uitleggen
 6. Gebruiker werkt op **MacBook Air**, bestanden in `~/ClaudeCodeZandbak/rhl-taakmanager/`
 7. Gebruiker heeft `gh` CLI, ingelogd als **RHLOS**
-8. **Model:** gebruik altijd `claude-sonnet-4-6` (niet Opus) — scheelt fors in verbruik
-9. **Bestanden lezen:** gebruik altijd `offset`+`limit` of `grep`, nooit grote bestanden ineens lezen
 
 ---
 

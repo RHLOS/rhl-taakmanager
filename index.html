@@ -253,7 +253,23 @@
       cursor: pointer; border-radius: 4px; padding: 2px 4px; margin: -2px -4px;
       transition: background .15s;
     }
-    .editable-dl:hover, .editable-num:hover { background: rgba(0,122,255,.06); }
+    .editable-dl:hover, .editable-num:hover, .editable-select:hover { background: rgba(0,122,255,.06); }
+    .editable-select {
+      cursor: pointer; border-radius: 4px; padding: 2px 4px; margin: -2px -4px;
+      transition: background .15s; font-size: 11px; color: var(--text-2);
+    }
+    .select-popup {
+      position: absolute; z-index: 60;
+      background: var(--card); border: 1px solid var(--sep);
+      border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      padding: 6px 0; min-width: 140px;
+    }
+    .select-popup label {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 14px; font-size: 12px; cursor: pointer;
+    }
+    .select-popup label:hover { background: rgba(0,122,255,.06); }
+    .select-popup input { accent-color: var(--accent); }
     .edit-input {
       width: 100%; border: 1px solid var(--accent); border-radius: 4px;
       padding: 3px 6px; font-size: inherit; font-family: inherit;
@@ -530,6 +546,19 @@
       return `<span class="editable-num tijd" data-id="${id}" data-table="${table}" data-field="tijd_uitgevoerd">${display || '—'}</span>`;
     }
 
+    const GESCHAT_OPTIES = ['', '<15 min', '<30 min', '<60 min', '<90 min', '<120 min'];
+    const CONTEXT_OPTIES = ['@Kantoor', '@Thuis', '@Onderweg', '@Computer', '@Telefoon', '@Online'];
+
+    function editableGeschat(val, id, table) {
+      return `<span class="editable-select tijd" data-id="${id}" data-table="${table}" data-field="tijdsinschatting" data-type="geschat">${val || '—'}</span>`;
+    }
+
+    function editableContext(ctx, id, table) {
+      const arr = Array.isArray(ctx) ? ctx : (ctx ? [ctx] : []);
+      const display = arr.length > 0 ? arr.join(', ') : '';
+      return `<span class="editable-select" data-id="${id}" data-table="${table}" data-field="context" data-type="context" data-raw='${JSON.stringify(arr)}'>${display || '—'}</span>`;
+    }
+
     function renderProject(project, subtaken, subsubtaken, tbody) {
       const cat = project.categorie;
       const isPrio = project.prioriteit === 'hoog';
@@ -545,9 +574,9 @@
           <td></td>
           <td></td>
           <td>${editableDeadline(project.deadline, project.id, 'taken')}</td>
-          <td class="tijd">${project.tijdsinschatting || ''}</td>
+          <td>${editableGeschat(project.tijdsinschatting, project.id, 'taken')}</td>
           <td>${editableWerkelijk(project.tijd_uitgevoerd, project.id, 'taken')}</td>
-          <td>${contextHtml(project.context)}</td>
+          <td>${editableContext(project.context, project.id, 'taken')}</td>
         </tr>
       `);
 
@@ -565,9 +594,9 @@
             <td>${hasSubs ? '<span class="chev">▶</span> ' : ''}<span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${sub.tekst}</span></td>
             <td></td>
             <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
-            <td class="tijd">${sub.tijdsinschatting || ''}</td>
+            <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
             <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
-            <td>${contextHtml(sub.context)}</td>
+            <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
           </tr>
         `);
 
@@ -582,7 +611,7 @@
               <td></td>
               <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${ss.tekst}</span></td>
               <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
-              <td class="tijd">${ss.tijdsinschatting || ''}</td>
+              <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
               <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
               <td>${contextHtml(ss.context)}</td>
             </tr>
@@ -657,6 +686,7 @@
         attachEditable();
         attachDeadlines();
         attachWerkelijk();
+        attachSelects();
 
       } catch (err) {
         debugEl.innerHTML = `
@@ -879,6 +909,105 @@
             if (ev.key === 'Enter') input.blur();
             if (ev.key === 'Escape') { el.textContent = current; }
           });
+        });
+      });
+    }
+
+    // ═══ Geschat & Context: dropdown selectie ═══
+    function attachSelects() {
+      document.querySelectorAll('.editable-select').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // Sluit andere popups
+          document.querySelectorAll('.select-popup').forEach(p => p.remove());
+
+          const id = el.dataset.id;
+          const table = el.dataset.table;
+          const field = el.dataset.field;
+          const type = el.dataset.type;
+
+          const popup = document.createElement('div');
+          popup.className = 'select-popup';
+
+          if (type === 'geschat') {
+            // Single select dropdown
+            const current = el.textContent.trim();
+            GESCHAT_OPTIES.forEach(opt => {
+              const label = document.createElement('label');
+              const radio = document.createElement('input');
+              radio.type = 'radio';
+              radio.name = 'geschat_' + id;
+              radio.value = opt;
+              radio.checked = (opt === current) || (opt === '' && current === '—');
+              label.appendChild(radio);
+              label.appendChild(document.createTextNode(opt || 'Geen'));
+              label.addEventListener('click', async () => {
+                el.textContent = opt || '—';
+                popup.remove();
+                try {
+                  await patch(table, id, { [field]: opt || null });
+                } catch (err) {
+                  el.textContent = current;
+                  alert('Opslaan mislukt: ' + err.message);
+                }
+              });
+              popup.appendChild(label);
+            });
+          } else if (type === 'context') {
+            // Multi select dropdown
+            let selected = [];
+            try { selected = JSON.parse(el.dataset.raw || '[]'); } catch(e) {}
+
+            CONTEXT_OPTIES.forEach(opt => {
+              const label = document.createElement('label');
+              const cb = document.createElement('input');
+              cb.type = 'checkbox';
+              cb.value = opt;
+              cb.checked = selected.includes(opt);
+              cb.addEventListener('change', () => {
+                if (cb.checked) {
+                  selected.push(opt);
+                } else {
+                  selected = selected.filter(s => s !== opt);
+                }
+              });
+              label.appendChild(cb);
+              label.appendChild(document.createTextNode(opt));
+              popup.appendChild(label);
+            });
+
+            // Opslaan knop
+            const saveBtn = document.createElement('div');
+            saveBtn.style.cssText = 'padding:6px 14px;text-align:center;';
+            saveBtn.innerHTML = '<button style="padding:4px 16px;border:none;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;">Opslaan</button>';
+            saveBtn.querySelector('button').addEventListener('click', async () => {
+              el.textContent = selected.length > 0 ? selected.join(', ') : '—';
+              el.dataset.raw = JSON.stringify(selected);
+              popup.remove();
+              try {
+                await patch(table, id, { [field]: selected.length > 0 ? selected : null });
+              } catch (err) {
+                alert('Opslaan mislukt: ' + err.message);
+              }
+            });
+            popup.appendChild(saveBtn);
+          }
+
+          // Positioneer popup
+          const rect = el.getBoundingClientRect();
+          popup.style.position = 'fixed';
+          popup.style.left = rect.left + 'px';
+          popup.style.top = (rect.bottom + 4) + 'px';
+          document.body.appendChild(popup);
+
+          // Sluit bij klik buiten
+          const closePopup = (ev) => {
+            if (!popup.contains(ev.target) && ev.target !== el) {
+              popup.remove();
+              document.removeEventListener('click', closePopup);
+            }
+          };
+          setTimeout(() => document.addEventListener('click', closePopup), 0);
         });
       });
     }

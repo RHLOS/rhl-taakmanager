@@ -111,16 +111,24 @@ Regels:
 ## Bestanden
 
 ```
-├── index.html              # Webapp (alles in één bestand)
+├── index.html              # Webapp HTML
+├── style.css               # Webapp CSS
+├── api.js                  # Supabase config + API helpers
+├── ui.js                   # Modals, toast, datum helpers
+├── render.js               # Tabel render functies
+├── app.js                  # State, filters, logica, init
+├── analyse.js              # Analyse dashboard
+├── analyse.css             # Analyse dashboard styling
 ├── manifest.json           # PWA manifest
 ├── taken.json              # Originele dataset (referentie)
+├── OVERDRACHT.md           # Sessie-overdracht document
 ├── supabase/
-│   ├── schema.sql          # Basis tabellen
-│   ├── import.sql          # Initiële data import
-│   ├── sub_subtaken.sql    # Sub-subtaken + migraties
-│   ├── update_v2.sql       # Extra velden
-│   ├── hernummer.sql       # Hernummering
-│   └── inbox.sql           # Inbox veld
+│   ├── schema.sql
+│   ├── import.sql
+│   ├── sub_subtaken.sql
+│   ├── update_v2.sql
+│   ├── hernummer.sql
+│   └── inbox.sql
 ├── ClaudeCode_Briefing_Taakmanager.md
 └── Taakanalyse_Briefing_RHL_v2.md
 ```

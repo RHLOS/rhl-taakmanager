@@ -191,7 +191,6 @@
     tbody tr:first-child td { border-top: none; }
 
     /* Kolombreedtes */
-    .col-check, td.cc { width: 36px; text-align: center; }
     .col-done, td.cd  { width: 36px; text-align: center; }
     .col-prio, td.cp  { width: 32px; text-align: center; }
     td.cd, td.cp { vertical-align: middle; }
@@ -424,7 +423,6 @@
       <table>
         <thead>
           <tr>
-            <th class="col-check"></th>
             <th class="col-done">✓</th>
             <th class="col-prio">P</th>
             <th class="col-cat">W/P</th>
@@ -498,7 +496,6 @@
       // Project-rij
       tbody.insertAdjacentHTML('beforeend', `
         <tr class="row-project" data-project-id="${project.id}">
-          <td class="cc"><input type="checkbox"></td>
           <td class="cd"></td>
           <td class="cp">${starHtml(isPrio)}</td>
           <td>${catBadge(cat)}</td>
@@ -519,7 +516,6 @@
 
         tbody.insertAdjacentHTML('beforeend', `
           <tr class="row-taak collapsed" data-parent="${project.id}" data-taak-id="${sub.id}">
-            <td class="cc"></td>
             <td class="cd">${!hasSubs ? '<span class="cb">○</span>' : ''}</td>
             <td class="cp">${starHtml(sub.prio_ster)}</td>
             <td>${catBadge(cat)}</td>
@@ -537,7 +533,6 @@
         subs.forEach(ss => {
           tbody.insertAdjacentHTML('beforeend', `
             <tr class="row-subtaak collapsed" data-parent-taak="${sub.id}">
-              <td class="cc"></td>
               <td class="cd"><span class="cb">○</span></td>
               <td class="cp">${starHtml(ss.prioriteit)}</td>
               <td></td>
@@ -557,7 +552,7 @@
     // ═══ Init ═══
     async function init() {
       const debugEl = document.getElementById('tbody');
-      debugEl.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--text-2);font-size:12px;">Verbinden met Supabase...</td></tr>`;
+      debugEl.innerHTML = `<tr><td colspan="10" style="padding:20px;color:var(--text-2);font-size:12px;">Verbinden met Supabase...</td></tr>`;
 
       try {
         // Test eerst of Supabase bereikbaar is
@@ -566,14 +561,14 @@
         const testBody = await testResp.text();
 
         if (!testResp.ok) {
-          debugEl.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--red);font-size:12px;">
+          debugEl.innerHTML = `<tr><td colspan="10" style="padding:20px;color:var(--red);font-size:12px;">
             Supabase fout (HTTP ${testStatus}):<br>${testBody}
           </td></tr>`;
           return;
         }
 
         const testData = JSON.parse(testBody);
-        debugEl.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--green);font-size:12px;">
+        debugEl.innerHTML = `<tr><td colspan="10" style="padding:20px;color:var(--green);font-size:12px;">
           Verbonden! ${testData.length} projecten gevonden in test. Volledige data laden...
         </td></tr>`;
 
@@ -588,7 +583,7 @@
 
         // Debug info boven de tabel
         const debugInfo = document.createElement('tr');
-        debugInfo.innerHTML = `<td colspan="11" style="padding:8px 10px;background:#f0f8ff;font-size:11px;color:var(--text-2);">
+        debugInfo.innerHTML = `<td colspan="10" style="padding:8px 10px;background:#f0f8ff;font-size:11px;color:var(--text-2);">
           DEBUG: ${projecten.length} projecten, ${subtaken.length} subtaken, ${subsubtaken.length} sub-subtaken geladen
         </td>`;
         tbody.appendChild(debugInfo);
@@ -596,7 +591,7 @@
         const openProjecten = projecten.filter(p => !p.gedaan);
 
         if (openProjecten.length === 0) {
-          tbody.innerHTML += `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
+          tbody.innerHTML += `<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-2);">
             Geen open projecten gevonden.
           </td></tr>`;
           return;
@@ -618,7 +613,7 @@
 
       } catch (err) {
         debugEl.innerHTML = `
-          <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--red);">
+          <tr><td colspan="10" style="text-align:center;padding:40px;color:var(--red);">
             Fout: ${err.message}<br>
             <span style="font-size:11px;color:var(--text-2)">Type: ${err.name} — controleer of Supabase bereikbaar is</span>
           </td></tr>`;

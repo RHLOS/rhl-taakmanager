@@ -576,6 +576,8 @@
         document.getElementById('mWerk').textContent = projecten.filter(p => p.categorie === 'Werk').length;
         document.getElementById('mPrio').textContent = projecten.filter(p => p.prioriteit === 'hoog').length;
 
+        attachToggle();
+
       } catch (err) {
         document.getElementById('tbody').innerHTML = `
           <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
@@ -583,6 +585,60 @@
           </td></tr>`;
       }
     }
+
+    // ═══ In/uitklappen ═══
+    function attachToggle() {
+      // Project-rij klikken → toon/verberg taak-rijen
+      document.querySelectorAll('.row-project').forEach(row => {
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('input[type="checkbox"]') || e.target.closest('.star') || e.target.closest('.cb')) return;
+          const id = row.dataset.projectId;
+          const chev = row.querySelector('.chev');
+          const isOpen = chev.classList.contains('open');
+
+          chev.classList.toggle('open');
+          document.querySelectorAll(`.row-taak[data-parent="${id}"]`).forEach(r => {
+            r.classList.toggle('collapsed', isOpen);
+            // Bij inklappen ook sub-subtaken verbergen
+            if (isOpen) {
+              const tId = r.dataset.taakId;
+              if (tId) {
+                const tChev = r.querySelector('.chev');
+                if (tChev) tChev.classList.remove('open');
+                document.querySelectorAll(`.row-subtaak[data-parent-taak="${tId}"]`).forEach(sr => {
+                  sr.classList.add('collapsed');
+                });
+              }
+            }
+          });
+        });
+      });
+
+      // Taak-rij klikken → toon/verberg sub-subtaak-rijen
+      document.querySelectorAll('.row-taak').forEach(row => {
+        const chev = row.querySelector('.chev');
+        if (!chev) return; // geen sub-subtaken
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('.cb') || e.target.closest('.star')) return;
+          const tId = row.dataset.taakId;
+          const isOpen = chev.classList.contains('open');
+          chev.classList.toggle('open');
+          document.querySelectorAll(`.row-subtaak[data-parent-taak="${tId}"]`).forEach(r => {
+            r.classList.toggle('collapsed', isOpen);
+          });
+        });
+      });
+    }
+
+    // Alles inklappen / uitklappen knoppen
+    document.getElementById('btnCollapseAll').addEventListener('click', () => {
+      document.querySelectorAll('.chev').forEach(c => c.classList.remove('open'));
+      document.querySelectorAll('.row-taak, .row-subtaak').forEach(r => r.classList.add('collapsed'));
+    });
+    document.getElementById('btnExpandAll').addEventListener('click', () => {
+      document.querySelectorAll('.chev').forEach(c => c.classList.add('open'));
+      document.querySelectorAll('.row-taak, .row-subtaak').forEach(r => r.classList.remove('collapsed'));
+    });
 
     // ═══ Dropdown filter toggle ═══
     document.querySelectorAll('.filter-dd-btn').forEach(btn => {

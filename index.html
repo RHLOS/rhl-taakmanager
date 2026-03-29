@@ -1014,6 +1014,84 @@
       document.getElementById('viewTitle').textContent = getViewTitle();
     }
 
+    function renderInbox(tbody) {
+      // Toon alleen individuele items met inbox=true, met projectnaam erbij
+      const inboxSubs = allSubtaken.filter(s => !s.gedaan && s.inbox);
+      const inboxSubSubs = allSubsubtaken.filter(s => !s.gedaan && s.inbox);
+      const inboxProjecten = allProjecten.filter(p => !p.gedaan && p.inbox);
+
+      if (inboxSubs.length === 0 && inboxSubSubs.length === 0 && inboxProjecten.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
+          Inbox is leeg
+        </td></tr>`;
+        return;
+      }
+
+      // Inbox projecten
+      inboxProjecten.forEach(p => {
+        const cat = p.categorie;
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="row-taak">
+            <td class="cd"></td>
+            <td class="cp">${starHtmlData(p.prioriteit === 'hoog', p.id, 'taken', 'prioriteit')}</td>
+            <td>${catBadge(cat)}</td>
+            <td><span class="editable" data-id="${p.id}" data-table="taken" data-field="taak">${p.taak}</span></td>
+            <td><span style="color:var(--text-3);font-size:11px;">nieuw project</span></td>
+            <td></td>
+            <td>${editableDeadline(p.deadline, p.id, 'taken')}</td>
+            <td>${editableGeschat(p.tijdsinschatting, p.id, 'taken')}</td>
+            <td>${editableWerkelijk(p.tijd_uitgevoerd, p.id, 'taken')}</td>
+            <td>${editableContext(p.context, p.id, 'taken')}</td>
+            <td class="col-add"><button class="del-btn" data-del-id="${p.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
+          </tr>
+        `);
+      });
+
+      // Inbox subtaken
+      inboxSubs.forEach(sub => {
+        const project = allProjecten.find(p => p.id === sub.taak_id);
+        const cat = project ? project.categorie : 'Werk';
+        const projectNaam = project ? project.taak : '?';
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="row-taak">
+            <td class="cd"><span class="cb" data-id="${sub.id}" data-table="subtaken">○</span></td>
+            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
+            <td>${catBadge(cat)}</td>
+            <td><span style="color:var(--text-3);font-size:11px;">${projectNaam}</span></td>
+            <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${sub.tekst}</span></td>
+            <td></td>
+            <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
+            <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
+            <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
+            <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
+            <td class="col-add"><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
+          </tr>
+        `);
+      });
+
+      // Inbox sub-subtaken
+      inboxSubSubs.forEach(ss => {
+        const sub = allSubtaken.find(s => s.id === ss.subtaak_id);
+        const project = sub ? allProjecten.find(p => p.id === sub.taak_id) : null;
+        const taakNaam = sub ? sub.tekst : '?';
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="row-subtaak">
+            <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
+            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+            <td></td>
+            <td><span style="color:var(--text-3);font-size:11px;">${project ? project.taak : '?'}</span></td>
+            <td><span style="color:var(--text-3);font-size:11px;">${taakNaam}</span></td>
+            <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${ss.tekst}</span></td>
+            <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
+            <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
+            <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
+            <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
+            <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
+          </tr>
+        `);
+      });
+    }
+
     function renderAll() {
       const tbody = document.getElementById('tbody');
       tbody.innerHTML = '';
@@ -1021,7 +1099,9 @@
       let filtered = getViewProjects().filter(p => projectMatchesFilter(p));
       filtered = sortProjecten(filtered);
 
-      if (filtered.length === 0) {
+      if (currentView === 'inbox') {
+        renderInbox(tbody);
+      } else if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
           Geen taken in deze weergave
         </td></tr>`;

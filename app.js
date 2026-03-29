@@ -18,11 +18,13 @@
     }
 
     async function post(table, data) {
+      showSaving();
       const r = await fetch(`${SB}/rest/v1/${table}`, {
         method: 'POST', headers: { ...hdrs, 'Prefer': 'return=representation' },
         body: JSON.stringify(data)
       });
       if (!r.ok) { const t = await r.text(); throw new Error(`Fout bij aanmaken: ${t}`); }
+      showSaved();
       return r.json();
     }
 
@@ -38,11 +40,13 @@
     }
 
     async function patch(table, id, data) {
+      showSaving();
       const r = await fetch(`${SB}/rest/v1/${table}?id=eq.${id}`, {
         method: 'PATCH', headers: { ...hdrs, 'Prefer': 'return=representation' },
         body: JSON.stringify(data)
       });
       if (!r.ok) throw new Error(`Fout bij opslaan`);
+      showSaved();
       return r.json();
     }
 
@@ -125,6 +129,21 @@
         { label: confirmLabel || 'Bevestigen', class: isDanger ? 'danger' : 'primary', value: true }
       ]);
       return result === true;
+    }
+
+    // ═══ Saving indicator ═══
+    let savingTimeout;
+    function showSaving() {
+      const el = document.getElementById('savingIndicator');
+      el.classList.add('active');
+      el.innerHTML = '<div class="saving-dot"></div> <span>Opslaan...</span>';
+    }
+    function showSaved() {
+      const el = document.getElementById('savingIndicator');
+      el.innerHTML = '<span class="saved-check">✓ Opgeslagen</span>';
+      el.classList.add('active');
+      clearTimeout(savingTimeout);
+      savingTimeout = setTimeout(() => el.classList.remove('active'), 2000);
     }
 
     // ═══ Toast / Undo ═══

@@ -357,51 +357,41 @@
     </div>
 
     <div class="sidebar-section">
-      <div class="sidebar-item active">
+      <div class="sidebar-item active" data-view="alle">
         <span class="icon">📥</span> Alle taken
+        <span class="badge" id="badgeAlle"></span>
       </div>
     </div>
 
     <div class="sidebar-section">
       <div class="sidebar-title">Snelle weergaven</div>
-      <div class="sidebar-item">
+      <div class="sidebar-item" data-view="vandaag">
         <span class="icon">🔴</span> Vandaag
-        <span class="badge" id="badgeVandaag">0</span>
+        <span class="badge" id="badgeVandaag"></span>
       </div>
-      <div class="sidebar-item">
+      <div class="sidebar-item" data-view="week">
         <span class="icon">📅</span> Deze week
+        <span class="badge" id="badgeWeek"></span>
       </div>
-      <div class="sidebar-item">
-        <span class="icon">⏳</span> Wachten op
+      <div class="sidebar-item" data-view="prioriteit">
+        <span class="icon">⭐</span> Prioriteit
+        <span class="badge" id="badgePrio"></span>
       </div>
-      <div class="sidebar-item">
-        <span class="icon">⚡</span> Quick wins
+      <div class="sidebar-item" data-view="voltooid">
+        <span class="icon">✅</span> Voltooid
+        <span class="badge" id="badgeVoltooid"></span>
       </div>
     </div>
 
     <div class="sidebar-section">
       <div class="sidebar-title">Projecten</div>
-      <div class="sidebar-item">
-        <span class="icon">▸</span> HSPI project
-      </div>
-      <div class="sidebar-item">
-        <span class="icon">▸</span> Commercie
-      </div>
-      <div class="sidebar-item">
-        <span class="icon">▸</span> Privé divers
-      </div>
-      <div class="sidebar-item">
-        <span class="icon">▸</span> Natasja
-      </div>
+      <div id="sidebarProjecten"></div>
     </div>
 
     <div style="flex:1"></div>
 
     <div class="sidebar-section">
-      <div class="sidebar-item">
-        <span class="icon">📦</span> Archief
-      </div>
-      <div class="sidebar-item">
+      <div class="sidebar-item" data-view="beheer" style="opacity:.5;cursor:default;">
         <span class="icon">⚙️</span> Beheer
       </div>
     </div>
@@ -412,7 +402,7 @@
 
     <!-- Top bar -->
     <div class="topbar">
-      <h1>Alle taken</h1>
+      <h1 id="viewTitle">Alle taken</h1>
       <button class="btn-new">+ Nieuwe taak</button>
     </div>
 
@@ -733,7 +723,8 @@
     // ═══ Kolom-header filter/sort popups ═══
     let allProjecten = [], allSubtaken = [], allSubsubtaken = [];
     let currentSort = null;
-    let activeFilters = {}; // { col: Set of selected values }
+    let activeFilters = {};
+    let currentView = 'alle'; // alle, vandaag, week, prioriteit, voltooid, project:{id}
 
     function getFilterOptions(col) {
       switch(col) {
@@ -901,25 +892,127 @@
       return s;
     }
 
+    // Helper: heeft een project taken met deadline vandaag/deze week?
+    function projectHasDeadline(project, mode) {
+      if (mode === 'vandaag') {
+        if (project.deadline && daysUntil(project.deadline) === 0) return true;
+      } else if (mode === 'week') {
+        if (project.deadline && daysUntil(project.deadline) >= 0 && daysUntil(project.deadline) <= 7) return true;
+      }
+      const subs = allSubtaken.filter(s => s.taak_id === project.id && !s.gedaan);
+      return subs.some(s => {
+        if (mode === 'vandaag') return s.deadline && daysUntil(s.deadline) === 0;
+        if (mode === 'week') return s.deadline && daysUntil(s.deadline) >= 0 && daysUntil(s.deadline) <= 7;
+        return false;
+      });
+    }
+
+    function projectIsPrio(project) {
+      if (project.prioriteit === 'hoog') return true;
+      const subs = allSubtaken.filter(s => s.taak_id === project.id && !s.gedaan);
+      return subs.some(s => s.prio_ster);
+    }
+
+    function getViewProjects() {
+      if (currentView === 'voltooid') {
+        return allProjecten.filter(p => p.gedaan);
+      }
+
+      let projects = allProjecten.filter(p => !p.gedaan);
+
+      if (currentView === 'vandaag') {
+        projects = projects.filter(p => projectHasDeadline(p, 'vandaag'));
+      } else if (currentView === 'week') {
+        projects = projects.filter(p => projectHasDeadline(p, 'week'));
+      } else if (currentView === 'prioriteit') {
+        projects = projects.filter(p => projectIsPrio(p));
+      } else if (currentView.startsWith('project:')) {
+        const projectId = currentView.split(':')[1];
+        projects = projects.filter(p => p.id === projectId);
+      }
+      // 'alle' = geen extra filter
+
+      return projects;
+    }
+
+    function getViewTitle() {
+      switch(currentView) {
+        case 'alle': return 'Alle taken';
+        case 'vandaag': return 'Vandaag';
+        case 'week': return 'Deze week';
+        case 'prioriteit': return 'Prioriteit';
+        case 'voltooid': return 'Voltooid';
+        default:
+          if (currentView.startsWith('project:')) {
+            const pid = currentView.split(':')[1];
+            const p = allProjecten.find(pr => pr.id === pid);
+            return p ? p.taak : 'Project';
+          }
+          return 'Taken';
+      }
+    }
+
+    function updateSidebar() {
+      const open = allProjecten.filter(p => !p.gedaan);
+      const openSubs = allSubtaken.filter(s => !s.gedaan);
+
+      // Badges
+      const el = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val || ''; };
+      el('badgeAlle', openSubs.length);
+      el('badgeVandaag', open.filter(p => projectHasDeadline(p, 'vandaag')).length || '');
+      el('badgeWeek', open.filter(p => projectHasDeadline(p, 'week')).length || '');
+      el('badgePrio', open.filter(p => projectIsPrio(p)).length || '');
+      el('badgeVoltooid', allProjecten.filter(p => p.gedaan).length || '');
+
+      // Active state
+      document.querySelectorAll('.sidebar-item[data-view]').forEach(item => {
+        item.classList.toggle('active', item.dataset.view === currentView);
+      });
+
+      // Dynamische projecten
+      const container = document.getElementById('sidebarProjecten');
+      container.innerHTML = '';
+      open.forEach(p => {
+        const count = allSubtaken.filter(s => s.taak_id === p.id && !s.gedaan).length;
+        const isActive = currentView === `project:${p.id}`;
+        const div = document.createElement('div');
+        div.className = 'sidebar-item' + (isActive ? ' active' : '');
+        div.dataset.view = `project:${p.id}`;
+        div.innerHTML = `<span class="icon">▸</span> ${p.taak} <span class="badge">${count || ''}</span>`;
+        div.addEventListener('click', () => {
+          currentView = `project:${p.id}`;
+          renderAll();
+        });
+        container.appendChild(div);
+      });
+
+      // Titel
+      document.getElementById('viewTitle').textContent = getViewTitle();
+    }
+
     function renderAll() {
       const tbody = document.getElementById('tbody');
       tbody.innerHTML = '';
 
-      let filtered = allProjecten.filter(p => !p.gedaan && projectMatchesFilter(p));
+      let filtered = getViewProjects().filter(p => projectMatchesFilter(p));
       filtered = sortProjecten(filtered);
 
-      // Stap 2: alleen bepaalde projecten (wordt later alle)
-      const targets = ['hspi', 'privé divers', 'follow up'];
-      filtered = filtered.filter(p => targets.some(t => p.taak.toLowerCase().includes(t)));
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
+          Geen taken in deze weergave
+        </td></tr>`;
+      } else {
+        filtered.forEach(p => renderProject(p, allSubtaken, allSubsubtaken, tbody));
+      }
 
-      filtered.forEach(p => renderProject(p, allSubtaken, allSubsubtaken, tbody));
-
-      // Metrics
+      // Metrics (altijd op basis van alle open)
       const openAll = allProjecten.filter(p => !p.gedaan);
       document.getElementById('mTotal').textContent = openAll.length;
       document.getElementById('mOpen').textContent = allSubtaken.filter(s => !s.gedaan).length;
       document.getElementById('mWerk').textContent = openAll.filter(p => p.categorie === 'Werk').length;
-      document.getElementById('mPrio').textContent = openAll.filter(p => p.prioriteit === 'hoog').length;
+      document.getElementById('mPrio').textContent = openAll.filter(p => projectIsPrio(p)).length;
+
+      updateSidebar();
 
       attachToggle();
       attachCheckboxes();
@@ -1347,6 +1440,15 @@
         });
       });
     }
+
+    // ═══ Sidebar navigatie ═══
+    document.querySelectorAll('.sidebar-item[data-view]').forEach(item => {
+      if (item.dataset.view === 'beheer') return; // nog niet actief
+      item.addEventListener('click', () => {
+        currentView = item.dataset.view;
+        renderAll();
+      });
+    });
 
     init();
   </script>

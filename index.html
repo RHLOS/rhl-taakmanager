@@ -598,15 +598,16 @@
 
         if (openProjecten.length === 0) {
           tbody.innerHTML += `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
-            Geen open projecten. ${projecten.length} totaal geladen, namen: ${projecten.map(p => p.taak).join(', ')}
+            Geen open projecten gevonden.
           </td></tr>`;
           return;
         }
 
-        // Render eerste project
-        const hspi = openProjecten.find(p => p.taak.toLowerCase().includes('hspi'));
-        const target = hspi || openProjecten[0];
-        renderProject(target, subtaken, subsubtaken, tbody);
+        // Stap 2b: render HSPI, Privé divers, Follow up commercial leads
+        const targets = ['hspi', 'privé divers', 'follow up'];
+        openProjecten
+          .filter(p => targets.some(t => p.taak.toLowerCase().includes(t)))
+          .forEach(p => renderProject(p, subtaken, subsubtaken, tbody));
 
         // Metrics
         document.getElementById('mTotal').textContent = openProjecten.length;
@@ -680,10 +681,11 @@
     });
 
     // ═══ Dropdown filter toggle ═══
-    document.querySelectorAll('.filter-dd-btn').forEach(btn => {
+    document.querySelectorAll('.filter-dd .filter-dd-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const menu = btn.nextElementSibling;
+        if (!menu || !menu.classList.contains('filter-dd-menu')) return;
         document.querySelectorAll('.filter-dd-menu.open').forEach(m => {
           if (m !== menu) m.classList.remove('open');
         });

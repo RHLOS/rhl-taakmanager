@@ -396,6 +396,7 @@
         allProjecten = projecten;
         allSubtaken = subtaken;
         allSubsubtaken = subsubtaken;
+        buildIndexes();
 
         await cleanupPrullenmand();
 

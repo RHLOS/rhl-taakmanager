@@ -552,29 +552,39 @@
     // ═══ Init ═══
     async function init() {
       try {
-        // Laad alleen HSPI project (nr=8 in de originele data, maar hernummerd)
-        // We laden alles en filteren op 'HSPI project'
         const [projecten, subtaken, subsubtaken] = await Promise.all([
-          api('taken', 'gedaan=eq.false&order=nr.asc'),
-          api('subtaken', 'gedaan=eq.false&order=volgorde.asc'),
-          api('sub_subtaken', 'gedaan=eq.false&order=volgorde.asc')
+          api('taken', 'order=nr.asc'),
+          api('subtaken', 'order=volgorde.asc'),
+          api('sub_subtaken', 'order=volgorde.asc')
         ]);
+
+        console.log('Projecten:', projecten.length, projecten);
+        console.log('Subtaken:', subtaken.length);
+        console.log('Sub-subtaken:', subsubtaken.length);
 
         const tbody = document.getElementById('tbody');
         tbody.innerHTML = '';
 
-        // Stap 2a: alleen HSPI project renderen
-        const hspi = projecten.find(p => p.taak.toLowerCase().includes('hspi'));
-        if (hspi) {
-          renderProject(hspi, subtaken, subsubtaken, tbody);
+        // Filter: alleen niet-afgeronde projecten met open subtaken
+        const openProjecten = projecten.filter(p => !p.gedaan);
+
+        if (openProjecten.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
+            Geen open taken gevonden (${projecten.length} projecten geladen, alle gedaan)
+          </td></tr>`;
+          return;
         }
 
-        // Metrics (voorlopig op basis van wat geladen is)
-        document.getElementById('mTotal').textContent = projecten.length;
-        const openCount = subtaken.length;
-        document.getElementById('mOpen').textContent = openCount;
-        document.getElementById('mWerk').textContent = projecten.filter(p => p.categorie === 'Werk').length;
-        document.getElementById('mPrio').textContent = projecten.filter(p => p.prioriteit === 'hoog').length;
+        // Stap 2a: render alleen eerste project (HSPI of eerste beschikbare)
+        const hspi = openProjecten.find(p => p.taak.toLowerCase().includes('hspi'));
+        const target = hspi || openProjecten[0];
+        renderProject(target, subtaken, subsubtaken, tbody);
+
+        // Metrics
+        document.getElementById('mTotal').textContent = openProjecten.length;
+        document.getElementById('mOpen').textContent = subtaken.filter(s => !s.gedaan).length;
+        document.getElementById('mWerk').textContent = openProjecten.filter(p => p.categorie === 'Werk').length;
+        document.getElementById('mPrio').textContent = openProjecten.filter(p => p.prioriteit === 'hoog').length;
 
         attachToggle();
 
@@ -583,7 +593,7 @@
         document.getElementById('tbody').innerHTML = `
           <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--red);">
             Fout bij laden: ${err.message}<br>
-            <span style="font-size:11px;color:var(--text-2)">Open de browser console (Cmd+Option+J) voor details</span>
+            <span style="font-size:11px;color:var(--text-2)">Open de browser console (Cmd+Option+C) voor details</span>
           </td></tr>`;
       }
     }

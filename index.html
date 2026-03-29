@@ -663,27 +663,10 @@
     function isVerwijderd(item) { return !!item.verwijderd_op; }
 
     async function init() {
-      const debugEl = document.getElementById('tbody');
-      debugEl.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--text-2);font-size:12px;">Verbinden met Supabase...</td></tr>`;
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--text-2);font-size:12px;">Laden...</td></tr>`;
 
       try {
-        // Test eerst of Supabase bereikbaar is
-        const testResp = await fetch(`${SB}/rest/v1/taken?select=nr,taak&limit=3`, { headers: hdrs });
-        const testStatus = testResp.status;
-        const testBody = await testResp.text();
-
-        if (!testResp.ok) {
-          debugEl.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--red);font-size:12px;">
-            Supabase fout (HTTP ${testStatus}):<br>${testBody}
-          </td></tr>`;
-          return;
-        }
-
-        const testData = JSON.parse(testBody);
-        debugEl.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--green);font-size:12px;">
-          Verbonden! ${testData.length} projecten gevonden in test. Volledige data laden...
-        </td></tr>`;
-
         const [projecten, subtaken, subsubtaken] = await Promise.all([
           api('taken', 'order=nr.asc'),
           api('subtaken', 'order=volgorde.asc'),
@@ -701,10 +684,9 @@
         renderAll();
 
       } catch (err) {
-        debugEl.innerHTML = `
+        document.getElementById('tbody').innerHTML = `
           <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--red);">
-            Fout: ${err.message}<br>
-            <span style="font-size:11px;color:var(--text-2)">Type: ${err.name} — controleer of Supabase bereikbaar is</span>
+            Kan taken niet laden: ${err.message}
           </td></tr>`;
       }
     }
@@ -1028,7 +1010,9 @@
       el('badgeVandaag', open.filter(p => projectHasDeadline(p, 'vandaag')).length || '');
       el('badgeWeek', open.filter(p => projectHasDeadline(p, 'week')).length || '');
       el('badgePrio', open.filter(p => projectIsPrio(p)).length || '');
-      el('badgeVoltooid', allProjecten.filter(p => p.gedaan && isActief(p)).length || '');
+      const voltooidCount = allSubtaken.filter(s => s.gedaan && isActief(s)).length +
+        allSubsubtaken.filter(s => s.gedaan && isActief(s)).length;
+      el('badgeVoltooid', voltooidCount || '');
       const prullenmandCount = allProjecten.filter(isVerwijderd).length +
         allSubtaken.filter(isVerwijderd).length +
         allSubsubtaken.filter(isVerwijderd).length;
@@ -1138,6 +1122,49 @@
       });
     }
 
+    function renderVoltooid(tbody) {
+      const items = [
+        ...allSubtaken.filter(s => s.gedaan && isActief(s)).map(s => {
+          const p = allProjecten.find(pr => pr.id === s.taak_id);
+          return { tekst: s.tekst, datum: s.gedaan_datum, project: p?.taak || '?', cat: p?.categorie || 'Werk' };
+        }),
+        ...allSubsubtaken.filter(s => s.gedaan && isActief(s)).map(ss => {
+          const sub = allSubtaken.find(s => s.id === ss.subtaak_id);
+          const p = sub ? allProjecten.find(pr => pr.id === sub.taak_id) : null;
+          return { tekst: ss.tekst, datum: ss.gedaan_datum, project: p?.taak || '?', taak: sub?.tekst || '?', cat: p?.categorie || 'Werk' };
+        })
+      ];
+
+      // Sorteer op datum (nieuwste eerst)
+      items.sort((a, b) => (b.datum || '').localeCompare(a.datum || ''));
+
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
+          Geen voltooide taken
+        </td></tr>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const catHtml = item.cat === 'Werk' ? '<span class="cat w">W</span>' : '<span class="cat p">P</span>';
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="row-taak">
+            <td class="cd"><span class="cb done">✓</span></td>
+            <td class="cp"></td>
+            <td>${catHtml}</td>
+            <td><span style="color:var(--text-3);font-size:11px;">${item.project}</span></td>
+            <td>${item.taak ? `<span style="color:var(--text-3);font-size:11px;">${item.taak}</span>` : ''}</td>
+            <td style="text-decoration:line-through;color:var(--text-3);">${item.tekst}</td>
+            <td><span class="dl normal">${item.datum ? formatDate(item.datum) : ''}</span></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        `);
+      });
+    }
+
     function renderPrullenmand(tbody) {
       const verwijderd = [
         ...allProjecten.filter(isVerwijderd).map(p => ({ ...p, _table: 'taken', _label: p.taak, _type: 'project' })),
@@ -1191,6 +1218,8 @@
 
       if (currentView === 'prullenmand') {
         renderPrullenmand(tbody);
+      } else if (currentView === 'voltooid') {
+        renderVoltooid(tbody);
       } else if (currentView === 'inbox') {
         renderInbox(tbody);
       } else if (filtered.length === 0) {

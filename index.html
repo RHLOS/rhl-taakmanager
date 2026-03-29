@@ -237,15 +237,12 @@
 
     /* Checkbox */
     .cb {
-      width: 17px; height: 17px; border-radius: 50%;
-      border: 1.5px solid #d1d1d6; display: flex;
-      align-items: center; justify-content: center;
-      cursor: pointer; transition: all .2s;
-      margin: 0 auto;
+      font-size: 16px; cursor: pointer; user-select: none;
+      transition: color .15s; line-height: 1;
+      color: #d1d1d6;
     }
-    .cb:hover { border-color: var(--accent); }
-    .cb.done { background: var(--green); border-color: var(--green); }
-    .cb.done::after { content: '\2713'; color: #fff; font-size: 10px; font-weight: 700; }
+    .cb:hover { color: var(--accent); }
+    .cb.done { color: var(--green); }
 
     /* Deadline */
     .dl { font-size: 12px; font-weight: 500; white-space: nowrap; }
@@ -523,7 +520,7 @@
         tbody.insertAdjacentHTML('beforeend', `
           <tr class="row-taak collapsed" data-parent="${project.id}" data-taak-id="${sub.id}">
             <td class="cc"></td>
-            <td class="cd">${!hasSubs ? '<div class="cb"></div>' : ''}</td>
+            <td class="cd">${!hasSubs ? '<span class="cb">○</span>' : ''}</td>
             <td class="cp">${starHtml(sub.prio_ster)}</td>
             <td>${catBadge(cat)}</td>
             <td></td>
@@ -541,7 +538,7 @@
           tbody.insertAdjacentHTML('beforeend', `
             <tr class="row-subtaak collapsed" data-parent-taak="${sub.id}">
               <td class="cc"></td>
-              <td class="cd"><div class="cb"></div></td>
+              <td class="cd"><span class="cb">○</span></td>
               <td class="cp">${starHtml(ss.prioriteit)}</td>
               <td></td>
               <td></td>

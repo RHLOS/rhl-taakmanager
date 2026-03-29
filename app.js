@@ -26,16 +26,14 @@
       return r.json();
     }
 
-    async function del(tableAndFilter) {
-      // Kan aangeroepen worden als del('taken', 'uuid') of del('taken&filter=waarde')
-      const args = arguments;
-      let url;
-      if (args.length === 2) {
-        url = `${SB}/rest/v1/${args[0]}?id=eq.${args[1]}`;
-      } else {
-        url = `${SB}/rest/v1/${args[0]}`;
-      }
-      const r = await fetch(url, { method: 'DELETE', headers: hdrs });
+    async function del(table, idOrFilter) {
+      const filter = idOrFilter ? `id=eq.${idOrFilter}` : '';
+      const r = await fetch(`${SB}/rest/v1/${table}?${filter}`, { method: 'DELETE', headers: hdrs });
+      if (!r.ok) throw new Error('Fout bij verwijderen');
+    }
+
+    async function delWhere(table, filter) {
+      const r = await fetch(`${SB}/rest/v1/${table}?${filter}`, { method: 'DELETE', headers: hdrs });
       if (!r.ok) throw new Error('Fout bij verwijderen');
     }
 
@@ -195,7 +193,7 @@
     function renderProject(project, subtaken, subsubtaken, tbody) {
       const cat = project.categorie;
       const isPrio = project.prioriteit === 'hoog';
-      const openSubs = subtaken.filter(s => s.taak_id === project.id && !s.gedaan && isActief(s));
+      const openSubs = getSubsFor(project.id).filter(s => !s.gedaan && isActief(s));
 
       // Project-rij
       tbody.insertAdjacentHTML('beforeend', `
@@ -216,7 +214,7 @@
 
       // Subtaken (taak-rijen)
       openSubs.forEach(sub => {
-        const subs = subsubtaken.filter(ss => ss.subtaak_id === sub.id && !ss.gedaan && isActief(ss));
+        const subs = getSubsubsFor(sub.id).filter(ss => !ss.gedaan && isActief(ss));
         const hasSubs = subs.length > 0;
 
         tbody.insertAdjacentHTML('beforeend', `
@@ -266,15 +264,16 @@
       allProjecten = projecten;
       allSubtaken = subtaken;
       allSubsubtaken = subsubtaken;
+      buildIndexes();
     }
 
     async function cleanupPrullenmand() {
-      const zevenDagenGeleden = new Date(Date.now() - 7 * 86400000).toISOString();
+      const cutoff = new Date(Date.now() - 7 * 86400000).toISOString();
       try {
-        await del('sub_subtaken&verwijderd_op=lt.' + zevenDagenGeleden);
-        await del('subtaken&verwijderd_op=lt.' + zevenDagenGeleden);
-        await del('taken&verwijderd_op=lt.' + zevenDagenGeleden);
-      } catch(e) { /* stil negeren als er niks te verwijderen is */ }
+        await delWhere('sub_subtaken', 'verwijderd_op=lt.' + cutoff);
+        await delWhere('subtaken', 'verwijderd_op=lt.' + cutoff);
+        await delWhere('taken', 'verwijderd_op=lt.' + cutoff);
+      } catch(e) { /* stil negeren */ }
     }
 
     // Helper: is item niet verwijderd?
@@ -367,10 +366,32 @@
 
     // ═══ Kolom-header filter/sort popups ═══
     let allProjecten = [], allSubtaken = [], allSubsubtaken = [];
+    let subsByProject = new Map();  // taak_id → subtaken[]
+    let subsubsBySubtaak = new Map(); // subtaak_id → sub_subtaken[]
     let currentSort = null;
     let activeFilters = {};
     let currentView = 'alle';
     let searchQuery = '';
+
+    function buildIndexes() {
+      subsByProject = new Map();
+      subsubsBySubtaak = new Map();
+      allSubtaken.forEach(s => {
+        if (!subsByProject.has(s.taak_id)) subsByProject.set(s.taak_id, []);
+        subsByProject.get(s.taak_id).push(s);
+      });
+      allSubsubtaken.forEach(ss => {
+        if (!subsubsBySubtaak.has(ss.subtaak_id)) subsubsBySubtaak.set(ss.subtaak_id, []);
+        subsubsBySubtaak.get(ss.subtaak_id).push(ss);
+      });
+    }
+
+    function getSubsFor(projectId) {
+      return subsByProject.get(projectId) || [];
+    }
+    function getSubsubsFor(subtaakId) {
+      return subsubsBySubtaak.get(subtaakId) || [];
+    }
 
     function getFilterOptions(col) {
       switch(col) {
@@ -540,31 +561,28 @@
 
     // Helper: heeft een project taken met deadline vandaag/deze week?
     function projectHasDeadline(project, mode) {
-      if (mode === 'vandaag') {
-        if (project.deadline && daysUntil(project.deadline) === 0) return true;
-      } else if (mode === 'week') {
-        if (project.deadline && daysUntil(project.deadline) >= 0 && daysUntil(project.deadline) <= 7) return true;
-      }
-      const subs = allSubtaken.filter(s => s.taak_id === project.id && !s.gedaan);
-      return subs.some(s => {
-        if (mode === 'vandaag') return s.deadline && daysUntil(s.deadline) === 0;
-        if (mode === 'week') return s.deadline && daysUntil(s.deadline) >= 0 && daysUntil(s.deadline) <= 7;
+      const dl = project.deadline ? daysUntil(project.deadline) : null;
+      if (mode === 'vandaag' && dl === 0) return true;
+      if (mode === 'week' && dl !== null && dl >= 0 && dl <= 7) return true;
+      return getSubsFor(project.id).some(s => {
+        if (s.gedaan) return false;
+        const d = s.deadline ? daysUntil(s.deadline) : null;
+        if (mode === 'vandaag') return d === 0;
+        if (mode === 'week') return d !== null && d >= 0 && d <= 7;
         return false;
       });
     }
 
     function projectIsPrio(project) {
       if (project.prioriteit === 'hoog') return true;
-      const subs = allSubtaken.filter(s => s.taak_id === project.id && !s.gedaan);
-      return subs.some(s => s.prio_ster);
+      return getSubsFor(project.id).some(s => !s.gedaan && s.prio_ster);
     }
 
     function projectHasInbox(project) {
       if (project.inbox) return true;
-      const subs = allSubtaken.filter(s => s.taak_id === project.id && !s.gedaan);
-      if (subs.some(s => s.inbox)) return true;
-      const subIds = subs.map(s => s.id);
-      return allSubsubtaken.some(ss => subIds.includes(ss.subtaak_id) && !ss.gedaan && ss.inbox);
+      const subs = getSubsFor(project.id);
+      if (subs.some(s => !s.gedaan && s.inbox)) return true;
+      return subs.some(s => getSubsubsFor(s.id).some(ss => !ss.gedaan && ss.inbox));
     }
 
     function countInbox() {
@@ -648,7 +666,7 @@
       const container = document.getElementById('sidebarProjecten');
       container.innerHTML = '';
       open.forEach(p => {
-        const count = allSubtaken.filter(s => s.taak_id === p.id && !s.gedaan && isActief(s)).length;
+        const count = getSubsFor(p.id).filter(s => !s.gedaan && isActief(s)).length;
         const isActive = currentView === `project:${p.id}`;
         const div = document.createElement('div');
         div.className = 'sidebar-item' + (isActive ? ' active' : '');

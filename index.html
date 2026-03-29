@@ -579,9 +579,11 @@
         attachToggle();
 
       } catch (err) {
+        console.error('Laden mislukt:', err);
         document.getElementById('tbody').innerHTML = `
-          <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
-            Fout bij laden: ${err.message}
+          <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--red);">
+            Fout bij laden: ${err.message}<br>
+            <span style="font-size:11px;color:var(--text-2)">Open de browser console (Cmd+Option+J) voor details</span>
           </td></tr>`;
       }
     }

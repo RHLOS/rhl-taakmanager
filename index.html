@@ -202,6 +202,15 @@
     .col-geschat  { width: 75px; }
     .col-werkelijk { width: 70px; }
     .col-context { width: 100px; }
+    .col-add { width: 32px; text-align: center; }
+    .add-btn {
+      font-size: 16px; color: var(--text-3); cursor: pointer;
+      user-select: none; transition: color .15s; line-height: 1;
+      border: none; background: none; font-family: inherit;
+      padding: 0; width: 20px; height: 20px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .add-btn:hover { color: var(--accent); background: rgba(0,122,255,.08); }
 
     /* Rij hover */
     tbody tr:hover td { background: rgba(0,122,255,.015); }
@@ -466,6 +475,7 @@
             <th class="col-geschat">Geschat</th>
             <th class="col-werkelijk">Werkelijk</th>
             <th class="col-context">Context</th>
+            <th class="col-add"></th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -484,6 +494,15 @@
     async function api(table, params = '') {
       const r = await fetch(`${SB}/rest/v1/${table}?${params}`, { headers: hdrs });
       if (!r.ok) throw new Error(`Fout bij laden ${table}`);
+      return r.json();
+    }
+
+    async function post(table, data) {
+      const r = await fetch(`${SB}/rest/v1/${table}`, {
+        method: 'POST', headers: { ...hdrs, 'Prefer': 'return=representation' },
+        body: JSON.stringify(data)
+      });
+      if (!r.ok) { const t = await r.text(); throw new Error(`Fout bij aanmaken: ${t}`); }
       return r.json();
     }
 
@@ -577,6 +596,7 @@
           <td>${editableGeschat(project.tijdsinschatting, project.id, 'taken')}</td>
           <td>${editableWerkelijk(project.tijd_uitgevoerd, project.id, 'taken')}</td>
           <td>${editableContext(project.context, project.id, 'taken')}</td>
+          <td class="col-add"><button class="add-btn" data-add="subtaak" data-parent-id="${project.id}" data-cat="${cat}" title="Subtaak toevoegen">+</button></td>
         </tr>
       `);
 
@@ -597,6 +617,7 @@
             <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
             <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
             <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
+            <td class="col-add"><button class="add-btn" data-add="subsubtaak" data-parent-id="${sub.id}" title="Sub-subtaak toevoegen">+</button></td>
           </tr>
         `);
 
@@ -613,7 +634,8 @@
               <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
               <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
               <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
-              <td>${contextHtml(ss.context)}</td>
+              <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
+              <td class="col-add"></td>
             </tr>
           `);
         });
@@ -623,7 +645,7 @@
     // ═══ Init ═══
     async function init() {
       const debugEl = document.getElementById('tbody');
-      debugEl.innerHTML = `<tr><td colspan="10" style="padding:20px;color:var(--text-2);font-size:12px;">Verbinden met Supabase...</td></tr>`;
+      debugEl.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--text-2);font-size:12px;">Verbinden met Supabase...</td></tr>`;
 
       try {
         // Test eerst of Supabase bereikbaar is
@@ -632,14 +654,14 @@
         const testBody = await testResp.text();
 
         if (!testResp.ok) {
-          debugEl.innerHTML = `<tr><td colspan="10" style="padding:20px;color:var(--red);font-size:12px;">
+          debugEl.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--red);font-size:12px;">
             Supabase fout (HTTP ${testStatus}):<br>${testBody}
           </td></tr>`;
           return;
         }
 
         const testData = JSON.parse(testBody);
-        debugEl.innerHTML = `<tr><td colspan="10" style="padding:20px;color:var(--green);font-size:12px;">
+        debugEl.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--green);font-size:12px;">
           Verbonden! ${testData.length} projecten gevonden in test. Volledige data laden...
         </td></tr>`;
 
@@ -654,7 +676,7 @@
 
         // Debug info boven de tabel
         const debugInfo = document.createElement('tr');
-        debugInfo.innerHTML = `<td colspan="10" style="padding:8px 10px;background:#f0f8ff;font-size:11px;color:var(--text-2);">
+        debugInfo.innerHTML = `<td colspan="11" style="padding:8px 10px;background:#f0f8ff;font-size:11px;color:var(--text-2);">
           DEBUG: ${projecten.length} projecten, ${subtaken.length} subtaken, ${subsubtaken.length} sub-subtaken geladen
         </td>`;
         tbody.appendChild(debugInfo);
@@ -662,7 +684,7 @@
         const openProjecten = projecten.filter(p => !p.gedaan);
 
         if (openProjecten.length === 0) {
-          tbody.innerHTML += `<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-2);">
+          tbody.innerHTML += `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
             Geen open projecten gevonden.
           </td></tr>`;
           return;
@@ -687,10 +709,11 @@
         attachDeadlines();
         attachWerkelijk();
         attachSelects();
+        attachAddButtons();
 
       } catch (err) {
         debugEl.innerHTML = `
-          <tr><td colspan="10" style="text-align:center;padding:40px;color:var(--red);">
+          <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--red);">
             Fout: ${err.message}<br>
             <span style="font-size:11px;color:var(--text-2)">Type: ${err.name} — controleer of Supabase bereikbaar is</span>
           </td></tr>`;
@@ -1009,6 +1032,79 @@
           };
           setTimeout(() => document.addEventListener('click', closePopup), 0);
         });
+      });
+    }
+
+    // ═══ + knoppen: taken toevoegen ═══
+    function attachAddButtons() {
+      // + per rij
+      document.querySelectorAll('.add-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const type = btn.dataset.add;
+          const parentId = btn.dataset.parentId;
+
+          const tekst = prompt(type === 'subtaak' ? 'Nieuwe subtaak:' : 'Nieuwe sub-subtaak:');
+          if (!tekst || !tekst.trim()) return;
+
+          try {
+            if (type === 'subtaak') {
+              // Bepaal volgorde
+              const bestaande = document.querySelectorAll(`.row-taak[data-parent="${parentId}"]`);
+              const volgorde = bestaande.length + 1;
+              await post('subtaken', {
+                taak_id: parentId,
+                sub_id: '',
+                tekst: tekst.trim(),
+                volgorde: volgorde
+              });
+            } else if (type === 'subsubtaak') {
+              const bestaande = document.querySelectorAll(`.row-subtaak[data-parent-taak="${parentId}"]`);
+              const volgorde = bestaande.length + 1;
+              await post('sub_subtaken', {
+                subtaak_id: parentId,
+                tekst: tekst.trim(),
+                volgorde: volgorde
+              });
+            }
+            // Herlaad de pagina om de nieuwe taak te tonen
+            location.reload();
+          } catch (err) {
+            alert('Toevoegen mislukt: ' + err.message);
+          }
+        });
+      });
+
+      // + Nieuwe taak knop (project-niveau)
+      document.querySelector('.btn-new').addEventListener('click', async () => {
+        const naam = prompt('Nieuw project:');
+        if (!naam || !naam.trim()) return;
+
+        const cat = confirm('Is dit een werktaak?\n\nOK = Werk\nAnnuleren = Privé') ? 'Werk' : 'Privé';
+
+        try {
+          // Haal volgend nr op
+          const meta = await api('meta', 'sleutel=eq.volgend_nr');
+          const nr = parseInt(meta[0]?.waarde || '99');
+
+          await post('taken', {
+            nr: nr,
+            taak: naam.trim(),
+            categorie: cat,
+            prioriteit: 'normaal'
+          });
+
+          // Update volgend nr
+          await fetch(`${SB}/rest/v1/meta?sleutel=eq.volgend_nr`, {
+            method: 'PATCH',
+            headers: { ...hdrs, 'Prefer': 'return=representation' },
+            body: JSON.stringify({ waarde: String(nr + 1) })
+          });
+
+          location.reload();
+        } catch (err) {
+          alert('Toevoegen mislukt: ' + err.message);
+        }
       });
     }
 

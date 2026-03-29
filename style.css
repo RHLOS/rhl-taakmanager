@@ -321,6 +321,13 @@
       padding: 3px 6px; font-size: inherit; font-family: inherit;
       background: #fff; outline: none;
     }
+    .notitie-cel {
+      width: 60px; text-align: center; cursor: pointer;
+      font-size: 14px; vertical-align: middle;
+    }
+    .notitie-cel:hover { background: rgba(0,122,255,.04); }
+    .notitie-add { font-size: 16px; color: var(--text-3); }
+    .notitie-ta { resize: vertical; min-height: 60px; }
 
     /* Deadline */
     .dl { font-size: 12px; font-weight: 500; white-space: nowrap; }

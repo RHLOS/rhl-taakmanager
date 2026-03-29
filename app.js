@@ -352,6 +352,7 @@
       attachCheckboxes();
       attachStars();
       attachEditable();
+      attachNotities();
       attachDeadlines();
       attachWerkelijk();
       attachSelects();
@@ -462,6 +463,50 @@
     });
 
     // ═══ Tekstvelden: klik om te bewerken ═══
+    function attachNotities() {
+      document.querySelectorAll('.notitie-cel').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (el.querySelector('textarea')) return;
+
+          const id = el.dataset.id;
+          const table = el.dataset.table;
+          const current = el.dataset.notitie || '';
+
+          const ta = document.createElement('textarea');
+          ta.className = 'edit-input notitie-ta';
+          ta.value = current;
+          ta.rows = 3;
+          el.innerHTML = '';
+          el.appendChild(ta);
+          ta.focus();
+
+          const save = async () => {
+            const val = ta.value.trim();
+            el.dataset.notitie = val;
+            el.innerHTML = val ? '📝' : '<span class="notitie-add">+</span>';
+            if (val !== current) {
+              try {
+                await patch(table, id, { notities: val || null });
+              } catch (err) {
+                el.innerHTML = current ? '📝' : '<span class="notitie-add">+</span>';
+                el.dataset.notitie = current;
+                alert('Opslaan mislukt: ' + err.message);
+              }
+            }
+          };
+
+          ta.addEventListener('blur', save);
+          ta.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape') {
+              el.dataset.notitie = current;
+              el.innerHTML = current ? '📝' : '<span class="notitie-add">+</span>';
+            }
+          });
+        });
+      });
+    }
+
     function attachEditable() {
       document.querySelectorAll('.editable').forEach(el => {
         el.addEventListener('click', (e) => {

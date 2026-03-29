@@ -434,3 +434,39 @@
       text-align: center; padding: 28px 0 16px;
       font-size: 11px; color: var(--text-3);
     }
+
+    /* ═══════════════════════════════════
+       DARK MODE
+       ═══════════════════════════════════ */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1c1e;
+        --sidebar-bg: #2c2c2e;
+        --card: #2c2c2e;
+        --text: #f5f5f7;
+        --text-2: #98989d;
+        --text-3: #636366;
+        --sep: #3a3a3c;
+        --accent: #0a84ff;
+        --red: #ff453a;
+        --orange: #ff9f0a;
+        --green: #30d158;
+        --yellow: #ffd60a;
+      }
+      .sidebar { border-right-color: var(--sep); }
+      .search-input { background: #3a3a3c; border-color: var(--sep); color: var(--text); }
+      tbody td { border-top-color: #3a3a3c; }
+      .edit-input { background: #3a3a3c; border-color: var(--accent); color: var(--text); }
+      .modal-body input[type="text"], .modal-body select {
+        background: #3a3a3c; border-color: var(--sep); color: var(--text);
+      }
+      .modal-btn.cancel { background: #3a3a3c; color: var(--text); }
+      .toast { background: #3a3a3c; }
+      .star.off { color: #4a4a4c; }
+      .cb { color: #4a4a4c; }
+      .cat.w { background: rgba(10,132,255,.15); }
+      .cat.p { background: rgba(255,159,10,.15); }
+      .ctx span { background: rgba(255,255,255,.08); }
+      .col-popup { background: #2c2c2e; border-color: var(--sep); }
+      .select-popup { background: #2c2c2e; border-color: var(--sep); }
+    }

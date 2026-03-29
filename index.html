@@ -126,14 +126,7 @@
     .metric.prio .num { color: var(--red); }
     .metric.werk .num { color: var(--accent); }
 
-    /* ── Filter dropdowns ── */
-    .filter-row {
-      display: flex; gap: 8px; margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-    .filter-dd {
-      position: relative; display: inline-block;
-    }
+    /* ── Toolbar knoppen ── */
     .filter-dd-btn {
       display: flex; align-items: center; gap: 6px;
       padding: 6px 12px; border-radius: 8px;
@@ -144,27 +137,54 @@
       transition: all .15s; user-select: none;
     }
     .filter-dd-btn:hover { border-color: #ccc; }
-    .filter-dd-btn.has-value { border-color: var(--accent); color: var(--accent); }
-    .filter-dd-btn .arrow {
-      font-size: 8px; color: var(--text-3);
-      margin-left: 2px;
-    }
-    .filter-dd-menu {
-      display: none;
-      position: absolute; top: calc(100% + 4px); left: 0;
+
+    /* ── Kolom-header filter/sort ── */
+    .th-filter { cursor: pointer; position: relative; }
+    .th-filter:hover { color: var(--accent); }
+    .th-arrow { font-size: 8px; color: var(--text-3); }
+    .th-filter:hover .th-arrow { color: var(--accent); }
+    .th-filter.active { color: var(--accent); }
+    .th-filter.active .th-arrow { color: var(--accent); }
+
+    .col-popup {
+      position: fixed; z-index: 100;
       background: var(--card); border: 1px solid var(--sep);
-      border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
-      padding: 6px 0; min-width: 160px;
-      z-index: 50;
+      border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.15);
+      padding: 12px 0; min-width: 200px; max-height: 400px;
+      overflow-y: auto;
     }
-    .filter-dd-menu.open { display: block; }
-    .filter-dd-option {
+    .col-popup-title {
+      font-size: 10px; font-weight: 700; color: var(--text-2);
+      text-transform: uppercase; letter-spacing: .5px;
+      padding: 4px 14px 6px; margin-top: 4px;
+    }
+    .col-popup-title:first-child { margin-top: 0; }
+    .col-popup-sep { height: 1px; background: var(--sep); margin: 6px 0; }
+    .col-popup-btn {
       display: flex; align-items: center; gap: 8px;
-      padding: 6px 14px; font-size: 12px;
-      cursor: pointer; transition: background .1s;
+      padding: 7px 14px; font-size: 12px; width: 100%;
+      cursor: pointer; border: none; background: none;
+      font-family: inherit; color: var(--text); text-align: left;
     }
-    .filter-dd-option:hover { background: rgba(0,122,255,.06); }
-    .filter-dd-option input { accent-color: var(--accent); }
+    .col-popup-btn:hover { background: rgba(0,122,255,.06); }
+    .col-popup-btn.active { color: var(--accent); font-weight: 600; }
+    .col-popup label {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 14px; font-size: 12px; cursor: pointer;
+    }
+    .col-popup label:hover { background: rgba(0,122,255,.06); }
+    .col-popup input[type="checkbox"] { accent-color: var(--accent); }
+    .col-popup-actions {
+      display: flex; gap: 6px; padding: 8px 14px 4px; justify-content: flex-end;
+    }
+    .col-popup-actions button {
+      padding: 4px 14px; border-radius: 6px; font-size: 11px;
+      cursor: pointer; font-family: inherit; border: 1px solid var(--sep);
+      background: var(--card); color: var(--text);
+    }
+    .col-popup-actions button.primary {
+      background: var(--accent); color: #fff; border-color: var(--accent);
+    }
 
     /* ── Tabel ── */
     .table-wrap {
@@ -416,58 +436,10 @@
       </div>
     </div>
 
-    <!-- Toolbar: filters + acties -->
-    <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center;">
+    <!-- Toolbar -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
       <button class="filter-dd-btn" id="btnCollapseAll">▶ Alles inklappen</button>
       <button class="filter-dd-btn" id="btnExpandAll">▼ Alles uitklappen</button>
-    </div>
-
-    <!-- Filter dropdowns -->
-    <div class="filter-row">
-      <div class="filter-dd">
-        <button class="filter-dd-btn">Categorie <span class="arrow">▾</span></button>
-        <div class="filter-dd-menu">
-          <label class="filter-dd-option"><input type="checkbox" value="Werk"> Werk</label>
-          <label class="filter-dd-option"><input type="checkbox" value="Privé"> Privé</label>
-        </div>
-      </div>
-      <div class="filter-dd">
-        <button class="filter-dd-btn">Prioriteit <span class="arrow">▾</span></button>
-        <div class="filter-dd-menu">
-          <label class="filter-dd-option"><input type="checkbox" value="hoog"> Hoog</label>
-          <label class="filter-dd-option"><input type="checkbox" value="normaal"> Normaal</label>
-          <label class="filter-dd-option"><input type="checkbox" value="laag"> Laag</label>
-        </div>
-      </div>
-      <div class="filter-dd">
-        <button class="filter-dd-btn">Deadline <span class="arrow">▾</span></button>
-        <div class="filter-dd-menu">
-          <label class="filter-dd-option"><input type="checkbox" value="vandaag"> Vandaag</label>
-          <label class="filter-dd-option"><input type="checkbox" value="week"> Deze week</label>
-          <label class="filter-dd-option"><input type="checkbox" value="geen"> Geen deadline</label>
-        </div>
-      </div>
-      <div class="filter-dd">
-        <button class="filter-dd-btn">Context <span class="arrow">▾</span></button>
-        <div class="filter-dd-menu">
-          <label class="filter-dd-option"><input type="checkbox" value="Kantoor"> @Kantoor</label>
-          <label class="filter-dd-option"><input type="checkbox" value="Thuis"> @Thuis</label>
-          <label class="filter-dd-option"><input type="checkbox" value="Onderweg"> @Onderweg</label>
-          <label class="filter-dd-option"><input type="checkbox" value="Computer"> @Computer</label>
-          <label class="filter-dd-option"><input type="checkbox" value="Telefoon"> @Telefoon</label>
-          <label class="filter-dd-option"><input type="checkbox" value="Online"> @Online</label>
-        </div>
-      </div>
-      <div class="filter-dd">
-        <button class="filter-dd-btn">Geschat <span class="arrow">▾</span></button>
-        <div class="filter-dd-menu">
-          <label class="filter-dd-option"><input type="checkbox" value="15"> &lt;15 min</label>
-          <label class="filter-dd-option"><input type="checkbox" value="30"> &lt;30 min</label>
-          <label class="filter-dd-option"><input type="checkbox" value="60"> &lt;60 min</label>
-          <label class="filter-dd-option"><input type="checkbox" value="90"> &lt;90 min</label>
-          <label class="filter-dd-option"><input type="checkbox" value="120"> &lt;120 min</label>
-        </div>
-      </div>
     </div>
 
     <!-- Tabel -->
@@ -476,15 +448,15 @@
         <thead>
           <tr>
             <th class="col-done">✓</th>
-            <th class="col-prio">P</th>
-            <th class="col-cat">W/P</th>
-            <th class="col-project">Project</th>
-            <th class="col-taak">Taak</th>
+            <th class="col-prio th-filter" data-col="prio">P <span class="th-arrow">▾</span></th>
+            <th class="col-cat th-filter" data-col="cat">W/P <span class="th-arrow">▾</span></th>
+            <th class="col-project th-filter" data-col="project">Project <span class="th-arrow">▾</span></th>
+            <th class="col-taak th-filter" data-col="taak">Taak <span class="th-arrow">▾</span></th>
             <th class="col-subtaak">Subtaak</th>
-            <th class="col-deadline">Deadline</th>
-            <th class="col-geschat">Geschat</th>
+            <th class="col-deadline th-filter" data-col="deadline">Deadline <span class="th-arrow">▾</span></th>
+            <th class="col-geschat th-filter" data-col="geschat">Geschat <span class="th-arrow">▾</span></th>
             <th class="col-werkelijk">Werkelijk</th>
-            <th class="col-context">Context</th>
+            <th class="col-context th-filter" data-col="context">Context <span class="th-arrow">▾</span></th>
             <th class="col-add"></th>
           </tr>
         </thead>
@@ -792,24 +764,79 @@
       document.querySelectorAll('.row-taak, .row-subtaak').forEach(r => r.classList.remove('collapsed'));
     });
 
-    // ═══ Dropdown filter toggle ═══
-    document.querySelectorAll('.filter-dd .filter-dd-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+    // ═══ Kolom-header filter/sort popups ═══
+    const COL_CONFIG = {
+      prio:     { label: 'Prioriteit', sort: true, filter: ['★ Prioriteit', '☆ Normaal'] },
+      cat:      { label: 'Categorie', sort: true, filter: ['Werk', 'Privé'] },
+      project:  { label: 'Project', sort: true, filter: null },
+      taak:     { label: 'Taak', sort: true, filter: null },
+      deadline: { label: 'Deadline', sort: true, filter: ['Vandaag', 'Deze week', 'Geen deadline'] },
+      geschat:  { label: 'Geschat', sort: true, filter: GESCHAT_OPTIES.filter(o => o) },
+      context:  { label: 'Context', sort: false, filter: CONTEXT_OPTIES }
+    };
+    let currentSort = null; // { col, dir }
+
+    function closePopups() {
+      document.querySelectorAll('.col-popup').forEach(p => p.remove());
+    }
+
+    document.querySelectorAll('.th-filter').forEach(th => {
+      th.addEventListener('click', (e) => {
         e.stopPropagation();
-        const menu = btn.nextElementSibling;
-        if (!menu || !menu.classList.contains('filter-dd-menu')) return;
-        document.querySelectorAll('.filter-dd-menu.open').forEach(m => {
-          if (m !== menu) m.classList.remove('open');
-        });
-        menu.classList.toggle('open');
+        closePopups();
+
+        const col = th.dataset.col;
+        const cfg = COL_CONFIG[col];
+        if (!cfg) return;
+
+        const popup = document.createElement('div');
+        popup.className = 'col-popup';
+
+        // Sorteren
+        if (cfg.sort) {
+          popup.innerHTML += `<div class="col-popup-title">Sorteren</div>`;
+          const sortAsc = document.createElement('button');
+          sortAsc.className = 'col-popup-btn' + (currentSort?.col === col && currentSort?.dir === 'asc' ? ' active' : '');
+          sortAsc.textContent = '↑ Oplopend';
+          sortAsc.addEventListener('click', () => { currentSort = { col, dir: 'asc' }; closePopups(); init(); });
+          popup.appendChild(sortAsc);
+
+          const sortDesc = document.createElement('button');
+          sortDesc.className = 'col-popup-btn' + (currentSort?.col === col && currentSort?.dir === 'desc' ? ' active' : '');
+          sortDesc.textContent = '↓ Aflopend';
+          sortDesc.addEventListener('click', () => { currentSort = { col, dir: 'desc' }; closePopups(); init(); });
+          popup.appendChild(sortDesc);
+        }
+
+        // Filter
+        if (cfg.filter) {
+          const sep = document.createElement('div');
+          sep.className = 'col-popup-sep';
+          popup.appendChild(sep);
+          popup.innerHTML += `<div class="col-popup-title">Filter</div>`;
+
+          cfg.filter.forEach(opt => {
+            const label = document.createElement('label');
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.value = opt;
+            cb.checked = true;
+            label.appendChild(cb);
+            label.appendChild(document.createTextNode(opt));
+            popup.appendChild(label);
+          });
+        }
+
+        // Positioneer
+        const rect = th.getBoundingClientRect();
+        popup.style.left = rect.left + 'px';
+        popup.style.top = (rect.bottom + 4) + 'px';
+        document.body.appendChild(popup);
+        popup.addEventListener('click', (ev) => ev.stopPropagation());
       });
     });
-    document.addEventListener('click', () => {
-      document.querySelectorAll('.filter-dd-menu.open').forEach(m => m.classList.remove('open'));
-    });
-    document.querySelectorAll('.filter-dd-menu').forEach(menu => {
-      menu.addEventListener('click', (e) => e.stopPropagation());
-    });
+
+    document.addEventListener('click', closePopups);
 
     // ═══ Tekstvelden: klik om te bewerken ═══
     function attachEditable() {

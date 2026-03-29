@@ -473,6 +473,14 @@
     const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoa3R0ZnpxZGp5bnptdGpidWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDg5NjgsImV4cCI6MjA5MDI4NDk2OH0.0p7IK97uPxBcazlUwredncV8EIFuvgjAhe46N9P118I';
     const hdrs = { 'apikey': KEY, 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' };
 
+    // ═══ Veiligheid: voorkom XSS ═══
+    function esc(str) {
+      if (!str) return '';
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
     async function api(table, params = '') {
       const r = await fetch(`${SB}/rest/v1/${table}?${params}`, { headers: hdrs });
       if (!r.ok) throw new Error(`Fout bij laden ${table}`);
@@ -584,7 +592,7 @@
           <td class="cd"></td>
           <td class="cp">${starHtmlData(isPrio, project.id, 'taken', 'prioriteit')}</td>
           <td>${catBadge(cat)}</td>
-          <td><span class="chev">▶</span> <span class="editable" data-id="${project.id}" data-table="taken" data-field="taak">${project.taak}</span></td>
+          <td><span class="chev">▶</span> <span class="editable" data-id="${project.id}" data-table="taken" data-field="taak">${esc(project.taak)}</span></td>
           <td></td>
           <td></td>
           <td>${editableDeadline(project.deadline, project.id, 'taken')}</td>
@@ -606,7 +614,7 @@
             <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
             <td>${catBadge(cat)}</td>
             <td></td>
-            <td>${hasSubs ? '<span class="chev">▶</span> ' : ''}<span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${sub.tekst}</span></td>
+            <td>${hasSubs ? '<span class="chev">▶</span> ' : ''}<span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
             <td></td>
             <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
             <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
@@ -625,7 +633,7 @@
               <td></td>
               <td></td>
               <td></td>
-              <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${ss.tekst}</span></td>
+              <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${esc(ss.tekst)}</span></td>
               <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
               <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
               <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
@@ -682,6 +690,7 @@
         await cleanupPrullenmand();
 
         renderAll();
+        bindBtnNew();
 
       } catch (err) {
         document.getElementById('tbody').innerHTML = `
@@ -1087,8 +1096,8 @@
             <td class="cd"><span class="cb" data-id="${sub.id}" data-table="subtaken">○</span></td>
             <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
             <td>${catBadge(cat)}</td>
-            <td><span style="color:var(--text-3);font-size:11px;">${projectNaam}</span></td>
-            <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${sub.tekst}</span></td>
+            <td><span style="color:var(--text-3);font-size:11px;">${esc(projectNaam)}</span></td>
+            <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
             <td></td>
             <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
             <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
@@ -1110,7 +1119,7 @@
             <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
             <td></td>
             <td><span style="color:var(--text-3);font-size:11px;">${project ? project.taak : '?'}</span></td>
-            <td><span style="color:var(--text-3);font-size:11px;">${taakNaam}</span></td>
+            <td><span style="color:var(--text-3);font-size:11px;">${esc(taakNaam)}</span></td>
             <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${ss.tekst}</span></td>
             <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
             <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
@@ -1154,7 +1163,7 @@
             <td>${catHtml}</td>
             <td><span style="color:var(--text-3);font-size:11px;">${item.project}</span></td>
             <td>${item.taak ? `<span style="color:var(--text-3);font-size:11px;">${item.taak}</span>` : ''}</td>
-            <td style="text-decoration:line-through;color:var(--text-3);">${item.tekst}</td>
+            <td style="text-decoration:line-through;color:var(--text-3);">${esc(item.tekst)}</td>
             <td><span class="dl normal">${item.datum ? formatDate(item.datum) : ''}</span></td>
             <td></td>
             <td></td>
@@ -1194,7 +1203,7 @@
             <td class="cp"></td>
             <td></td>
             <td><span style="color:var(--text-3);font-size:11px;">${item._project || item._type}</span></td>
-            <td>${item._label}</td>
+            <td>${esc(item._label)}</td>
             <td></td>
             <td><span class="dl normal">${verwijderdDatum}</span></td>
             <td></td>
@@ -1525,15 +1534,20 @@
                 volgorde: volgorde
               });
             }
-            // Herlaad de pagina om de nieuwe taak te tonen
-            location.reload();
+            await reloadData();
+            renderAll();
           } catch (err) {
             alert('Toevoegen mislukt: ' + err.message);
           }
         });
       });
+    }
 
-      // + Nieuwe taak knop (project-niveau)
+    // ═══ Nieuwe taak knop (eenmalig, buiten renderAll) ═══
+    let btnNewBound = false;
+    function bindBtnNew() {
+      if (btnNewBound) return;
+      btnNewBound = true;
       document.querySelector('.btn-new').addEventListener('click', async () => {
         const naam = prompt('Nieuw project:');
         if (!naam || !naam.trim()) return;
@@ -1541,7 +1555,6 @@
         const cat = confirm('Is dit een werktaak?\n\nOK = Werk\nAnnuleren = Privé') ? 'Werk' : 'Privé';
 
         try {
-          // Haal volgend nr op
           const meta = await api('meta', 'sleutel=eq.volgend_nr');
           const nr = parseInt(meta[0]?.waarde || '99');
 
@@ -1552,14 +1565,14 @@
             prioriteit: 'normaal'
           });
 
-          // Update volgend nr
           await fetch(`${SB}/rest/v1/meta?sleutel=eq.volgend_nr`, {
             method: 'PATCH',
             headers: { ...hdrs, 'Prefer': 'return=representation' },
             body: JSON.stringify({ waarde: String(nr + 1) })
           });
 
-          location.reload();
+          await reloadData();
+          renderAll();
         } catch (err) {
           alert('Toevoegen mislukt: ' + err.message);
         }
@@ -1664,10 +1677,10 @@
               gedaan: true,
               gedaan_datum: new Date().toISOString().split('T')[0]
             });
-            // Rij verbergen na korte delay
-            setTimeout(() => {
-              const row = cb.closest('tr');
-              if (row) row.style.display = 'none';
+            // Lokale data bijwerken en herrenderen na korte delay
+            setTimeout(async () => {
+              await reloadData();
+              renderAll();
             }, 400);
           } catch (err) {
             cb.textContent = '○';

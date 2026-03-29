@@ -398,6 +398,19 @@
     }
     .modal-btn.danger:hover { background: #e0342b; }
 
+    /* ── Saving indicator ── */
+    .saving-indicator {
+      font-size: 11px; color: var(--text-3);
+      display: none; align-items: center; gap: 6px;
+    }
+    .saving-indicator.active { display: flex; }
+    .saving-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); animation: pulse .8s ease infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
+    .saved-check { color: var(--green); font-weight: 600; }
+
     /* ── Toast ── */
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);

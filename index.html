@@ -82,7 +82,12 @@
     <!-- Top bar -->
     <div class="topbar">
       <h1 id="viewTitle">Alle taken</h1>
-      <button class="btn-new">+ Nieuwe taak</button>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="saving-indicator" id="savingIndicator">
+          <div class="saving-dot"></div> <span>Opslaan...</span>
+        </div>
+        <button class="btn-new">+ Nieuwe taak</button>
+      </div>
     </div>
 
     <!-- Metrics -->

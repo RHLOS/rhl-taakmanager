@@ -1,0 +1,160 @@
+/* ═══ Analyse Dashboard ═══ */
+
+.analyse-panel {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  padding: 24px 32px;
+  overflow-y: auto;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.analyse-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.analyse-topbar h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Filters */
+.analyse-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.analyse-filter-btn {
+  font-family: inherit;
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.analyse-filter-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* KPI kaarten */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.kpi-label {
+  font-size: 11px;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 6px;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.kpi-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 4px;
+}
+
+/* Grafiek grid */
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.chart-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.chart-canvas-wrap {
+  position: relative;
+  height: 180px;
+}
+
+/* Project voortgang */
+.project-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.project-bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.project-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.project-bar-pct {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.project-bar-track {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.project-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width .4s ease;
+}
+
+/* Geen data melding */
+.chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 140px;
+  font-size: 12px;
+  color: var(--text-3);
+}

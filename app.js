@@ -48,6 +48,87 @@
       return r.json();
     }
 
+    // ═══ Modal helpers ═══
+    function showModal(title, bodyHtml, buttons) {
+      return new Promise(resolve => {
+        const overlay = document.getElementById('modal');
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalBody').innerHTML = bodyHtml;
+        const actions = document.getElementById('modalActions');
+        actions.innerHTML = '';
+
+        buttons.forEach(btn => {
+          const b = document.createElement('button');
+          b.className = `modal-btn ${btn.class || 'cancel'}`;
+          b.textContent = btn.label;
+          b.addEventListener('click', () => {
+            overlay.style.display = 'none';
+            resolve(btn.value);
+          });
+          actions.appendChild(b);
+        });
+
+        overlay.style.display = 'flex';
+
+        // Focus eerste input als die er is
+        const firstInput = document.querySelector('#modalBody input');
+        if (firstInput) setTimeout(() => firstInput.focus(), 50);
+
+        // Enter = primary button
+        const handler = (e) => {
+          if (e.key === 'Enter') {
+            const primary = buttons.find(b => b.class === 'primary');
+            if (primary) { overlay.style.display = 'none'; resolve(primary.value); }
+            document.removeEventListener('keydown', handler);
+          }
+          if (e.key === 'Escape') {
+            overlay.style.display = 'none';
+            resolve(null);
+            document.removeEventListener('keydown', handler);
+          }
+        };
+        document.addEventListener('keydown', handler);
+      });
+    }
+
+    async function modalInput(title, label, placeholder) {
+      const bodyHtml = `<label>${esc(label)}</label><input type="text" id="modalInputVal" placeholder="${esc(placeholder || '')}">`;
+      const result = await showModal(title, bodyHtml, [
+        { label: 'Annuleren', class: 'cancel', value: null },
+        { label: 'Toevoegen', class: 'primary', value: 'ok' }
+      ]);
+      if (result !== 'ok') return null;
+      return document.getElementById('modalInputVal')?.value?.trim() || null;
+    }
+
+    async function modalNewProject(title) {
+      const bodyHtml = `
+        <label>Naam</label><input type="text" id="modalInputVal" placeholder="Projectnaam">
+        <label>Categorie</label>
+        <select id="modalSelectCat">
+          <option value="Werk">Werk</option>
+          <option value="Privé">Privé</option>
+        </select>`;
+      const result = await showModal(title, bodyHtml, [
+        { label: 'Annuleren', class: 'cancel', value: null },
+        { label: 'Aanmaken', class: 'primary', value: 'ok' }
+      ]);
+      if (result !== 'ok') return null;
+      const naam = document.getElementById('modalInputVal')?.value?.trim();
+      const cat = document.getElementById('modalSelectCat')?.value;
+      if (!naam) return null;
+      return { naam, cat };
+    }
+
+    async function modalConfirm(title, message, confirmLabel, isDanger) {
+      const bodyHtml = `<p style="font-size:14px;color:var(--text);line-height:1.5;">${esc(message)}</p>`;
+      const result = await showModal(title, bodyHtml, [
+        { label: 'Annuleren', class: 'cancel', value: false },
+        { label: confirmLabel || 'Bevestigen', class: isDanger ? 'danger' : 'primary', value: true }
+      ]);
+      return result === true;
+    }
+
     // ═══ Datum helpers ═══
     function formatDate(d) {
       if (!d) return '';
@@ -1052,8 +1133,9 @@
           const type = btn.dataset.add;
           const parentId = btn.dataset.parentId;
 
-          const tekst = prompt(type === 'subtaak' ? 'Nieuwe taak:' : 'Nieuwe subtaak:');
-          if (!tekst || !tekst.trim()) return;
+          const label = type === 'subtaak' ? 'Nieuwe taak' : 'Nieuwe subtaak';
+          const tekst = await modalInput(label, 'Naam', 'Wat moet er gedaan worden?');
+          if (!tekst) return;
 
           try {
             if (type === 'subtaak') {
@@ -1090,10 +1172,8 @@
       if (btnNewBound) return;
       btnNewBound = true;
       document.querySelector('.btn-new').addEventListener('click', async () => {
-        const naam = prompt('Nieuw project:');
-        if (!naam || !naam.trim()) return;
-
-        const cat = confirm('Is dit een werktaak?\n\nOK = Werk\nAnnuleren = Privé') ? 'Werk' : 'Privé';
+        const result = await modalNewProject('Nieuw project');
+        if (!result) return;
 
         try {
           const meta = await api('meta', 'sleutel=eq.volgend_nr');
@@ -1101,8 +1181,8 @@
 
           await post('taken', {
             nr: nr,
-            taak: naam.trim(),
-            categorie: cat,
+            taak: result.naam,
+            categorie: result.cat,
             prioriteit: 'normaal'
           });
 
@@ -1128,7 +1208,7 @@
           const id = btn.dataset.delId;
           const table = btn.dataset.delTable;
 
-          const bevestig = confirm('Naar prullenmand verplaatsen?');
+          const bevestig = await modalConfirm('Verwijderen', 'Dit item naar de prullenmand verplaatsen?', 'Verwijderen', true);
           if (!bevestig) return;
 
           try {
@@ -1184,7 +1264,7 @@
       document.querySelectorAll('.permanent-del-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           e.stopPropagation();
-          if (!confirm('Definitief verwijderen? Dit kan niet ongedaan worden.')) return;
+          if (!await modalConfirm('Definitief verwijderen', 'Dit kan niet ongedaan worden. Weet je het zeker?', 'Definitief verwijderen', true)) return;
           const id = btn.dataset.permId;
           const table = btn.dataset.permTable;
           try {

@@ -557,31 +557,53 @@
 
     // ═══ Init ═══
     async function init() {
+      const debugEl = document.getElementById('tbody');
+      debugEl.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--text-2);font-size:12px;">Verbinden met Supabase...</td></tr>`;
+
       try {
+        // Test eerst of Supabase bereikbaar is
+        const testResp = await fetch(`${SB}/rest/v1/taken?select=nr,taak&limit=3`, { headers: hdrs });
+        const testStatus = testResp.status;
+        const testBody = await testResp.text();
+
+        if (!testResp.ok) {
+          debugEl.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--red);font-size:12px;">
+            Supabase fout (HTTP ${testStatus}):<br>${testBody}
+          </td></tr>`;
+          return;
+        }
+
+        const testData = JSON.parse(testBody);
+        debugEl.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--green);font-size:12px;">
+          Verbonden! ${testData.length} projecten gevonden in test. Volledige data laden...
+        </td></tr>`;
+
         const [projecten, subtaken, subsubtaken] = await Promise.all([
           api('taken', 'order=nr.asc'),
           api('subtaken', 'order=volgorde.asc'),
           api('sub_subtaken', 'order=volgorde.asc')
         ]);
 
-        console.log('Projecten:', projecten.length, projecten);
-        console.log('Subtaken:', subtaken.length);
-        console.log('Sub-subtaken:', subsubtaken.length);
-
         const tbody = document.getElementById('tbody');
         tbody.innerHTML = '';
 
-        // Filter: alleen niet-afgeronde projecten met open subtaken
+        // Debug info boven de tabel
+        const debugInfo = document.createElement('tr');
+        debugInfo.innerHTML = `<td colspan="11" style="padding:8px 10px;background:#f0f8ff;font-size:11px;color:var(--text-2);">
+          DEBUG: ${projecten.length} projecten, ${subtaken.length} subtaken, ${subsubtaken.length} sub-subtaken geladen
+        </td>`;
+        tbody.appendChild(debugInfo);
+
         const openProjecten = projecten.filter(p => !p.gedaan);
 
         if (openProjecten.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
-            Geen open taken gevonden (${projecten.length} projecten geladen, alle gedaan)
+          tbody.innerHTML += `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
+            Geen open projecten. ${projecten.length} totaal geladen, namen: ${projecten.map(p => p.taak).join(', ')}
           </td></tr>`;
           return;
         }
 
-        // Stap 2a: render alleen eerste project (HSPI of eerste beschikbare)
+        // Render eerste project
         const hspi = openProjecten.find(p => p.taak.toLowerCase().includes('hspi'));
         const target = hspi || openProjecten[0];
         renderProject(target, subtaken, subsubtaken, tbody);
@@ -595,11 +617,10 @@
         attachToggle();
 
       } catch (err) {
-        console.error('Laden mislukt:', err);
-        document.getElementById('tbody').innerHTML = `
+        debugEl.innerHTML = `
           <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--red);">
-            Fout bij laden: ${err.message}<br>
-            <span style="font-size:11px;color:var(--text-2)">Open de browser console (Cmd+Option+C) voor details</span>
+            Fout: ${err.message}<br>
+            <span style="font-size:11px;color:var(--text-2)">Type: ${err.name} — controleer of Supabase bereikbaar is</span>
           </td></tr>`;
       }
     }

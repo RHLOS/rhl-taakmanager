@@ -348,6 +348,56 @@
     /* Collapsed rows */
     tr.collapsed { display: none; }
 
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,.4); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-box {
+      background: var(--card); border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+      padding: 24px; min-width: 340px; max-width: 440px; width: 90%;
+    }
+    .modal-title {
+      font-size: 17px; font-weight: 700; margin-bottom: 16px;
+    }
+    .modal-body { margin-bottom: 20px; }
+    .modal-body label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--text-2); margin-bottom: 6px; text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+    .modal-body input[type="text"], .modal-body select {
+      width: 100%; padding: 9px 12px; border: 1px solid var(--sep);
+      border-radius: 8px; font-size: 14px; font-family: inherit;
+      background: var(--bg); color: var(--text); outline: none;
+      transition: border-color .15s; margin-bottom: 12px;
+    }
+    .modal-body input[type="text"]:focus, .modal-body select:focus {
+      border-color: var(--accent);
+    }
+    .modal-actions {
+      display: flex; gap: 8px; justify-content: flex-end;
+    }
+    .modal-btn {
+      padding: 8px 20px; border-radius: 8px; border: none;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: background .15s;
+    }
+    .modal-btn.cancel {
+      background: var(--bg); color: var(--text);
+    }
+    .modal-btn.cancel:hover { background: var(--sep); }
+    .modal-btn.primary {
+      background: var(--accent); color: #fff;
+    }
+    .modal-btn.primary:hover { background: #006ae6; }
+    .modal-btn.danger {
+      background: var(--red); color: #fff;
+    }
+    .modal-btn.danger:hover { background: #e0342b; }
+
     /* ── Footer ── */
     .footer {
       text-align: center; padding: 28px 0 16px;

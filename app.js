@@ -1,420 +1,7 @@
-    // ═══ Supabase config ═══
-    const SB = 'https://fhkttfzqdjynzmtjbujv.supabase.co';
-    const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoa3R0ZnpxZGp5bnptdGpidWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDg5NjgsImV4cCI6MjA5MDI4NDk2OH0.0p7IK97uPxBcazlUwredncV8EIFuvgjAhe46N9P118I';
-    const hdrs = { 'apikey': KEY, 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' };
-
-    // ═══ Veiligheid: voorkom XSS ═══
-    function esc(str) {
-      if (!str) return '';
-      const d = document.createElement('div');
-      d.textContent = str;
-      return d.innerHTML;
-    }
-
-    async function api(table, params = '') {
-      const r = await fetch(`${SB}/rest/v1/${table}?${params}`, { headers: hdrs });
-      if (!r.ok) throw new Error(`Fout bij laden ${table}`);
-      return r.json();
-    }
-
-    async function post(table, data) {
-      showSaving();
-      const r = await fetch(`${SB}/rest/v1/${table}`, {
-        method: 'POST', headers: { ...hdrs, 'Prefer': 'return=representation' },
-        body: JSON.stringify(data)
-      });
-      if (!r.ok) { const t = await r.text(); throw new Error(`Fout bij aanmaken: ${t}`); }
-      showSaved();
-      return r.json();
-    }
-
-    async function del(table, idOrFilter) {
-      const filter = idOrFilter ? `id=eq.${idOrFilter}` : '';
-      const r = await fetch(`${SB}/rest/v1/${table}?${filter}`, { method: 'DELETE', headers: hdrs });
-      if (!r.ok) throw new Error('Fout bij verwijderen');
-    }
-
-    async function delWhere(table, filter) {
-      const r = await fetch(`${SB}/rest/v1/${table}?${filter}`, { method: 'DELETE', headers: hdrs });
-      if (!r.ok) throw new Error('Fout bij verwijderen');
-    }
-
-    async function patch(table, id, data) {
-      showSaving();
-      const r = await fetch(`${SB}/rest/v1/${table}?id=eq.${id}`, {
-        method: 'PATCH', headers: { ...hdrs, 'Prefer': 'return=representation' },
-        body: JSON.stringify(data)
-      });
-      if (!r.ok) throw new Error(`Fout bij opslaan`);
-      showSaved();
-      return r.json();
-    }
-
-    // ═══ Modal helpers ═══
-    function showModal(title, bodyHtml, buttons) {
-      return new Promise(resolve => {
-        const overlay = document.getElementById('modal');
-        document.getElementById('modalTitle').textContent = title;
-        document.getElementById('modalBody').innerHTML = bodyHtml;
-        const actions = document.getElementById('modalActions');
-        actions.innerHTML = '';
-
-        buttons.forEach(btn => {
-          const b = document.createElement('button');
-          b.className = `modal-btn ${btn.class || 'cancel'}`;
-          b.textContent = btn.label;
-          b.addEventListener('click', () => {
-            overlay.style.display = 'none';
-            resolve(btn.value);
-          });
-          actions.appendChild(b);
-        });
-
-        overlay.style.display = 'flex';
-
-        // Focus eerste input als die er is
-        const firstInput = document.querySelector('#modalBody input');
-        if (firstInput) setTimeout(() => firstInput.focus(), 50);
-
-        // Enter = primary button
-        const handler = (e) => {
-          if (e.key === 'Enter') {
-            const primary = buttons.find(b => b.class === 'primary');
-            if (primary) { overlay.style.display = 'none'; resolve(primary.value); }
-            document.removeEventListener('keydown', handler);
-          }
-          if (e.key === 'Escape') {
-            overlay.style.display = 'none';
-            resolve(null);
-            document.removeEventListener('keydown', handler);
-          }
-        };
-        document.addEventListener('keydown', handler);
-      });
-    }
-
-    async function modalInput(title, label, placeholder) {
-      const bodyHtml = `<label>${esc(label)}</label><input type="text" id="modalInputVal" placeholder="${esc(placeholder || '')}">`;
-      const result = await showModal(title, bodyHtml, [
-        { label: 'Annuleren', class: 'cancel', value: null },
-        { label: 'Toevoegen', class: 'primary', value: 'ok' }
-      ]);
-      if (result !== 'ok') return null;
-      return document.getElementById('modalInputVal')?.value?.trim() || null;
-    }
-
-    async function modalNewProject(title) {
-      const bodyHtml = `
-        <label>Naam</label><input type="text" id="modalInputVal" placeholder="Projectnaam">
-        <label>Categorie</label>
-        <select id="modalSelectCat">
-          <option value="Werk">Werk</option>
-          <option value="Privé">Privé</option>
-        </select>`;
-      const result = await showModal(title, bodyHtml, [
-        { label: 'Annuleren', class: 'cancel', value: null },
-        { label: 'Aanmaken', class: 'primary', value: 'ok' }
-      ]);
-      if (result !== 'ok') return null;
-      const naam = document.getElementById('modalInputVal')?.value?.trim();
-      const cat = document.getElementById('modalSelectCat')?.value;
-      if (!naam) return null;
-      return { naam, cat };
-    }
-
-    async function modalConfirm(title, message, confirmLabel, isDanger) {
-      const bodyHtml = `<p style="font-size:14px;color:var(--text);line-height:1.5;">${esc(message)}</p>`;
-      const result = await showModal(title, bodyHtml, [
-        { label: 'Annuleren', class: 'cancel', value: false },
-        { label: confirmLabel || 'Bevestigen', class: isDanger ? 'danger' : 'primary', value: true }
-      ]);
-      return result === true;
-    }
-
-    // ═══ Saving indicator ═══
-    let savingTimeout;
-    function showSaving() {
-      const el = document.getElementById('savingIndicator');
-      el.classList.add('active');
-      el.innerHTML = '<div class="saving-dot"></div> <span>Opslaan...</span>';
-    }
-    function showSaved() {
-      const el = document.getElementById('savingIndicator');
-      el.innerHTML = '<span class="saved-check">✓ Opgeslagen</span>';
-      el.classList.add('active');
-      clearTimeout(savingTimeout);
-      savingTimeout = setTimeout(() => el.classList.remove('active'), 2000);
-    }
-
-    // ═══ Toast / Undo ═══
-    let activeToast = null;
-    function showToast(message, undoFn) {
-      if (activeToast) activeToast.remove();
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.innerHTML = `<span>${esc(message)}</span>`;
-      if (undoFn) {
-        const btn = document.createElement('button');
-        btn.className = 'toast-undo';
-        btn.textContent = 'Ongedaan maken';
-        btn.addEventListener('click', async () => {
-          toast.remove();
-          activeToast = null;
-          await undoFn();
-        });
-        toast.appendChild(btn);
-      }
-      document.body.appendChild(toast);
-      activeToast = toast;
-      setTimeout(() => {
-        if (activeToast === toast) {
-          toast.classList.add('hiding');
-          setTimeout(() => { toast.remove(); activeToast = null; }, 300);
-        }
-      }, 5000);
-    }
-
-    // ═══ Datum helpers ═══
-    function formatDate(d) {
-      if (!d) return '';
-      const dt = new Date(d);
-      return `${String(dt.getDate()).padStart(2,'0')}-${String(dt.getMonth()+1).padStart(2,'0')}-${dt.getFullYear()}`;
-    }
-    function daysUntil(d) {
-      if (!d) return null;
-      const dt = new Date(d), now = new Date();
-      dt.setHours(0,0,0,0); now.setHours(0,0,0,0);
-      return Math.ceil((dt - now) / 86400000);
-    }
-
-    // ═══ Render helpers ═══
-    function catBadge(cat) {
-      return cat === 'Werk' ? '<span class="cat w">W</span>' : '<span class="cat p">P</span>';
-    }
-    function starHtml(isOn) {
-      return `<span class="star ${isOn ? 'on' : 'off'}">★</span>`;
-    }
-    function deadlineHtml(d) {
-      if (!d) return '';
-      const days = daysUntil(d);
-      const cls = days !== null && days <= 7 ? 'urgent' : 'normal';
-      return `<span class="dl ${cls}">${formatDate(d)}</span>`;
-    }
-    function contextHtml(ctx) {
-      if (!ctx) return '';
-      const arr = Array.isArray(ctx) ? ctx : [ctx];
-      if (arr.length === 0) return '';
-      return `<div class="ctx">${arr.map(c => `<span>${c}</span>`).join('')}</div>`;
-    }
-
-    // ═══ Render tabel ═══
-    function starHtmlData(isOn, id, table, field) {
-      return `<span class="star ${isOn ? 'on' : 'off'}" data-id="${id}" data-table="${table}" data-field="${field}">★</span>`;
-    }
-
-    function editableDeadline(date, id, table) {
-      const display = date ? formatDate(date) : '';
-      const urgent = date && daysUntil(date) <= 7;
-      const cls = date ? (urgent ? 'urgent' : 'normal') : '';
-      return `<span class="editable-dl dl ${cls}" data-id="${id}" data-table="${table}" data-field="deadline" data-raw="${date || ''}">${display || '—'}</span>`;
-    }
-
-    function editableWerkelijk(val, id, table) {
-      const display = val ? val + 'm' : '';
-      return `<span class="editable-num tijd" data-id="${id}" data-table="${table}" data-field="tijd_uitgevoerd">${display || '—'}</span>`;
-    }
-
-    const GESCHAT_OPTIES = ['', '<15 min', '<30 min', '<60 min', '<90 min', '<120 min'];
-    const CONTEXT_OPTIES = ['@Kantoor', '@Thuis', '@Onderweg', '@Computer', '@Telefoon', '@Online'];
-
-    function editableGeschat(val, id, table) {
-      return `<span class="editable-select tijd" data-id="${id}" data-table="${table}" data-field="tijdsinschatting" data-type="geschat">${val || '—'}</span>`;
-    }
-
-    function editableContext(ctx, id, table) {
-      const arr = Array.isArray(ctx) ? ctx : (ctx ? [ctx] : []);
-      const display = arr.length > 0 ? arr.join(', ') : '';
-      return `<span class="editable-select" data-id="${id}" data-table="${table}" data-field="context" data-type="context" data-raw='${JSON.stringify(arr)}'>${display || '—'}</span>`;
-    }
-
-    function renderProject(project, subtaken, subsubtaken, tbody) {
-      const cat = project.categorie;
-      const isPrio = project.prioriteit === 'hoog';
-      const openSubs = getSubsFor(project.id).filter(s => !s.gedaan && isActief(s));
-
-      // Project-rij
-      tbody.insertAdjacentHTML('beforeend', `
-        <tr class="row-project" data-project-id="${project.id}">
-          <td class="cd"></td>
-          <td class="cp">${starHtmlData(isPrio, project.id, 'taken', 'prioriteit')}</td>
-          <td>${catBadge(cat)}</td>
-          <td><span class="chev">▶</span> <span class="editable" data-id="${project.id}" data-table="taken" data-field="taak">${esc(project.taak)}</span></td>
-          <td></td>
-          <td></td>
-          <td>${editableDeadline(project.deadline, project.id, 'taken')}</td>
-          <td>${editableGeschat(project.tijdsinschatting, project.id, 'taken')}</td>
-          <td>${editableWerkelijk(project.tijd_uitgevoerd, project.id, 'taken')}</td>
-          <td>${editableContext(project.context, project.id, 'taken')}</td>
-          <td class="col-add"><button class="add-btn" data-add="subtaak" data-parent-id="${project.id}" data-cat="${cat}" title="Taak toevoegen">+</button><button class="del-btn" data-del-id="${project.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
-        </tr>
-      `);
-
-      // Subtaken (taak-rijen)
-      openSubs.forEach(sub => {
-        const subs = getSubsubsFor(sub.id).filter(ss => !ss.gedaan && isActief(ss));
-        const hasSubs = subs.length > 0;
-
-        tbody.insertAdjacentHTML('beforeend', `
-          <tr class="row-taak collapsed" data-parent="${project.id}" data-taak-id="${sub.id}">
-            <td class="cd">${!hasSubs ? `<span class="cb" data-id="${sub.id}" data-table="subtaken">○</span>` : ''}</td>
-            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
-            <td>${catBadge(cat)}</td>
-            <td></td>
-            <td>${hasSubs ? '<span class="chev">▶</span> ' : ''}<span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
-            <td></td>
-            <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
-            <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
-            <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
-            <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
-            <td class="col-add"><button class="add-btn" data-add="subsubtaak" data-parent-id="${sub.id}" title="Subtaak toevoegen">+</button><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
-          </tr>
-        `);
-
-        // Sub-subtaken
-        subs.forEach(ss => {
-          tbody.insertAdjacentHTML('beforeend', `
-            <tr class="row-subtaak collapsed" data-parent-taak="${sub.id}">
-              <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
-              <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${esc(ss.tekst)}</span></td>
-              <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
-              <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
-              <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
-              <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
-              <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
-            </tr>
-          `);
-        });
-      });
-    }
-
-    // ═══ Init ═══
-    async function reloadData() {
-      const [projecten, subtaken, subsubtaken] = await Promise.all([
-        api('taken', 'order=nr.asc'),
-        api('subtaken', 'order=volgorde.asc'),
-        api('sub_subtaken', 'order=volgorde.asc')
-      ]);
-      allProjecten = projecten;
-      allSubtaken = subtaken;
-      allSubsubtaken = subsubtaken;
-      buildIndexes();
-    }
-
-    async function cleanupPrullenmand() {
-      const cutoff = new Date(Date.now() - 7 * 86400000).toISOString();
-      try {
-        await delWhere('sub_subtaken', 'verwijderd_op=lt.' + cutoff);
-        await delWhere('subtaken', 'verwijderd_op=lt.' + cutoff);
-        await delWhere('taken', 'verwijderd_op=lt.' + cutoff);
-      } catch(e) { /* stil negeren */ }
-    }
-
-    // Helper: is item niet verwijderd?
-    function isActief(item) { return !item.verwijderd_op; }
-    function isVerwijderd(item) { return !!item.verwijderd_op; }
-
-    async function init() {
-      const tbody = document.getElementById('tbody');
-      tbody.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--text-2);font-size:12px;">Laden...</td></tr>`;
-
-      try {
-        const [projecten, subtaken, subsubtaken] = await Promise.all([
-          api('taken', 'order=nr.asc'),
-          api('subtaken', 'order=volgorde.asc'),
-          api('sub_subtaken', 'order=volgorde.asc')
-        ]);
-
-        // Sla data globaal op
-        allProjecten = projecten;
-        allSubtaken = subtaken;
-        allSubsubtaken = subsubtaken;
-
-        // Auto-cleanup: verwijder items ouder dan 7 dagen uit prullenmand
-        await cleanupPrullenmand();
-
-        renderAll();
-        bindBtnNew();
-
-      } catch (err) {
-        document.getElementById('tbody').innerHTML = `
-          <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--red);">
-            Kan taken niet laden: ${err.message}
-          </td></tr>`;
-      }
-    }
-
-    // ═══ In/uitklappen ═══
-    function attachToggle() {
-      // Project-rij klikken → toon/verberg taak-rijen
-      document.querySelectorAll('.row-project').forEach(row => {
-        row.addEventListener('click', (e) => {
-          if (e.target.closest('input[type="checkbox"]') || e.target.closest('.star') || e.target.closest('.cb')) return;
-          const id = row.dataset.projectId;
-          const chev = row.querySelector('.chev');
-          const isOpen = chev.classList.contains('open');
-
-          chev.classList.toggle('open');
-          document.querySelectorAll(`.row-taak[data-parent="${id}"]`).forEach(r => {
-            r.classList.toggle('collapsed', isOpen);
-            // Bij inklappen ook sub-subtaken verbergen
-            if (isOpen) {
-              const tId = r.dataset.taakId;
-              if (tId) {
-                const tChev = r.querySelector('.chev');
-                if (tChev) tChev.classList.remove('open');
-                document.querySelectorAll(`.row-subtaak[data-parent-taak="${tId}"]`).forEach(sr => {
-                  sr.classList.add('collapsed');
-                });
-              }
-            }
-          });
-        });
-      });
-
-      // Taak-rij klikken → toon/verberg sub-subtaak-rijen
-      document.querySelectorAll('.row-taak').forEach(row => {
-        const chev = row.querySelector('.chev');
-        if (!chev) return; // geen sub-subtaken
-        row.addEventListener('click', (e) => {
-          if (e.target.closest('.cb') || e.target.closest('.star')) return;
-          const tId = row.dataset.taakId;
-          const isOpen = chev.classList.contains('open');
-          chev.classList.toggle('open');
-          document.querySelectorAll(`.row-subtaak[data-parent-taak="${tId}"]`).forEach(r => {
-            r.classList.toggle('collapsed', isOpen);
-          });
-        });
-      });
-    }
-
-    // Alles inklappen / uitklappen knoppen
-    document.getElementById('btnCollapseAll').addEventListener('click', () => {
-      document.querySelectorAll('.chev').forEach(c => c.classList.remove('open'));
-      document.querySelectorAll('.row-taak, .row-subtaak').forEach(r => r.classList.add('collapsed'));
-    });
-    document.getElementById('btnExpandAll').addEventListener('click', () => {
-      document.querySelectorAll('.chev').forEach(c => c.classList.add('open'));
-      document.querySelectorAll('.row-taak, .row-subtaak').forEach(r => r.classList.remove('collapsed'));
-    });
-
     // ═══ Kolom-header filter/sort popups ═══
     let allProjecten = [], allSubtaken = [], allSubsubtaken = [];
-    let subsByProject = new Map();  // taak_id → subtaken[]
-    let subsubsBySubtaak = new Map(); // subtaak_id → sub_subtaken[]
+    let subsByProject = new Map();
+    let subsubsBySubtaak = new Map();
     let currentSort = null;
     let activeFilters = {};
     let currentView = 'alle';
@@ -439,6 +26,10 @@
     function getSubsubsFor(subtaakId) {
       return subsubsBySubtaak.get(subtaakId) || [];
     }
+
+    // Helper: is item niet verwijderd?
+    function isActief(item) { return !item.verwijderd_op; }
+    function isVerwijderd(item) { return !!item.verwijderd_op; }
 
     function getFilterOptions(col) {
       switch(col) {
@@ -469,7 +60,6 @@
         const popup = document.createElement('div');
         popup.className = 'col-popup';
 
-        // Sorteren
         popup.innerHTML = `<div class="col-popup-title">Sorteren</div>`;
         const sortAsc = document.createElement('button');
         sortAsc.className = 'col-popup-btn' + (currentSort?.col === col && currentSort?.dir === 'asc' ? ' active' : '');
@@ -483,12 +73,10 @@
         sortDesc.addEventListener('click', () => { currentSort = { col, dir: 'desc' }; closePopups(); renderAll(); });
         popup.appendChild(sortDesc);
 
-        // Scheiding
         const sep = document.createElement('div');
         sep.className = 'col-popup-sep';
         popup.appendChild(sep);
 
-        // Filter
         const filterTitle = document.createElement('div');
         filterTitle.className = 'col-popup-title';
         filterTitle.textContent = 'Filter';
@@ -507,12 +95,10 @@
           popup.appendChild(label);
         });
 
-        // Scheiding
         const sep2 = document.createElement('div');
         sep2.className = 'col-popup-sep';
         popup.appendChild(sep2);
 
-        // Actieknoppen
         const actions = document.createElement('div');
         actions.className = 'col-popup-actions';
 
@@ -544,7 +130,6 @@
         actions.appendChild(applyBtn);
         popup.appendChild(actions);
 
-        // Positioneer
         const rect = th.getBoundingClientRect();
         popup.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
         popup.style.top = (rect.bottom + 4) + 'px';
@@ -555,7 +140,7 @@
 
     document.addEventListener('click', closePopups);
 
-    // ═══ Render met filters/sort ═══
+    // ═══ Filter/sort logica ═══
     function projectMatchesFilter(project) {
       for (const [col, selected] of Object.entries(activeFilters)) {
         switch(col) {
@@ -606,7 +191,6 @@
       return s;
     }
 
-    // Helper: heeft een project taken met deadline vandaag/deze week?
     function projectHasDeadline(project, mode) {
       const dl = project.deadline ? daysUntil(project.deadline) : null;
       if (mode === 'vandaag' && dl === 0) return true;
@@ -644,7 +228,7 @@
         return allProjecten.filter(p => p.gedaan && isActief(p));
       }
       if (currentView === 'prullenmand') {
-        return []; // prullenmand heeft eigen render
+        return [];
       }
 
       let projects = allProjecten.filter(p => !p.gedaan && isActief(p));
@@ -661,7 +245,6 @@
         const projectId = currentView.split(':')[1];
         projects = projects.filter(p => p.id === projectId);
       }
-      // 'alle' = geen extra filter
 
       return projects;
     }
@@ -688,7 +271,6 @@
       const open = allProjecten.filter(p => !p.gedaan);
       const openSubs = allSubtaken.filter(s => !s.gedaan);
 
-      // Badges
       const el = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val || ''; };
       el('badgeAlle', openSubs.length);
       const inboxCount = countInbox();
@@ -704,12 +286,10 @@
         allSubsubtaken.filter(isVerwijderd).length;
       el('badgePrullenmand', prullenmandCount || '');
 
-      // Active state
       document.querySelectorAll('.sidebar-item[data-view]').forEach(item => {
         item.classList.toggle('active', item.dataset.view === currentView);
       });
 
-      // Dynamische projecten
       const container = document.getElementById('sidebarProjecten');
       container.innerHTML = '';
       open.forEach(p => {
@@ -726,173 +306,7 @@
         container.appendChild(div);
       });
 
-      // Titel
       document.getElementById('viewTitle').textContent = getViewTitle();
-    }
-
-    function renderInbox(tbody) {
-      // Toon alleen individuele items met inbox=true, met projectnaam erbij
-      const inboxSubs = allSubtaken.filter(s => !s.gedaan && s.inbox);
-      const inboxSubSubs = allSubsubtaken.filter(s => !s.gedaan && s.inbox);
-      const inboxProjecten = allProjecten.filter(p => !p.gedaan && p.inbox);
-
-      if (inboxSubs.length === 0 && inboxSubSubs.length === 0 && inboxProjecten.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
-          Inbox is leeg
-        </td></tr>`;
-        return;
-      }
-
-      // Inbox projecten
-      inboxProjecten.forEach(p => {
-        const cat = p.categorie;
-        tbody.insertAdjacentHTML('beforeend', `
-          <tr class="row-taak">
-            <td class="cd"></td>
-            <td class="cp">${starHtmlData(p.prioriteit === 'hoog', p.id, 'taken', 'prioriteit')}</td>
-            <td>${catBadge(cat)}</td>
-            <td><span class="editable" data-id="${p.id}" data-table="taken" data-field="taak">${p.taak}</span></td>
-            <td><span style="color:var(--text-3);font-size:11px;">nieuw project</span></td>
-            <td></td>
-            <td>${editableDeadline(p.deadline, p.id, 'taken')}</td>
-            <td>${editableGeschat(p.tijdsinschatting, p.id, 'taken')}</td>
-            <td>${editableWerkelijk(p.tijd_uitgevoerd, p.id, 'taken')}</td>
-            <td>${editableContext(p.context, p.id, 'taken')}</td>
-            <td class="col-add"><button class="del-btn" data-del-id="${p.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
-          </tr>
-        `);
-      });
-
-      // Inbox subtaken
-      inboxSubs.forEach(sub => {
-        const project = allProjecten.find(p => p.id === sub.taak_id);
-        const cat = project ? project.categorie : 'Werk';
-        const projectNaam = project ? project.taak : '?';
-        tbody.insertAdjacentHTML('beforeend', `
-          <tr class="row-taak">
-            <td class="cd"><span class="cb" data-id="${sub.id}" data-table="subtaken">○</span></td>
-            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
-            <td>${catBadge(cat)}</td>
-            <td><span style="color:var(--text-3);font-size:11px;">${esc(projectNaam)}</span></td>
-            <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
-            <td></td>
-            <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
-            <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
-            <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
-            <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
-            <td class="col-add"><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
-          </tr>
-        `);
-      });
-
-      // Inbox sub-subtaken
-      inboxSubSubs.forEach(ss => {
-        const sub = allSubtaken.find(s => s.id === ss.subtaak_id);
-        const project = sub ? allProjecten.find(p => p.id === sub.taak_id) : null;
-        const taakNaam = sub ? sub.tekst : '?';
-        tbody.insertAdjacentHTML('beforeend', `
-          <tr class="row-subtaak">
-            <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
-            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
-            <td></td>
-            <td><span style="color:var(--text-3);font-size:11px;">${project ? project.taak : '?'}</span></td>
-            <td><span style="color:var(--text-3);font-size:11px;">${esc(taakNaam)}</span></td>
-            <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${ss.tekst}</span></td>
-            <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
-            <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
-            <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
-            <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
-            <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
-          </tr>
-        `);
-      });
-    }
-
-    function renderVoltooid(tbody) {
-      const items = [
-        ...allSubtaken.filter(s => s.gedaan && isActief(s)).map(s => {
-          const p = allProjecten.find(pr => pr.id === s.taak_id);
-          return { tekst: s.tekst, datum: s.gedaan_datum, project: p?.taak || '?', cat: p?.categorie || 'Werk' };
-        }),
-        ...allSubsubtaken.filter(s => s.gedaan && isActief(s)).map(ss => {
-          const sub = allSubtaken.find(s => s.id === ss.subtaak_id);
-          const p = sub ? allProjecten.find(pr => pr.id === sub.taak_id) : null;
-          return { tekst: ss.tekst, datum: ss.gedaan_datum, project: p?.taak || '?', taak: sub?.tekst || '?', cat: p?.categorie || 'Werk' };
-        })
-      ];
-
-      // Sorteer op datum (nieuwste eerst)
-      items.sort((a, b) => (b.datum || '').localeCompare(a.datum || ''));
-
-      if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
-          Geen voltooide taken
-        </td></tr>`;
-        return;
-      }
-
-      items.forEach(item => {
-        const catHtml = item.cat === 'Werk' ? '<span class="cat w">W</span>' : '<span class="cat p">P</span>';
-        tbody.insertAdjacentHTML('beforeend', `
-          <tr class="row-taak">
-            <td class="cd"><span class="cb done">✓</span></td>
-            <td class="cp"></td>
-            <td>${catHtml}</td>
-            <td><span style="color:var(--text-3);font-size:11px;">${item.project}</span></td>
-            <td>${item.taak ? `<span style="color:var(--text-3);font-size:11px;">${item.taak}</span>` : ''}</td>
-            <td style="text-decoration:line-through;color:var(--text-3);">${esc(item.tekst)}</td>
-            <td><span class="dl normal">${item.datum ? formatDate(item.datum) : ''}</span></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-        `);
-      });
-    }
-
-    function renderPrullenmand(tbody) {
-      const verwijderd = [
-        ...allProjecten.filter(isVerwijderd).map(p => ({ ...p, _table: 'taken', _label: p.taak, _type: 'project' })),
-        ...allSubtaken.filter(isVerwijderd).map(s => {
-          const p = allProjecten.find(pr => pr.id === s.taak_id);
-          return { ...s, _table: 'subtaken', _label: s.tekst, _type: 'taak', _project: p?.taak || '?' };
-        }),
-        ...allSubsubtaken.filter(isVerwijderd).map(ss => {
-          const s = allSubtaken.find(su => su.id === ss.subtaak_id);
-          return { ...ss, _table: 'sub_subtaken', _label: ss.tekst, _type: 'subtaak', _project: s?.tekst || '?' };
-        })
-      ];
-
-      // Filter: alleen top-level verwijderde items tonen (niet items die mee-verwijderd zijn met hun parent)
-      if (verwijderd.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
-          Prullenmand is leeg
-        </td></tr>`;
-        return;
-      }
-
-      verwijderd.forEach(item => {
-        const verwijderdDatum = formatDate(item.verwijderd_op);
-        tbody.insertAdjacentHTML('beforeend', `
-          <tr class="row-taak">
-            <td class="cd"></td>
-            <td class="cp"></td>
-            <td></td>
-            <td><span style="color:var(--text-3);font-size:11px;">${item._project || item._type}</span></td>
-            <td>${esc(item._label)}</td>
-            <td></td>
-            <td><span class="dl normal">${verwijderdDatum}</span></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td class="col-add">
-              <button class="add-btn restore-btn" data-restore-id="${item.id}" data-restore-table="${item._table}" title="Herstellen">↩</button>
-              <button class="del-btn permanent-del-btn" data-perm-id="${item.id}" data-perm-table="${item._table}" title="Definitief verwijderen" style="opacity:1;">🗑</button>
-            </td>
-          </tr>
-        `);
-      });
     }
 
     function renderAll() {
@@ -926,7 +340,6 @@
         filtered.forEach(p => renderProject(p, allSubtaken, allSubsubtaken, tbody));
       }
 
-      // Metrics (altijd op basis van alle open)
       const openAll = allProjecten.filter(p => !p.gedaan);
       document.getElementById('mTotal').textContent = openAll.length;
       document.getElementById('mOpen').textContent = allSubtaken.filter(s => !s.gedaan).length;
@@ -946,6 +359,106 @@
       attachDeleteButtons();
       attachPrullenmandButtons();
     }
+
+    // ═══ Init ═══
+    async function reloadData() {
+      const [projecten, subtaken, subsubtaken] = await Promise.all([
+        api('taken', 'order=nr.asc'),
+        api('subtaken', 'order=volgorde.asc'),
+        api('sub_subtaken', 'order=volgorde.asc')
+      ]);
+      allProjecten = projecten;
+      allSubtaken = subtaken;
+      allSubsubtaken = subsubtaken;
+      buildIndexes();
+    }
+
+    async function cleanupPrullenmand() {
+      const cutoff = new Date(Date.now() - 7 * 86400000).toISOString();
+      try {
+        await delWhere('sub_subtaken', 'verwijderd_op=lt.' + cutoff);
+        await delWhere('subtaken', 'verwijderd_op=lt.' + cutoff);
+        await delWhere('taken', 'verwijderd_op=lt.' + cutoff);
+      } catch(e) { /* stil negeren */ }
+    }
+
+    async function init() {
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--text-2);font-size:12px;">Laden...</td></tr>`;
+
+      try {
+        const [projecten, subtaken, subsubtaken] = await Promise.all([
+          api('taken', 'order=nr.asc'),
+          api('subtaken', 'order=volgorde.asc'),
+          api('sub_subtaken', 'order=volgorde.asc')
+        ]);
+
+        allProjecten = projecten;
+        allSubtaken = subtaken;
+        allSubsubtaken = subsubtaken;
+
+        await cleanupPrullenmand();
+
+        renderAll();
+        bindBtnNew();
+
+      } catch (err) {
+        document.getElementById('tbody').innerHTML = `
+          <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--red);">
+            Kan taken niet laden: ${err.message}
+          </td></tr>`;
+      }
+    }
+
+    // ═══ In/uitklappen ═══
+    function attachToggle() {
+      document.querySelectorAll('.row-project').forEach(row => {
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('input[type="checkbox"]') || e.target.closest('.star') || e.target.closest('.cb')) return;
+          const id = row.dataset.projectId;
+          const chev = row.querySelector('.chev');
+          const isOpen = chev.classList.contains('open');
+
+          chev.classList.toggle('open');
+          document.querySelectorAll(`.row-taak[data-parent="${id}"]`).forEach(r => {
+            r.classList.toggle('collapsed', isOpen);
+            if (isOpen) {
+              const tId = r.dataset.taakId;
+              if (tId) {
+                const tChev = r.querySelector('.chev');
+                if (tChev) tChev.classList.remove('open');
+                document.querySelectorAll(`.row-subtaak[data-parent-taak="${tId}"]`).forEach(sr => {
+                  sr.classList.add('collapsed');
+                });
+              }
+            }
+          });
+        });
+      });
+
+      document.querySelectorAll('.row-taak').forEach(row => {
+        const chev = row.querySelector('.chev');
+        if (!chev) return;
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('.cb') || e.target.closest('.star')) return;
+          const tId = row.dataset.taakId;
+          const isOpen = chev.classList.contains('open');
+          chev.classList.toggle('open');
+          document.querySelectorAll(`.row-subtaak[data-parent-taak="${tId}"]`).forEach(r => {
+            r.classList.toggle('collapsed', isOpen);
+          });
+        });
+      });
+    }
+
+    document.getElementById('btnCollapseAll').addEventListener('click', () => {
+      document.querySelectorAll('.chev').forEach(c => c.classList.remove('open'));
+      document.querySelectorAll('.row-taak, .row-subtaak').forEach(r => r.classList.add('collapsed'));
+    });
+    document.getElementById('btnExpandAll').addEventListener('click', () => {
+      document.querySelectorAll('.chev').forEach(c => c.classList.add('open'));
+      document.querySelectorAll('.row-taak, .row-subtaak').forEach(r => r.classList.remove('collapsed'));
+    });
 
     // ═══ Tekstvelden: klik om te bewerken ═══
     function attachEditable() {
@@ -1005,7 +518,7 @@
           const input = document.createElement('input');
           input.className = 'edit-input';
           input.type = 'date';
-          input.value = raw; // yyyy-mm-dd formaat
+          input.value = raw;
           input.style.width = '130px';
           el.textContent = '';
           el.appendChild(input);
@@ -1095,7 +608,6 @@
       document.querySelectorAll('.editable-select').forEach(el => {
         el.addEventListener('click', (e) => {
           e.stopPropagation();
-          // Sluit andere popups
           document.querySelectorAll('.select-popup').forEach(p => p.remove());
 
           const id = el.dataset.id;
@@ -1107,7 +619,6 @@
           popup.className = 'select-popup';
 
           if (type === 'geschat') {
-            // Single select dropdown
             const current = el.textContent.trim();
             GESCHAT_OPTIES.forEach(opt => {
               const label = document.createElement('label');
@@ -1131,7 +642,6 @@
               popup.appendChild(label);
             });
           } else if (type === 'context') {
-            // Multi select dropdown
             let selected = [];
             try { selected = JSON.parse(el.dataset.raw || '[]'); } catch(e) {}
 
@@ -1153,7 +663,6 @@
               popup.appendChild(label);
             });
 
-            // Opslaan knop
             const saveBtn = document.createElement('div');
             saveBtn.style.cssText = 'padding:6px 14px;text-align:center;';
             saveBtn.innerHTML = '<button style="padding:4px 16px;border:none;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;">Opslaan</button>';
@@ -1170,14 +679,12 @@
             popup.appendChild(saveBtn);
           }
 
-          // Positioneer popup
           const rect = el.getBoundingClientRect();
           popup.style.position = 'fixed';
           popup.style.left = rect.left + 'px';
           popup.style.top = (rect.bottom + 4) + 'px';
           document.body.appendChild(popup);
 
-          // Sluit bij klik buiten
           const closePopup = (ev) => {
             if (!popup.contains(ev.target) && ev.target !== el) {
               popup.remove();
@@ -1191,7 +698,6 @@
 
     // ═══ + knoppen: taken toevoegen ═══
     function attachAddButtons() {
-      // + per rij
       document.querySelectorAll('.add-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           e.stopPropagation();
@@ -1204,7 +710,6 @@
 
           try {
             if (type === 'subtaak') {
-              // Bepaal volgorde
               const bestaande = document.querySelectorAll(`.row-taak[data-parent="${parentId}"]`);
               const volgorde = bestaande.length + 1;
               await post('subtaken', {
@@ -1231,7 +736,7 @@
       });
     }
 
-    // ═══ Nieuwe taak knop (eenmalig, buiten renderAll) ═══
+    // ═══ Nieuwe taak knop ═══
     let btnNewBound = false;
     function bindBtnNew() {
       if (btnNewBound) return;
@@ -1277,10 +782,8 @@
           if (!bevestig) return;
 
           try {
-            // Soft delete: zet verwijderd_op timestamp
             await patch(table, id, { verwijderd_op: new Date().toISOString() });
 
-            // Ook onderliggende items soft-deleten
             if (table === 'taken') {
               const subs = allSubtaken.filter(s => s.taak_id === id);
               for (const sub of subs) {
@@ -1297,11 +800,9 @@
               }
             }
 
-            // Herlaad data en render
             await reloadData();
             renderAll();
             showToast('Naar prullenmand verplaatst', async () => {
-              // Undo: verwijderd_op terugzetten
               await patch(table, id, { verwijderd_op: null });
               if (table === 'taken') {
                 for (const sub of allSubtaken.filter(s => s.taak_id === id)) {
@@ -1327,7 +828,6 @@
 
     // ═══ Prullenmand: herstellen en definitief verwijderen ═══
     function attachPrullenmandButtons() {
-      // Herstellen
       document.querySelectorAll('.restore-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           e.stopPropagation();
@@ -1343,7 +843,6 @@
         });
       });
 
-      // Definitief verwijderen
       document.querySelectorAll('.permanent-del-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           e.stopPropagation();
@@ -1410,7 +909,6 @@
           star.classList.toggle('on');
           star.classList.toggle('off');
 
-          // Waarde bepalen: taken.prioriteit = 'hoog'/'normaal', subtaken.prio_ster = true/false
           let value;
           if (field === 'prioriteit' && table === 'taken') {
             value = isOn ? 'normaal' : 'hoog';
@@ -1421,7 +919,6 @@
           try {
             await patch(table, id, { [field]: value });
           } catch (err) {
-            // Terugdraaien bij fout
             star.classList.toggle('on');
             star.classList.toggle('off');
             alert('Opslaan mislukt: ' + err.message);
@@ -1446,7 +943,7 @@
       searchTimeout = setTimeout(() => {
         searchQuery = e.target.value.trim();
         if (searchQuery && currentView !== 'alle') {
-          currentView = 'alle'; // zoeken werkt altijd op alle taken
+          currentView = 'alle';
         }
         renderAll();
       }, 200);

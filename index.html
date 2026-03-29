@@ -454,6 +454,15 @@
       return r.json();
     }
 
+    async function patch(table, id, data) {
+      const r = await fetch(`${SB}/rest/v1/${table}?id=eq.${id}`, {
+        method: 'PATCH', headers: { ...hdrs, 'Prefer': 'return=representation' },
+        body: JSON.stringify(data)
+      });
+      if (!r.ok) throw new Error(`Fout bij opslaan`);
+      return r.json();
+    }
+
     // ═══ Datum helpers ═══
     function formatDate(d) {
       if (!d) return '';
@@ -488,6 +497,10 @@
     }
 
     // ═══ Render tabel ═══
+    function starHtmlData(isOn, id, table, field) {
+      return `<span class="star ${isOn ? 'on' : 'off'}" data-id="${id}" data-table="${table}" data-field="${field}">★</span>`;
+    }
+
     function renderProject(project, subtaken, subsubtaken, tbody) {
       const cat = project.categorie;
       const isPrio = project.prioriteit === 'hoog';
@@ -497,7 +510,7 @@
       tbody.insertAdjacentHTML('beforeend', `
         <tr class="row-project" data-project-id="${project.id}">
           <td class="cd"></td>
-          <td class="cp">${starHtml(isPrio)}</td>
+          <td class="cp">${starHtmlData(isPrio, project.id, 'taken', 'prioriteit')}</td>
           <td>${catBadge(cat)}</td>
           <td><span class="chev">▶</span> ${project.taak}</td>
           <td></td>
@@ -516,8 +529,8 @@
 
         tbody.insertAdjacentHTML('beforeend', `
           <tr class="row-taak collapsed" data-parent="${project.id}" data-taak-id="${sub.id}">
-            <td class="cd">${!hasSubs ? '<span class="cb">○</span>' : ''}</td>
-            <td class="cp">${starHtml(sub.prio_ster)}</td>
+            <td class="cd">${!hasSubs ? `<span class="cb" data-id="${sub.id}" data-table="subtaken">○</span>` : ''}</td>
+            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
             <td>${catBadge(cat)}</td>
             <td></td>
             <td>${hasSubs ? '<span class="chev">▶</span> ' : ''}${sub.tekst}</td>
@@ -533,8 +546,8 @@
         subs.forEach(ss => {
           tbody.insertAdjacentHTML('beforeend', `
             <tr class="row-subtaak collapsed" data-parent-taak="${sub.id}">
-              <td class="cd"><span class="cb">○</span></td>
-              <td class="cp">${starHtml(ss.prioriteit)}</td>
+              <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
+              <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
               <td></td>
               <td></td>
               <td></td>
@@ -610,6 +623,8 @@
         document.getElementById('mPrio').textContent = openProjecten.filter(p => p.prioriteit === 'hoog').length;
 
         attachToggle();
+        attachCheckboxes();
+        attachStars();
 
       } catch (err) {
         debugEl.innerHTML = `
@@ -692,6 +707,75 @@
     document.querySelectorAll('.filter-dd-menu').forEach(menu => {
       menu.addEventListener('click', (e) => e.stopPropagation());
     });
+
+    // ═══ Checkboxes: afvinken ═══
+    function attachCheckboxes() {
+      document.querySelectorAll('.cb').forEach(cb => {
+        cb.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = cb.dataset.id;
+          const table = cb.dataset.table;
+          if (!id || !table) return;
+
+          // Visueel afvinken
+          cb.textContent = '✓';
+          cb.classList.add('done');
+          cb.style.pointerEvents = 'none';
+
+          // Opslaan naar Supabase
+          try {
+            await patch(table, id, {
+              gedaan: true,
+              gedaan_datum: new Date().toISOString().split('T')[0]
+            });
+            // Rij verbergen na korte delay
+            setTimeout(() => {
+              const row = cb.closest('tr');
+              if (row) row.style.display = 'none';
+            }, 400);
+          } catch (err) {
+            cb.textContent = '○';
+            cb.classList.remove('done');
+            cb.style.pointerEvents = '';
+            alert('Opslaan mislukt: ' + err.message);
+          }
+        });
+      });
+    }
+
+    // ═══ Prio sterren: toggle ═══
+    function attachStars() {
+      document.querySelectorAll('.star').forEach(star => {
+        star.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = star.dataset.id;
+          const table = star.dataset.table;
+          const field = star.dataset.field;
+          if (!id || !table || !field) return;
+
+          const isOn = star.classList.contains('on');
+          star.classList.toggle('on');
+          star.classList.toggle('off');
+
+          // Waarde bepalen: taken.prioriteit = 'hoog'/'normaal', subtaken.prio_ster = true/false
+          let value;
+          if (field === 'prioriteit' && table === 'taken') {
+            value = isOn ? 'normaal' : 'hoog';
+          } else {
+            value = !isOn;
+          }
+
+          try {
+            await patch(table, id, { [field]: value });
+          } catch (err) {
+            // Terugdraaien bij fout
+            star.classList.toggle('on');
+            star.classList.toggle('off');
+            alert('Opslaan mislukt: ' + err.message);
+          }
+        });
+      });
+    }
 
     init();
   </script>

@@ -249,6 +249,11 @@
       transition: background .15s;
     }
     .editable:hover { background: rgba(0,122,255,.06); }
+    .editable-dl, .editable-num {
+      cursor: pointer; border-radius: 4px; padding: 2px 4px; margin: -2px -4px;
+      transition: background .15s;
+    }
+    .editable-dl:hover, .editable-num:hover { background: rgba(0,122,255,.06); }
     .edit-input {
       width: 100%; border: 1px solid var(--accent); border-radius: 4px;
       padding: 3px 6px; font-size: inherit; font-family: inherit;
@@ -513,6 +518,18 @@
       return `<span class="star ${isOn ? 'on' : 'off'}" data-id="${id}" data-table="${table}" data-field="${field}">★</span>`;
     }
 
+    function editableDeadline(date, id, table) {
+      const display = date ? formatDate(date) : '';
+      const urgent = date && daysUntil(date) <= 7;
+      const cls = date ? (urgent ? 'urgent' : 'normal') : '';
+      return `<span class="editable-dl dl ${cls}" data-id="${id}" data-table="${table}" data-field="deadline" data-raw="${date || ''}">${display || '—'}</span>`;
+    }
+
+    function editableWerkelijk(val, id, table) {
+      const display = val ? val + 'm' : '';
+      return `<span class="editable-num tijd" data-id="${id}" data-table="${table}" data-field="tijd_uitgevoerd">${display || '—'}</span>`;
+    }
+
     function renderProject(project, subtaken, subsubtaken, tbody) {
       const cat = project.categorie;
       const isPrio = project.prioriteit === 'hoog';
@@ -527,9 +544,9 @@
           <td><span class="chev">▶</span> <span class="editable" data-id="${project.id}" data-table="taken" data-field="taak">${project.taak}</span></td>
           <td></td>
           <td></td>
-          <td>${deadlineHtml(project.deadline)}</td>
+          <td>${editableDeadline(project.deadline, project.id, 'taken')}</td>
           <td class="tijd">${project.tijdsinschatting || ''}</td>
-          <td class="tijd">${project.tijd_uitgevoerd ? project.tijd_uitgevoerd + 'm' : ''}</td>
+          <td>${editableWerkelijk(project.tijd_uitgevoerd, project.id, 'taken')}</td>
           <td>${contextHtml(project.context)}</td>
         </tr>
       `);
@@ -547,9 +564,9 @@
             <td></td>
             <td>${hasSubs ? '<span class="chev">▶</span> ' : ''}<span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${sub.tekst}</span></td>
             <td></td>
-            <td>${deadlineHtml(sub.deadline)}</td>
+            <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
             <td class="tijd">${sub.tijdsinschatting || ''}</td>
-            <td class="tijd">${sub.tijd_uitgevoerd ? sub.tijd_uitgevoerd + 'm' : ''}</td>
+            <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
             <td>${contextHtml(sub.context)}</td>
           </tr>
         `);
@@ -564,9 +581,9 @@
               <td></td>
               <td></td>
               <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${ss.tekst}</span></td>
-              <td>${deadlineHtml(ss.deadline)}</td>
+              <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
               <td class="tijd">${ss.tijdsinschatting || ''}</td>
-              <td class="tijd">${ss.tijd_uitgevoerd ? ss.tijd_uitgevoerd + 'm' : ''}</td>
+              <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
               <td>${contextHtml(ss.context)}</td>
             </tr>
           `);
@@ -638,6 +655,8 @@
         attachCheckboxes();
         attachStars();
         attachEditable();
+        attachDeadlines();
+        attachWerkelijk();
 
       } catch (err) {
         debugEl.innerHTML = `
@@ -748,6 +767,106 @@
             if (val && val !== current) {
               try {
                 await patch(table, id, { [field]: val });
+              } catch (err) {
+                el.textContent = current;
+                alert('Opslaan mislukt: ' + err.message);
+              }
+            }
+          };
+
+          input.addEventListener('blur', save);
+          input.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') input.blur();
+            if (ev.key === 'Escape') { el.textContent = current; }
+          });
+        });
+      });
+    }
+
+    // ═══ Deadlines: klik om datum te kiezen ═══
+    function attachDeadlines() {
+      document.querySelectorAll('.editable-dl').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (el.querySelector('input')) return;
+
+          const id = el.dataset.id;
+          const table = el.dataset.table;
+          const raw = el.dataset.raw || '';
+          const current = el.textContent.trim();
+
+          const input = document.createElement('input');
+          input.className = 'edit-input';
+          input.type = 'date';
+          input.value = raw; // yyyy-mm-dd formaat
+          input.style.width = '130px';
+          el.textContent = '';
+          el.appendChild(input);
+          input.focus();
+
+          const save = async () => {
+            const val = input.value;
+            if (val) {
+              el.dataset.raw = val;
+              const days = daysUntil(val);
+              el.className = `editable-dl dl ${days <= 7 ? 'urgent' : 'normal'}`;
+              el.textContent = formatDate(val);
+            } else {
+              el.dataset.raw = '';
+              el.className = 'editable-dl dl';
+              el.textContent = '—';
+            }
+
+            if (val !== raw) {
+              try {
+                await patch(table, id, { deadline: val || null });
+              } catch (err) {
+                el.textContent = current;
+                alert('Opslaan mislukt: ' + err.message);
+              }
+            }
+          };
+
+          input.addEventListener('blur', save);
+          input.addEventListener('change', () => input.blur());
+          input.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape') { el.textContent = current; }
+          });
+        });
+      });
+    }
+
+    // ═══ Werkelijk: klik om minuten in te voeren ═══
+    function attachWerkelijk() {
+      document.querySelectorAll('.editable-num').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (el.querySelector('input')) return;
+
+          const id = el.dataset.id;
+          const table = el.dataset.table;
+          const current = el.textContent.trim();
+          const currentNum = parseInt(current) || '';
+
+          const input = document.createElement('input');
+          input.className = 'edit-input';
+          input.type = 'number';
+          input.min = '0';
+          input.placeholder = 'min';
+          input.value = currentNum;
+          input.style.width = '60px';
+          el.textContent = '';
+          el.appendChild(input);
+          input.focus();
+          input.select();
+
+          const save = async () => {
+            const val = parseInt(input.value) || null;
+            el.textContent = val ? val + 'm' : '—';
+
+            if (val !== (parseInt(current) || null)) {
+              try {
+                await patch(table, id, { tijd_uitgevoerd: val });
               } catch (err) {
                 el.textContent = current;
                 alert('Opslaan mislukt: ' + err.message);

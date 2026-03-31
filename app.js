@@ -332,6 +332,10 @@
         renderVoltooid(tbody);
       } else if (currentView === 'inbox') {
         renderInbox(tbody);
+      } else if (currentView === 'vandaag') {
+        renderVandaag(tbody);
+      } else if (currentView === 'prioriteit') {
+        renderPrioriteit(tbody);
       } else if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
           Geen taken in deze weergave
@@ -402,6 +406,13 @@
 
         renderAll();
         bindBtnNew();
+
+        document.getElementById('tilePrio').addEventListener('click', () => {
+          currentView = 'prioriteit';
+          document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+          document.querySelector('.sidebar-item[data-view="prioriteit"]')?.classList.add('active');
+          renderAll();
+        });
 
       } catch (err) {
         document.getElementById('tbody').innerHTML = `

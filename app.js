@@ -193,12 +193,12 @@
 
     function projectHasDeadline(project, mode) {
       const dl = project.deadline ? daysUntil(project.deadline) : null;
-      if (mode === 'vandaag' && dl === 0) return true;
+      if (mode === 'vandaag' && dl !== null && dl <= 0) return true;
       if (mode === 'week' && dl !== null && dl >= 0 && dl <= 7) return true;
       return getSubsFor(project.id).some(s => {
         if (s.gedaan) return false;
         const d = s.deadline ? daysUntil(s.deadline) : null;
-        if (mode === 'vandaag') return d === 0;
+        if (mode === 'vandaag') return d !== null && d <= 0;
         if (mode === 'week') return d !== null && d >= 0 && d <= 7;
         return false;
       });
@@ -253,7 +253,7 @@
       switch(currentView) {
         case 'alle': return 'Alle taken';
         case 'inbox': return 'Inbox';
-        case 'vandaag': return 'Vandaag';
+        case 'vandaag': return 'Vandaag & Verlopen';
         case 'week': return 'Deze week';
         case 'prioriteit': return 'Prioriteit';
         case 'voltooid': return 'Voltooid';

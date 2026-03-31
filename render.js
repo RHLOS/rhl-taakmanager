@@ -47,11 +47,6 @@
       return `<span class="editable-select" data-id="${id}" data-table="${table}" data-field="context" data-type="context" data-raw='${JSON.stringify(arr)}'>${display || '—'}</span>`;
     }
 
-    function notitieHtml(notities, id, table) {
-      const val = notities || '';
-      return `<td class="notitie-cel" data-id="${id}" data-table="${table}" data-notitie="${esc(val)}">${val ? '📝' : '<span class="notitie-add">+</span>'}</td>`;
-    }
-
     function renderProject(project, subtaken, subsubtaken, tbody) {
       const cat = project.categorie;
       const isPrio = project.prioriteit === 'hoog';
@@ -70,7 +65,6 @@
           <td>${editableGeschat(project.tijdsinschatting, project.id, 'taken')}</td>
           <td>${editableWerkelijk(project.tijd_uitgevoerd, project.id, 'taken')}</td>
           <td>${editableContext(project.context, project.id, 'taken')}</td>
-          ${notitieHtml(project.notities, project.id, 'taken')}
           <td class="col-add"><button class="add-btn" data-add="subtaak" data-parent-id="${project.id}" data-cat="${cat}" title="Taak toevoegen">+</button><button class="del-btn" data-del-id="${project.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
         </tr>
       `);
@@ -93,7 +87,6 @@
             <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
             <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
             <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
-            ${notitieHtml(sub.notities, sub.id, 'subtaken')}
             <td class="col-add"><button class="add-btn" data-add="subsubtaak" data-parent-id="${sub.id}" title="Subtaak toevoegen">+</button><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -112,7 +105,6 @@
               <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
               <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
               <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
-              ${notitieHtml(ss.notities, ss.id, 'sub_subtaken')}
               <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
             </tr>
           `);
@@ -147,7 +139,6 @@
             <td>${editableGeschat(p.tijdsinschatting, p.id, 'taken')}</td>
             <td>${editableWerkelijk(p.tijd_uitgevoerd, p.id, 'taken')}</td>
             <td>${editableContext(p.context, p.id, 'taken')}</td>
-            ${notitieHtml(p.notities, p.id, 'taken')}
             <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${p.id}" data-verwerkt-table="taken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${p.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -170,7 +161,6 @@
             <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
             <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
             <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
-            ${notitieHtml(sub.notities, sub.id, 'subtaken')}
             <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${sub.id}" data-verwerkt-table="subtaken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -193,7 +183,6 @@
             <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
             <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
             <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
-            ${notitieHtml(ss.notities, ss.id, 'sub_subtaken')}
             <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${ss.id}" data-verwerkt-table="sub_subtaken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -225,7 +214,6 @@
             <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
             <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
             <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
-            ${notitieHtml(sub.notities, sub.id, 'subtaken')}
             <td class="col-add"><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -247,7 +235,6 @@
             <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
             <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
             <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
-            ${notitieHtml(ss.notities, ss.id, 'sub_subtaken')}
             <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -279,7 +266,6 @@
             <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
             <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
             <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
-            ${notitieHtml(sub.notities, sub.id, 'subtaken')}
             <td class="col-add"><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -301,7 +287,6 @@
             <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
             <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
             <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
-            ${notitieHtml(ss.notities, ss.id, 'sub_subtaken')}
             <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);

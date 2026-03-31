@@ -244,9 +244,7 @@
       border: none; background: none; font-family: inherit;
       padding: 0; width: 20px; height: 20px; border-radius: 4px;
       display: inline-flex; align-items: center; justify-content: center;
-      opacity: 0; transition: opacity .15s;
     }
-    tr:hover .del-btn { opacity: 1; }
     .del-btn:hover { color: var(--red); background: rgba(255,59,48,.08); }
 
     /* Rij hover */

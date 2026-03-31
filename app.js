@@ -343,7 +343,6 @@
       const openAll = allProjecten.filter(p => !p.gedaan);
       document.getElementById('mTotal').textContent = openAll.length;
       document.getElementById('mOpen').textContent = allSubtaken.filter(s => !s.gedaan).length;
-      document.getElementById('mWerk').textContent = openAll.filter(p => p.categorie === 'Werk').length;
       document.getElementById('mPrio').textContent = openAll.filter(p => projectIsPrio(p)).length;
 
       updateSidebar();

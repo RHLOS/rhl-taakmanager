@@ -220,7 +220,7 @@
         const catHtml = item.cat === 'Werk' ? '<span class="cat w">W</span>' : '<span class="cat p">P</span>';
         tbody.insertAdjacentHTML('beforeend', `
           <tr class="row-taak">
-            <td class="cd"><span class="cb done">✓</span></td>
+            <td class="cd"><span class="cb done" data-id="${item.id}" data-table="${item.table}" style="cursor:pointer;" title="Terugzetten naar actief">✓</span></td>
             <td class="cp"></td>
             <td>${catHtml}</td>
             <td><span style="color:var(--text-3);font-size:11px;">${item.project}</span></td>
@@ -230,7 +230,7 @@
             <td></td>
             <td></td>
             <td></td>
-            <td class="col-add"><button class="add-btn reactief-btn" data-reactief-id="${item.id}" data-reactief-table="${item.table}" title="Terugzetten naar actief">↩</button></td>
+            <td></td>
           </tr>
         `);
       });

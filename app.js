@@ -358,7 +358,6 @@
       attachSelects();
       attachAddButtons();
       attachDeleteButtons();
-      attachVoltooidButtons();
       attachPrullenmandButtons();
     }
 
@@ -873,24 +872,6 @@
       });
     }
 
-    // ═══ Voltooid: terugzetten naar actief ═══
-    function attachVoltooidButtons() {
-      document.querySelectorAll('.reactief-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          const id = btn.dataset.reactiefId;
-          const table = btn.dataset.reactiefTable;
-          try {
-            await patch(table, id, { gedaan: false, gedaan_datum: null });
-            await reloadData();
-            renderAll();
-          } catch (err) {
-            alert('Terugzetten mislukt: ' + err.message);
-          }
-        });
-      });
-    }
-
     // ═══ Prullenmand: herstellen en definitief verwijderen ═══
     function attachPrullenmandButtons() {
       document.querySelectorAll('.restore-btn').forEach(btn => {
@@ -933,6 +914,17 @@
           const id = cb.dataset.id;
           const table = cb.dataset.table;
           if (!id || !table) return;
+
+          if (cb.classList.contains('done')) {
+            try {
+              await patch(table, id, { gedaan: false, gedaan_datum: null });
+              await reloadData();
+              renderAll();
+            } catch (err) {
+              alert('Terugzetten mislukt: ' + err.message);
+            }
+            return;
+          }
 
           cb.textContent = '✓';
           cb.classList.add('done');

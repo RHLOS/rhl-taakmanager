@@ -136,6 +136,7 @@
         const cat = p.categorie;
         tbody.insertAdjacentHTML('beforeend', `
           <tr class="row-taak">
+            <td class="col-nr-cell"></td>
             <td class="cd"></td>
             <td class="cp">${starHtmlData(p.prioriteit === 'hoog', p.id, 'taken', 'prioriteit')}</td>
             <td>${catBadge(cat)}</td>
@@ -146,6 +147,7 @@
             <td>${editableGeschat(p.tijdsinschatting, p.id, 'taken')}</td>
             <td>${editableWerkelijk(p.tijd_uitgevoerd, p.id, 'taken')}</td>
             <td>${editableContext(p.context, p.id, 'taken')}</td>
+            ${notitieHtml(p.notities, p.id, 'taken')}
             <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${p.id}" data-verwerkt-table="taken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${p.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -157,6 +159,7 @@
         const projectNaam = project ? project.taak : '?';
         tbody.insertAdjacentHTML('beforeend', `
           <tr class="row-taak">
+            <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${sub.id}" data-table="subtaken">○</span></td>
             <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
             <td>${catBadge(cat)}</td>
@@ -167,6 +170,7 @@
             <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
             <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
             <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
+            ${notitieHtml(sub.notities, sub.id, 'subtaken')}
             <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${sub.id}" data-verwerkt-table="subtaken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -178,6 +182,7 @@
         const taakNaam = sub ? sub.tekst : '?';
         tbody.insertAdjacentHTML('beforeend', `
           <tr class="row-subtaak">
+            <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
             <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
             <td></td>
@@ -188,6 +193,7 @@
             <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
             <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
             <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
+            ${notitieHtml(ss.notities, ss.id, 'sub_subtaken')}
             <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${ss.id}" data-verwerkt-table="sub_subtaken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);

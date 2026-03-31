@@ -353,7 +353,10 @@
       document.getElementById('mPrio').textContent = openAll.filter(p => projectIsPrio(p)).length;
 
       updateSidebar();
-      document.getElementById('btnAllesVerwerken').style.display = currentView === 'inbox' ? '' : 'none';
+      const isInbox = currentView === 'inbox';
+      document.getElementById('btnAllesVerwerken').style.display = isInbox ? '' : 'none';
+      document.getElementById('btnFilterWerk').style.display = isInbox ? 'none' : '';
+      document.getElementById('btnFilterPrive').style.display = isInbox ? 'none' : '';
 
       attachToggle();
       attachCheckboxes();

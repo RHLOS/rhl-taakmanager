@@ -755,14 +755,6 @@
           if (!tekst) return;
 
           try {
-            const meta = await api('meta', 'sleutel=eq.volgend_nr');
-            const nr = parseInt(meta[0]?.waarde || '999');
-            await fetch(`${SB}/rest/v1/meta?sleutel=eq.volgend_nr`, {
-              method: 'PATCH',
-              headers: { ...hdrs, 'Prefer': 'return=representation' },
-              body: JSON.stringify({ waarde: String(nr + 1) })
-            });
-
             if (type === 'subtaak') {
               const bestaande = document.querySelectorAll(`.row-taak[data-parent="${parentId}"]`);
               const volgorde = bestaande.length + 1;
@@ -770,8 +762,7 @@
                 taak_id: parentId,
                 sub_id: '',
                 tekst: tekst.trim(),
-                volgorde: volgorde,
-                nr: nr
+                volgorde: volgorde
               });
             } else if (type === 'subsubtaak') {
               const bestaande = document.querySelectorAll(`.row-subtaak[data-parent-taak="${parentId}"]`);
@@ -779,8 +770,7 @@
               await post('sub_subtaken', {
                 subtaak_id: parentId,
                 tekst: tekst.trim(),
-                volgorde: volgorde,
-                nr: nr
+                volgorde: volgorde
               });
             }
             await reloadData();

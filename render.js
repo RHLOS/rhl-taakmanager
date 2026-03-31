@@ -198,12 +198,12 @@
       const items = [
         ...allSubtaken.filter(s => s.gedaan && isActief(s)).map(s => {
           const p = allProjecten.find(pr => pr.id === s.taak_id);
-          return { tekst: s.tekst, datum: s.gedaan_datum, project: p?.taak || '?', cat: p?.categorie || 'Werk' };
+          return { id: s.id, table: 'subtaken', tekst: s.tekst, datum: s.gedaan_datum, project: p?.taak || '?', cat: p?.categorie || 'Werk' };
         }),
         ...allSubsubtaken.filter(s => s.gedaan && isActief(s)).map(ss => {
           const sub = allSubtaken.find(s => s.id === ss.subtaak_id);
           const p = sub ? allProjecten.find(pr => pr.id === sub.taak_id) : null;
-          return { tekst: ss.tekst, datum: ss.gedaan_datum, project: p?.taak || '?', taak: sub?.tekst || '?', cat: p?.categorie || 'Werk' };
+          return { id: ss.id, table: 'sub_subtaken', tekst: ss.tekst, datum: ss.gedaan_datum, project: p?.taak || '?', taak: sub?.tekst || '?', cat: p?.categorie || 'Werk' };
         })
       ];
 
@@ -230,7 +230,7 @@
             <td></td>
             <td></td>
             <td></td>
-            <td></td>
+            <td class="col-add"><button class="add-btn reactief-btn" data-reactief-id="${item.id}" data-reactief-table="${item.table}" title="Terugzetten naar actief">↩</button></td>
           </tr>
         `);
       });

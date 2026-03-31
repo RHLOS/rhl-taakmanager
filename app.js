@@ -358,6 +358,7 @@
       attachSelects();
       attachAddButtons();
       attachDeleteButtons();
+      attachVoltooidButtons();
       attachPrullenmandButtons();
     }
 
@@ -867,6 +868,24 @@
             });
           } catch (err) {
             showToast('Verwijderen mislukt: ' + err.message);
+          }
+        });
+      });
+    }
+
+    // ═══ Voltooid: terugzetten naar actief ═══
+    function attachVoltooidButtons() {
+      document.querySelectorAll('.reactief-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.reactiefId;
+          const table = btn.dataset.reactiefTable;
+          try {
+            await patch(table, id, { gedaan: false, gedaan_datum: null });
+            await reloadData();
+            renderAll();
+          } catch (err) {
+            alert('Terugzetten mislukt: ' + err.message);
           }
         });
       });

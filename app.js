@@ -6,6 +6,7 @@
     let activeFilters = {};
     let currentView = 'alle';
     let searchQuery = '';
+    let catFilter = null;
 
     function buildIndexes() {
       subsByProject = new Map();
@@ -233,6 +234,8 @@
 
       let projects = allProjecten.filter(p => !p.gedaan && isActief(p));
 
+      if (catFilter) projects = projects.filter(p => p.categorie === catFilter);
+
       if (currentView === 'inbox') {
         projects = projects.filter(p => projectHasInbox(p));
       } else if (currentView === 'vandaag') {
@@ -350,6 +353,7 @@
       document.getElementById('mPrio').textContent = openAll.filter(p => projectIsPrio(p)).length;
 
       updateSidebar();
+      document.getElementById('btnAllesVerwerken').style.display = currentView === 'inbox' ? '' : 'none';
 
       attachToggle();
       attachCheckboxes();
@@ -463,6 +467,31 @@
         });
       });
     }
+
+    document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = btn.dataset.cat;
+        catFilter = catFilter === cat ? null : cat;
+        document.getElementById('btnFilterWerk').classList.toggle('active', catFilter === 'Werk');
+        document.getElementById('btnFilterPrive').classList.toggle('active', catFilter === 'Privé');
+        renderAll();
+      });
+    });
+
+    document.getElementById('btnAllesVerwerken').addEventListener('click', async () => {
+      const items = [
+        ...allProjecten.filter(p => !p.gedaan && p.inbox).map(p => ({ id: p.id, table: 'taken' })),
+        ...allSubtaken.filter(s => !s.gedaan && s.inbox).map(s => ({ id: s.id, table: 'subtaken' })),
+        ...allSubsubtaken.filter(ss => !ss.gedaan && ss.inbox).map(ss => ({ id: ss.id, table: 'sub_subtaken' }))
+      ];
+      try {
+        await Promise.all(items.map(i => patch(i.table, i.id, { inbox: false })));
+        await reloadData();
+        renderAll();
+      } catch (err) {
+        alert('Verwerken mislukt: ' + err.message);
+      }
+    });
 
     document.getElementById('btnCollapseAll').addEventListener('click', () => {
       document.querySelectorAll('.chev').forEach(c => c.classList.remove('open'));

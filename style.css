@@ -144,6 +144,8 @@
       transition: all .15s; user-select: none;
     }
     .filter-dd-btn:hover { border-color: #ccc; }
+    #btnFilterWerk.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    #btnFilterPrive.active { background: var(--orange); color: #fff; border-color: var(--orange); }
 
     /* ── Kolom-header filter/sort ── */
     .th-filter { cursor: pointer; position: relative; }

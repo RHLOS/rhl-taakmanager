@@ -59,6 +59,7 @@
 
       tbody.insertAdjacentHTML('beforeend', `
         <tr class="row-project" data-project-id="${project.id}">
+          <td class="col-nr-cell">#${project.nr}</td>
           <td class="cd"></td>
           <td class="cp">${starHtmlData(isPrio, project.id, 'taken', 'prioriteit')}</td>
           <td>${catBadge(cat)}</td>
@@ -80,6 +81,7 @@
 
         tbody.insertAdjacentHTML('beforeend', `
           <tr class="row-taak collapsed" data-parent="${project.id}" data-taak-id="${sub.id}">
+            <td class="col-nr-cell">#${sub.nr}</td>
             <td class="cd">${!hasSubs ? `<span class="cb" data-id="${sub.id}" data-table="subtaken">○</span>` : ''}</td>
             <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
             <td>${catBadge(cat)}</td>
@@ -98,6 +100,7 @@
         subs.forEach(ss => {
           tbody.insertAdjacentHTML('beforeend', `
             <tr class="row-subtaak collapsed" data-parent-taak="${sub.id}">
+              <td class="col-nr-cell">#${ss.nr}</td>
               <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
               <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
               <td></td>

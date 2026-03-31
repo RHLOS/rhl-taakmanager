@@ -321,6 +321,8 @@
       padding: 3px 6px; font-size: inherit; font-family: inherit;
       background: #fff; outline: none;
     }
+    .col-nr { width: 40px; }
+    .col-nr-cell { width: 40px; font-size: 11px; color: var(--text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
     .notitie-cel {
       width: 60px; text-align: center; cursor: pointer;
       font-size: 14px; vertical-align: middle;

@@ -146,7 +146,7 @@
             <td>${editableGeschat(p.tijdsinschatting, p.id, 'taken')}</td>
             <td>${editableWerkelijk(p.tijd_uitgevoerd, p.id, 'taken')}</td>
             <td>${editableContext(p.context, p.id, 'taken')}</td>
-            <td class="col-add"><button class="del-btn" data-del-id="${p.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
+            <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${p.id}" data-verwerkt-table="taken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${p.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
       });
@@ -167,7 +167,7 @@
             <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
             <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
             <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
-            <td class="col-add"><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
+            <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${sub.id}" data-verwerkt-table="subtaken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
       });
@@ -188,7 +188,7 @@
             <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
             <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
             <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
-            <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
+            <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${ss.id}" data-verwerkt-table="sub_subtaken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
       });

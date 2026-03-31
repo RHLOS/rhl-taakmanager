@@ -361,6 +361,7 @@
       attachSelects();
       attachAddButtons();
       attachDeleteButtons();
+      attachInboxVerwerkt();
       attachPrullenmandButtons();
     }
 
@@ -877,6 +878,24 @@
             });
           } catch (err) {
             showToast('Verwijderen mislukt: ' + err.message);
+          }
+        });
+      });
+    }
+
+    // ═══ Inbox: verwerkt (inbox=false) ═══
+    function attachInboxVerwerkt() {
+      document.querySelectorAll('.inbox-verwerkt-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.verwerktId;
+          const table = btn.dataset.verwerktTable;
+          try {
+            await patch(table, id, { inbox: false });
+            await reloadData();
+            renderAll();
+          } catch (err) {
+            alert('Verwerken mislukt: ' + err.message);
           }
         });
       });

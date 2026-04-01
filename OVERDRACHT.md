@@ -1,9 +1,10 @@
 # RHL Taakmanager — Overdrachtsdocument
 
-**Datum:** 29 maart 2026
+**Laatste update:** 1 april 2026
 **Project:** rhl-taakmanager
 **Repo:** RHLOS/rhl-taakmanager
-**Branch:** claude/rewrite-webapp-b8wow
+**Branch:** `main` (feature branch al gemerged)
+**GitHub Pages:** https://rhlos.github.io/rhl-taakmanager/
 
 ---
 
@@ -12,44 +13,52 @@
 Zeg bij het begin van een nieuwe sessie:
 > "Lees OVERDRACHT.md en ga verder waar we gebleven zijn."
 
-Lees dan dit document, check de git log voor recente commits, en stel gerichte vragen voordat je iets bouwt.
+Lees dan dit document, check `git log --oneline -10` voor recente commits, en stel gerichte vragen voordat je iets bouwt.
+
+---
+
+## Token-verbruik laag houden — KRITIEK
+
+De gebruiker heeft een beperkt maandbudget. Hoog verbruik stopt de doorontwikkeling.
+
+1. **Model:** stel altijd `/model claude-sonnet-4-6` in bij sessiestart — Opus kost 5× meer
+2. **Nooit hele bestanden lezen** — gebruik `grep` om de juiste sectie te vinden, dan `offset`+`limit` om alleen die regels te lezen
+3. **Nieuwe features in aparte bestanden** — zodat bestaande grote bestanden niet aangeraakt hoeven te worden
+4. **Gebruik `/compact`** als een sessie lang wordt
+5. **Denk voor je leest** — weet je al wat er in een bestand staat? Dan niet opnieuw lezen
+
+---
+
+## Werkafspraken
+
+1. **NOOIT iets bouwen of aanpassen zonder vooraf toestemming**
+2. **Altijd vragen stellen** voordat je begint — kwaliteit boven snelheid
+3. **Stap voor stap** werken, vragen nummeren
+4. **Bij SQL in Supabase:** altijd zeggen "wis eerst het tekstveld"
+5. **Gebruiker is een leek** — simpel uitleggen
+6. Gebruiker werkt op **MacBook Air**, bestanden in `~/ClaudeCodeZandbak/rhl-taakmanager/`
+7. Gebruiker heeft `gh` CLI, ingelogd als **RHLOS**
+8. **Na elke werkende wijziging:** committen + pushen naar `main`
+9. **Link meesturen** bij elke refresh-verzoek: https://rhlos.github.io/rhl-taakmanager/ (open in privévenster: Cmd+Shift+N)
 
 ---
 
 ## Wat is er gebouwd
 
-### 1. Webapp
-
-Apple-native taakmanager als platte tabel. Gesplitst in bestanden:
+### 1. Webapp — bestandsstructuur
 
 | Bestand | Inhoud | Regels |
 |---------|--------|--------|
-| `index.html` | HTML structuur | ~210 |
-| `style.css` | Alle CSS | ~472 |
+| `index.html` | HTML structuur | ~230 |
+| `style.css` | Alle CSS (Apple Dark thema) | ~468 |
 | `api.js` | Supabase config + API helpers | ~51 |
 | `ui.js` | Modals, toast, saving indicator, datum helpers | ~134 |
-| `render.js` | Render functies (tabel, inbox, voltooid, prullenmand) | ~268 |
-| `app.js` | State, filters, attach-functies, init | ~961 |
-| `analyse.js` | Analyse dashboard logica + grafieken | ~330 |
-| `analyse.css` | Analyse dashboard styling | ~150 |
+| `render.js` | Render functies (tabel, inbox, voltooid, prullenmand) | ~379 |
+| `app.js` | State, filters, attach-functies, init | ~1079 |
+| `analyse.js` | Analyse dashboard logica + grafieken | ~400 |
+| `analyse.css` | Analyse dashboard styling | ~160 |
 
 **Laadvolgorde scripts:** ui.js → api.js → render.js → app.js → analyse.js
-
-### Wijzigingen deze sessie (1 april 2026)
-- Notitie kolom toegevoegd en later weer verwijderd
-- Hiërarchische nummering (1 / 1.1 / 1.1.2) in `#` kolom
-- Voltooid-weergave: klik op ✓ om taak terug te zetten naar actief
-- Soft delete was al correct geïmplementeerd (geen wijziging nodig)
-- Vandaag & Verlopen: toont ook verlopen deadlines (dl <= 0)
-- Prioriteit en Vandaag tonen nu individuele regels (zoals Inbox)
-- Prio-tile is klikbaar → navigeert naar Prioriteit-weergave
-- Statistiek-tiles aangepast: Aantal projecten / Aantal open taken / Aantal prioriteit taken
-- Inbox: ↗ knop per rij om taak als verwerkt te markeren (inbox=false)
-- Inbox: "Alles verwerken" knop
-- Toolbar: WERK (blauw) en PRIVÉ (oranje) filterknoppen
-- `+` knop en "+ Nieuwe taak" knop zijn groen
-- "+ Nieuwe taak" verplaatst naar toolbar (was rechtsbovenin)
-- 🗑 knop altijd zichtbaar (was alleen bij hover)
 
 ### 2. Supabase backend
 
@@ -75,38 +84,62 @@ Alle drie hoofdtabellen hebben: `gedaan`, `gedaan_datum`, `inbox`, `verwijderd_o
 - Supabase MCP server geconfigureerd in Claude Desktop
 - Config: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - PAT: `sbp_426ca190d40f5a43ce79b5d6c3ed624599d092e1`
+- **Let op:** de MCP werkt via `mcp__a7e63fc8-f838-4adc-a37a-edeb0796093c__execute_sql` met `project_id` parameter
 - Claude Chat kan direct taken lezen, aanmaken, afvinken en verwijderen
-- Project-instructie in Claude Chat zorgt dat `inbox=true` automatisch wordt meegezet
+- **TODO voor gebruiker:** Project-instructie in Claude Chat aanpassen zodat `inbox=true` automatisch wordt meegezet bij nieuwe taken
 
 ### 5. GitHub Pages
 
-- URL: `https://rhlos.github.io/rhl-taakmanager/`
-- Deployt vanaf `main` branch — feature branch moet nog gemerged worden
+- URL: https://rhlos.github.io/rhl-taakmanager/
+- Deployt vanaf `main` branch
+- Na push: ~1 minuut wachten, dan in privévenster openen (Cmd+Shift+N)
 
 ---
 
-## Webapp features (alles werkend)
+## Alle werkende features
 
 ### Tabel
-- 10 kolommen: ✓, P(ster), W/P, Project, Taak, Subtaak, Deadline, Geschat, Werkelijk, Context, +/🗑
-- Drie niveaus: Projecten → Taken → Subtaken
+- **Kolommen:** ✓, P(ster), W/P, Project, Taak, Subtaak, Deadline, Geschat, Werkelijk, Context, +/🗑
+- **Drie niveaus:** Projecten → Taken → Subtaken
+- **Hiërarchische nummering:** Project = 1, Taak = 1.1, Subtaak = 1.1.1 (berekend bij render, niet in DB)
 - In/uitklappen per project en per taak
-- Alles inklappen / uitklappen knoppen
+- Alles inklappen / uitklappen knoppen in toolbar
 
 ### Bewerkbaar
-- Tekstvelden: klik om te bewerken, opslaat direct naar Supabase
+- Tekstvelden: klik om te bewerken, slaat direct op naar Supabase
 - Deadline: date picker
 - Geschat: dropdown (<15 min t/m <120 min)
 - Werkelijk: number input (minuten)
 - Context: multi-select (@Kantoor, @Thuis, @Onderweg, @Computer, @Telefoon, @Online)
 - Prio ster: klik om te togglen
-- Checkbox: klik om af te vinken (met undo toast)
+- Checkbox: klik om af te vinken (met undo toast, 5 sec)
 
-### Sidebar
-- Alle taken, Inbox, Vandaag, Deze week, Prioriteit, Voltooid
-- Projecten (dynamisch, inklapbaar, met tellingen)
-- Prullenmand (soft-delete, herstel, auto-cleanup na 7 dagen)
-- 📊 Analyse (eigen panel, vervangt tabelweergave)
+### Sidebar-weergaven
+- **Alle taken** — volledige tabel, 3 niveaus
+- **Inbox** — individuele rijen met ↗ knop per rij (taak als verwerkt markeren) + "Alles verwerken" knop
+- **Vandaag & Verlopen** — taken met deadline vandaag of eerder (individuele rijen)
+- **Prioriteit** — taken met prio-ster (individuele rijen)
+- **Voltooid** — klik op ✓ om taak terug te zetten naar actief
+- **Projecten** (dynamisch, inklapbaar, met tellingen per project)
+- **Prullenmand** (soft-delete, herstel, auto-cleanup na 7 dagen)
+- **📊 Analyse** (eigen panel, vervangt tabelweergave)
+
+### Toolbar
+- WERK (blauw) / PRIVÉ (oranje) filterknoppen — actief = gemarkeerd, klik nogmaals = reset
+- + Nieuwe taak (groen)
+- "Alles verwerken" knop (alleen zichtbaar in Inbox-weergave)
+- Inklappen / Uitklappen knoppen
+
+### Soft delete
+- 🗑 knop altijd zichtbaar (niet alleen bij hover)
+- Taak verdwijnt naar Prullenmand (verwijderd_op timestamp)
+- Herstelbaar vanuit Prullenmand
+- Auto-cleanup na 7 dagen
+
+### Statistiek-tiles (boven tabel)
+- **Tile 1:** Aantal projecten
+- **Tile 2:** Aantal open taken
+- **Tile 3:** Aantal prioriteit-taken (klikbaar → navigeert naar Prioriteit-weergave)
 
 ### Analyse dashboard
 - 4 KPI-kaarten: afgerond deze week, open taken, op tijd %, gem. doorlooptijd
@@ -116,32 +149,9 @@ Alle drie hoofdtabellen hebben: `gedaan`, `gedaan_datum`, `inbox`, `verwijderd_o
 
 ### Overig
 - Zoekfunctie, kolom-header filters en sortering
-- Modale dialogen, undo toast, loading states, dark mode
-- XSS-bescherming, performance-indexes (Map)
-
----
-
-## Token-verbruik laag houden — KRITIEK
-
-De gebruiker heeft een beperkt maandbudget. Hoog verbruik stopt de doorontwikkeling. Dit zijn de regels:
-
-1. **Model:** stel altijd `/model claude-sonnet-4-6` in bij sessiestart — Opus kost 5× meer
-2. **Nooit hele bestanden lezen** — gebruik `grep` om de juiste sectie te vinden, dan `offset`+`limit` om alleen die regels te lezen
-3. **Nieuwe features in aparte bestanden** — zodat bestaande grote bestanden niet aangeraakt hoeven te worden
-4. **Gebruik `/compact`** als een sessie lang wordt (comprimeert context)
-5. **Denk voor je leest** — weet je al wat er in een bestand staat? Dan niet opnieuw lezen
-
----
-
-## Werkafspraken
-
-1. **NOOIT iets bouwen of aanpassen zonder vooraf toestemming**
-2. **Altijd vragen stellen** voordat je begint — kwaliteit boven snelheid
-3. **Stap voor stap** werken, vragen nummeren
-4. **Bij SQL in Supabase:** altijd zeggen "wis eerst het tekstveld"
-5. **Gebruiker is een leek** — simpel uitleggen
-6. Gebruiker werkt op **MacBook Air**, bestanden in `~/ClaudeCodeZandbak/rhl-taakmanager/`
-7. Gebruiker heeft `gh` CLI, ingelogd als **RHLOS**
+- Modale dialogen, undo toast, loading states
+- XSS-bescherming, performance-indexes (Map via `buildIndexes()`)
+- **Inbox-logica:** taken aangemaakt in Claude Chat krijgen automatisch `inbox=true` (instructie in Claude Chat project — TODO: nog aanpassen door gebruiker)
 
 ---
 
@@ -161,9 +171,9 @@ Geïmplementeerd op 1 april 2026. `style.css` gebruikt altijd de donkere Apple k
 | `--accent` | `#0a84ff` | Blauw accent |
 | `--red` | `#ff453a` | Rood |
 | `--orange` | `#ff9f0a` | Oranje (Privé) |
-| `--green` | `#30d158` | Groen (afvinken) |
+| `--green` | `#30d158` | Groen (afvinken / nieuwe taak) |
 
-### Alternatieve thema's (nog niet gebouwd)
+### Alternatieve thema's (nog niet gebouwd, kleuren bewaard)
 
 **Optie 2 — Midnight Blue**
 ```
@@ -181,7 +191,7 @@ Sidebar active: `rgba(79,195,247,.15)` / Badge: `rgba(79,195,247,.2)`
 ```
 Sidebar active: `rgba(91,141,238,.2)` / Badge: `rgba(91,141,238,.2)`
 
-Preview: `preview-thema/index.html` (lokaal, niet in repo)
+Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
 
 ---
 
@@ -191,10 +201,12 @@ Preview: `preview-thema/index.html` (lokaal, niet in repo)
 |---|------|-----------|
 | 1 | ~~Feature branch mergen naar `main`~~ ✅ | ~~Hoog~~ |
 | 2 | ~~Notities/beschrijving per taak~~ ✅ (kolom later verwijderd) | ~~Gemiddeld~~ |
-| 3 | Mobiele PWA bouwen (zie plan hieronder) | Hoog — wacht op stabiele desktop |
-| 4 | Authenticatie | Laag (1 gebruiker) |
-| 5 | Beheer-sectie (sidebar knop bestaat al) | Laag |
-| 6 | Offline support mobiele app (Service Worker) | Later |
+| 3 | ~~Apple Dark thema~~ ✅ | ~~Gemiddeld~~ |
+| 4 | Mobiele PWA bouwen (zie plan hieronder) | Hoog — wacht op stabiele desktop |
+| 5 | Claude Chat inbox-instructie aanpassen (door gebruiker zelf) | Gemiddeld |
+| 6 | Authenticatie | Laag (1 gebruiker) |
+| 7 | Beheer-sectie (sidebar knop bestaat al) | Laag |
+| 8 | Offline support mobiele app (Service Worker) | Later |
 
 ---
 
@@ -233,18 +245,17 @@ Preview: `preview-thema/index.html` (lokaal, niet in repo)
 
 **Taak detail**
 - Naam (bewerkbaar)
-- Deadline, Geschat, Context, Notitie — allemaal bewerkbaar
+- Deadline, Geschat, Context — allemaal bewerkbaar
 - Subtaken zichtbaar en bewerkbaar
 - Afvinken (→ gaat naar Voltooid)
 - Verwijderen
 
 ### Design
-- Zelfde stijl als desktop: wit, Apple-native, clean
-- Dark mode volgt systeeminstelling (zelfde als desktop)
+- Zelfde stijl als desktop: Apple Dark thema
+- Dark mode volgt systeeminstelling
 
 ### Nog niet besloten
 - Offline support (Service Worker + IndexedDB) — later toe te voegen
-- Relatie desktop ↔ mobiel: wijzigingen gaan **niet automatisch** mee, moeten handmatig worden doorgevoerd
 
 ---
 
@@ -258,7 +269,7 @@ Preview: `preview-thema/index.html` (lokaal, niet in repo)
 
 ```
 ├── index.html
-├── style.css
+├── style.css                           # Apple Dark thema (altijd donker)
 ├── api.js                              # Supabase config + fetch helpers
 ├── ui.js                               # Modals, toast, datum
 ├── render.js                           # Tabel render functies
@@ -269,9 +280,9 @@ Preview: `preview-thema/index.html` (lokaal, niet in repo)
 ├── taken.json                          # Originele dataset (referentie)
 ├── OVERDRACHT.md                       # Dit document
 ├── README.md                           # MCP setup instructies
-├── PLAN_ANALYSE_DASHBOARD.md           # Afgerond plan (mag weg)
-├── ClaudeCode_Briefing_Taakmanager.md
-├── Taakanalyse_Briefing_RHL_v2.md
+├── preview-thema/
+│   └── index.html                      # Lokale thema-preview (3 opties)
+├── preview-thema.html                  # Bronbestand thema-preview
 └── supabase/
     ├── schema.sql
     ├── import.sql
@@ -280,3 +291,13 @@ Preview: `preview-thema/index.html` (lokaal, niet in repo)
     ├── hernummer.sql
     └── inbox.sql
 ```
+
+---
+
+## Technische aandachtspunten voor volgende sessie
+
+- **`buildIndexes()`** wordt aangeroepen in zowel `init()` als `reloadData()` — dit is bewust en noodzakelijk (bug die één keer voorkwam: alleen in reloadData stond het, waardoor eerste load leeg bleef)
+- **`catFilter`** is een state-variabele in `app.js` voor WERK/PRIVÉ filtering, wordt toegepast in `getViewProjects()`
+- **Toolbar-knoppen** worden per view getoond/verborgen in `renderAll()` via `style.display`
+- **Supabase MCP** in Claude Code: gebruik `mcp__a7e63fc8-f838-4adc-a37a-edeb0796093c__execute_sql` met `project_id: "fhkttfzqdjynzmtjbujv"`
+- **Soft delete:** alle drie tabellen hebben `verwijderd_op timestamptz`. Queries filteren altijd op `verwijderd_op IS NULL`

@@ -35,6 +35,22 @@ Apple-native taakmanager als platte tabel. Gesplitst in bestanden:
 
 **Laadvolgorde scripts:** ui.js → api.js → render.js → app.js → analyse.js
 
+### Wijzigingen deze sessie (1 april 2026)
+- Notitie kolom toegevoegd en later weer verwijderd
+- Hiërarchische nummering (1 / 1.1 / 1.1.2) in `#` kolom
+- Voltooid-weergave: klik op ✓ om taak terug te zetten naar actief
+- Soft delete was al correct geïmplementeerd (geen wijziging nodig)
+- Vandaag & Verlopen: toont ook verlopen deadlines (dl <= 0)
+- Prioriteit en Vandaag tonen nu individuele regels (zoals Inbox)
+- Prio-tile is klikbaar → navigeert naar Prioriteit-weergave
+- Statistiek-tiles aangepast: Aantal projecten / Aantal open taken / Aantal prioriteit taken
+- Inbox: ↗ knop per rij om taak als verwerkt te markeren (inbox=false)
+- Inbox: "Alles verwerken" knop
+- Toolbar: WERK (blauw) en PRIVÉ (oranje) filterknoppen
+- `+` knop en "+ Nieuwe taak" knop zijn groen
+- "+ Nieuwe taak" verplaatst naar toolbar (was rechtsbovenin)
+- 🗑 knop altijd zichtbaar (was alleen bij hover)
+
 ### 2. Supabase backend
 
 - **Project URL:** `https://fhkttfzqdjynzmtjbujv.supabase.co`
@@ -133,11 +149,62 @@ De gebruiker heeft een beperkt maandbudget. Hoog verbruik stopt de doorontwikkel
 
 | # | Item | Prioriteit |
 |---|------|-----------|
-| 1 | Feature branch mergen naar `main` voor GitHub Pages | Hoog |
-| 2 | Notities/beschrijving per taak | Gemiddeld |
-| 3 | Responsive / mobiel design | Later |
+| 1 | ~~Feature branch mergen naar `main`~~ ✅ | ~~Hoog~~ |
+| 2 | ~~Notities/beschrijving per taak~~ ✅ (kolom later verwijderd) | ~~Gemiddeld~~ |
+| 3 | Mobiele PWA bouwen (zie plan hieronder) | Hoog — wacht op stabiele desktop |
 | 4 | Authenticatie | Laag (1 gebruiker) |
 | 5 | Beheer-sectie (sidebar knop bestaat al) | Laag |
+| 6 | Offline support mobiele app (Service Worker) | Later |
+
+---
+
+## Mobiele app — plan (nog niet gebouwd)
+
+**Wachten tot desktop stabiel is** voordat we dit bouwen.
+
+### Techniek
+- PWA (Progressive Web App) — geen App Store, geen Swift, geen Xcode nodig
+- Aparte pagina: `mobile.html` in dezelfde repo → `https://rhlos.github.io/rhl-taakmanager/mobile.html`
+- Zelfde Supabase backend → data altijd gesynchroniseerd met desktop
+- Deelt `api.js` met desktop
+- Eigen CSS en render logica (niet automatisch gesynchroniseerd met desktop)
+- Installatie: Safari op iPhone → "Zet op beginscherm"
+
+### Geïnspireerd op Microsoft To Do (GTD-stijl)
+
+### Schermopbouw
+
+**Home (Inbox)**
+- Lijst van inbox-taken
+- Swipe links → verwijderen
+- Tik op taak → Taak detail scherm
+- `+` knop onderaan → nieuwe taak aanmaken (automatisch inbox=true)
+
+**Menu (slide-in van links)**
+- Inbox / Vandaag & Verlopen / Prioriteit / Voltooid
+- Projectenlijst (ingeklapt, uitklapbaar)
+- Tik op project → Project detail scherm
+
+**Project detail**
+- Lijst van taken binnen het project
+- Taken uitklapbaar → subtaken zichtbaar
+- Tik op taak → Taak detail scherm
+- `+` knop → nieuwe taak aan dit project toevoegen
+
+**Taak detail**
+- Naam (bewerkbaar)
+- Deadline, Geschat, Context, Notitie — allemaal bewerkbaar
+- Subtaken zichtbaar en bewerkbaar
+- Afvinken (→ gaat naar Voltooid)
+- Verwijderen
+
+### Design
+- Zelfde stijl als desktop: wit, Apple-native, clean
+- Dark mode volgt systeeminstelling (zelfde als desktop)
+
+### Nog niet besloten
+- Offline support (Service Worker + IndexedDB) — later toe te voegen
+- Relatie desktop ↔ mobiel: wijzigingen gaan **niet automatisch** mee, moeten handmatig worden doorgevoerd
 
 ---
 

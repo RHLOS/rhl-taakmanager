@@ -324,8 +324,8 @@
             <td>${catHtml}</td>
             <td><span style="color:var(--text-3);font-size:11px;">${item.project}</span></td>
             <td>${item.taak ? `<span style="color:var(--text-3);font-size:11px;">${item.taak}</span>` : ''}</td>
-            <td style="text-decoration:line-through;color:var(--text-3);">${esc(item.tekst)}</td>
-            <td><span class="dl normal">${item.datum ? formatDate(item.datum) : ''}</span></td>
+            <td style="text-decoration:line-through;color:var(--text-3);">${esc(item.tekst)}${item.datum ? `<br><span style="font-size:11px;color:var(--text-3);">Afgerond: ${formatDate(item.datum)}</span>` : ''}</td>
+            <td></td>
             <td></td>
             <td></td>
             <td></td>
@@ -363,9 +363,9 @@
             <td class="cp"></td>
             <td></td>
             <td><span style="color:var(--text-3);font-size:11px;">${item._project || item._type}</span></td>
-            <td>${esc(item._label)}</td>
+            <td>${esc(item._label)}${verwijderdDatum ? `<br><span style="font-size:11px;color:var(--text-3);">Verwijderd: ${verwijderdDatum}</span>` : ''}</td>
             <td></td>
-            <td><span class="dl normal">${verwijderdDatum}</span></td>
+            <td></td>
             <td></td>
             <td></td>
             <td></td>

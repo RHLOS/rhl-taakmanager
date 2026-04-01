@@ -145,6 +145,46 @@ De gebruiker heeft een beperkt maandbudget. Hoog verbruik stopt de doorontwikkel
 
 ---
 
+## Thema — Apple Dark (actief)
+
+Geïmplementeerd op 1 april 2026. `style.css` gebruikt altijd de donkere Apple kleuren — geen lichtmodus meer.
+
+| Variabele | Waarde | Omschrijving |
+|-----------|--------|-------------|
+| `--bg` | `#000000` | Hoofdachtergrond (zwart) |
+| `--sidebar-bg` | `#1c1c1e` | Sidebar |
+| `--card` | `#1c1c1e` | Kaarten / tabel |
+| `--text` | `#f5f5f7` | Primaire tekst |
+| `--text-2` | `#98989d` | Secundaire tekst |
+| `--text-3` | `#636366` | Dimme tekst / nummers |
+| `--sep` | `#3a3a3c` | Scheidingslijnen |
+| `--accent` | `#0a84ff` | Blauw accent |
+| `--red` | `#ff453a` | Rood |
+| `--orange` | `#ff9f0a` | Oranje (Privé) |
+| `--green` | `#30d158` | Groen (afvinken) |
+
+### Alternatieve thema's (nog niet gebouwd)
+
+**Optie 2 — Midnight Blue**
+```
+--bg: #0d1b2a  --sidebar-bg: #0a1628  --card: #1b2838
+--sep: #2a3f5a  --accent: #4fc3f7  --text: #e8f4ff
+--text-2: #a8c8f0  --text-3: #4a6fa5
+```
+Sidebar active: `rgba(79,195,247,.15)` / Badge: `rgba(79,195,247,.2)`
+
+**Optie 3 — Indigo Dark**
+```
+--bg: #1a1f36  --sidebar-bg: #141929  --card: #252b44
+--sep: #353d5e  --accent: #5b8dee  --text: #e8eaf6
+--text-2: #b0badd  --text-3: #5b6a9a
+```
+Sidebar active: `rgba(91,141,238,.2)` / Badge: `rgba(91,141,238,.2)`
+
+Preview: `preview-thema/index.html` (lokaal, niet in repo)
+
+---
+
 ## Nog te doen
 
 | # | Item | Prioriteit |

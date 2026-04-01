@@ -1,18 +1,18 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #f5f5f7;
-      --sidebar-bg: #fafafa;
-      --card: #ffffff;
-      --text: #1d1d1f;
-      --text-2: #86868b;
-      --text-3: #aeaeb2;
-      --sep: #e8e8ed;
-      --accent: #007aff;
-      --red: #ff3b30;
-      --orange: #ff9500;
-      --green: #34c759;
-      --yellow: #ffcc00;
+      --bg: #000000;
+      --sidebar-bg: #1c1c1e;
+      --card: #1c1c1e;
+      --text: #f5f5f7;
+      --text-2: #98989d;
+      --text-3: #636366;
+      --sep: #3a3a3c;
+      --accent: #0a84ff;
+      --red: #ff453a;
+      --orange: #ff9f0a;
+      --green: #30d158;
+      --yellow: #ffd60a;
       --sidebar-w: 240px;
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
       font-size: 15px;
@@ -54,8 +54,8 @@
       transition: background .15s;
       user-select: none;
     }
-    .sidebar-item:hover { background: rgba(0,0,0,.04); }
-    .sidebar-item.active { background: rgba(0,122,255,.1); color: var(--accent); }
+    .sidebar-item:hover { background: rgba(255,255,255,.06); }
+    .sidebar-item.active { background: rgba(10,132,255,.18); color: var(--accent); }
     .sidebar-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
     .sidebar-item .badge {
       margin-left: auto; font-size: 11px; font-weight: 600;
@@ -143,8 +143,8 @@
       cursor: pointer; font-family: inherit;
       transition: all .15s; user-select: none;
     }
-    .filter-dd-btn:hover { border-color: #ccc; }
-    #btnFilterWerk { background: rgba(0,122,255,.08); color: var(--accent); border-color: rgba(0,122,255,.2); }
+    .filter-dd-btn:hover { border-color: #636366; }
+    #btnFilterWerk { background: rgba(10,132,255,.12); color: var(--accent); border-color: rgba(10,132,255,.25); }
     #btnFilterWerk.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     #btnFilterPrive { background: rgba(255,149,0,.1); color: var(--orange); border-color: rgba(255,149,0,.25); }
     #btnFilterPrive.active { background: var(--orange); color: #fff; border-color: var(--orange); }
@@ -177,13 +177,13 @@
       cursor: pointer; border: none; background: none;
       font-family: inherit; color: var(--text); text-align: left;
     }
-    .col-popup-btn:hover { background: rgba(0,122,255,.06); }
+    .col-popup-btn:hover { background: rgba(10,132,255,.1); }
     .col-popup-btn.active { color: var(--accent); font-weight: 600; }
     .col-popup label {
       display: flex; align-items: center; gap: 8px;
       padding: 5px 14px; font-size: 12px; cursor: pointer;
     }
-    .col-popup label:hover { background: rgba(0,122,255,.06); }
+    .col-popup label:hover { background: rgba(10,132,255,.1); }
     .col-popup input[type="checkbox"] { accent-color: var(--accent); }
     .col-popup-actions {
       display: flex; gap: 6px; padding: 8px 14px 4px; justify-content: flex-end;
@@ -252,7 +252,7 @@
     .del-btn:hover { color: var(--red); background: rgba(255,59,48,.08); }
 
     /* Rij hover */
-    tbody tr:hover td { background: rgba(0,122,255,.015); }
+    tbody tr:hover td { background: rgba(255,255,255,.03); }
 
     /* Project-rij */
     tr.row-project td { font-weight: 600; font-size: 13px; }
@@ -262,8 +262,8 @@
       font-size: 10px; font-weight: 700; padding: 2px 7px;
       border-radius: 4px; display: inline-block;
     }
-    .cat.w { background: rgba(0,122,255,.08); color: var(--accent); }
-    .cat.p { background: rgba(255,149,0,.1); color: var(--orange); }
+    .cat.w { background: rgba(10,132,255,.15); color: var(--accent); }
+    .cat.p { background: rgba(255,159,10,.15); color: var(--orange); }
 
     /* Chevron */
     .chev {
@@ -296,12 +296,12 @@
       cursor: pointer; border-radius: 4px; padding: 2px 4px; margin: -2px -4px;
       transition: background .15s;
     }
-    .editable:hover { background: rgba(0,122,255,.06); }
+    .editable:hover { background: rgba(10,132,255,.1); }
     .editable-dl, .editable-num {
       cursor: pointer; border-radius: 4px; padding: 2px 4px; margin: -2px -4px;
       transition: background .15s;
     }
-    .editable-dl:hover, .editable-num:hover, .editable-select:hover { background: rgba(0,122,255,.06); }
+    .editable-dl:hover, .editable-num:hover, .editable-select:hover { background: rgba(10,132,255,.1); }
     .editable-select {
       cursor: pointer; border-radius: 4px; padding: 2px 4px; margin: -2px -4px;
       transition: background .15s; font-size: 11px; color: var(--text-2);
@@ -316,7 +316,7 @@
       display: flex; align-items: center; gap: 8px;
       padding: 6px 14px; font-size: 12px; cursor: pointer;
     }
-    .select-popup label:hover { background: rgba(0,122,255,.06); }
+    .select-popup label:hover { background: rgba(10,132,255,.1); }
     .select-popup input { accent-color: var(--accent); }
     .edit-input {
       width: 100%; border: 1px solid var(--accent); border-radius: 4px;
@@ -329,7 +329,7 @@
       width: 60px; text-align: center; cursor: pointer;
       font-size: 14px; vertical-align: middle;
     }
-    .notitie-cel:hover { background: rgba(0,122,255,.04); }
+    .notitie-cel:hover { background: rgba(10,132,255,.08); }
     .notitie-add { font-size: 16px; color: var(--text-3); }
     .notitie-ta { resize: vertical; min-height: 60px; }
 
@@ -344,12 +344,12 @@
       border-radius: 4px; display: inline-block;
     }
     .status-badge.actief { background: rgba(52,199,89,.1); color: var(--green); }
-    .status-badge.inbox { background: rgba(0,122,255,.08); color: var(--accent); }
+    .status-badge.inbox { background: rgba(10,132,255,.15); color: var(--accent); }
 
     /* Context tags */
     .ctx { display: flex; flex-direction: column; gap: 2px; }
     .ctx span {
-      font-size: 10px; background: rgba(0,0,0,.04); padding: 2px 6px;
+      font-size: 10px; background: rgba(255,255,255,.08); padding: 2px 6px;
       border-radius: 3px; color: var(--text-2); white-space: nowrap;
     }
 
@@ -449,35 +449,20 @@
     /* ═══════════════════════════════════
        DARK MODE
        ═══════════════════════════════════ */
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #1c1c1e;
-        --sidebar-bg: #2c2c2e;
-        --card: #2c2c2e;
-        --text: #f5f5f7;
-        --text-2: #98989d;
-        --text-3: #636366;
-        --sep: #3a3a3c;
-        --accent: #0a84ff;
-        --red: #ff453a;
-        --orange: #ff9f0a;
-        --green: #30d158;
-        --yellow: #ffd60a;
-      }
-      .sidebar { border-right-color: var(--sep); }
-      .search-input { background: #3a3a3c; border-color: var(--sep); color: var(--text); }
-      tbody td { border-top-color: #3a3a3c; }
-      .edit-input { background: #3a3a3c; border-color: var(--accent); color: var(--text); }
-      .modal-body input[type="text"], .modal-body select {
-        background: #3a3a3c; border-color: var(--sep); color: var(--text);
-      }
-      .modal-btn.cancel { background: #3a3a3c; color: var(--text); }
-      .toast { background: #3a3a3c; }
-      .star.off { color: #4a4a4c; }
-      .cb { color: #4a4a4c; }
-      .cat.w { background: rgba(10,132,255,.15); }
-      .cat.p { background: rgba(255,159,10,.15); }
-      .ctx span { background: rgba(255,255,255,.08); }
-      .col-popup { background: #2c2c2e; border-color: var(--sep); }
-      .select-popup { background: #2c2c2e; border-color: var(--sep); }
+    /* ═══════════════════════════════════
+       APPLE DARK — altijd actief
+       ═══════════════════════════════════ */
+    .sidebar { border-right-color: var(--sep); }
+    .search-input { background: #2c2c2e; border-color: var(--sep); color: var(--text); }
+    tbody td { border-top-color: var(--sep); }
+    .edit-input { background: #2c2c2e; border-color: var(--accent); color: var(--text); }
+    .modal-body input[type="text"], .modal-body select {
+      background: #2c2c2e; border-color: var(--sep); color: var(--text);
     }
+    .modal-btn.cancel { background: #2c2c2e; color: var(--text); }
+    .toast { background: #2c2c2e; }
+    .star.off { color: #4a4a4c; }
+    .cb { color: #4a4a4c; }
+    .ctx span { background: rgba(255,255,255,.08); }
+    .col-popup { background: #1c1c1e; border-color: var(--sep); }
+    .select-popup { background: #1c1c1e; border-color: var(--sep); }

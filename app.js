@@ -673,12 +673,14 @@
 
       const popup = document.createElement('div');
       popup.className = 'date-picker-popup';
+      Object.assign(popup.style, { position:'fixed', width:'228px', background:'var(--card)', border:'1px solid var(--sep)', borderRadius:'10px', padding:'12px', zIndex:'2000', boxShadow:'0 8px 32px rgba(0,0,0,.6)', userSelect:'none' });
 
       function render() {
         popup.innerHTML = '';
 
         const header = document.createElement('div');
         header.className = 'dp-header';
+        Object.assign(header.style, { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'8px' });
         const prevBtn = document.createElement('button');
         prevBtn.className = 'dp-nav';
         prevBtn.textContent = '‹';
@@ -696,16 +698,19 @@
 
         const weekdays = document.createElement('div');
         weekdays.className = 'dp-weekdays';
+        Object.assign(weekdays.style, { display:'grid', gridTemplateColumns:'repeat(7,1fr)', marginBottom:'4px' });
         WEEKDAGEN.forEach(d => {
           const wd = document.createElement('div');
           wd.className = 'dp-weekday';
           wd.textContent = d;
+          Object.assign(wd.style, { textAlign:'center', fontSize:'11px', color:'var(--text-3)', padding:'2px 0' });
           weekdays.appendChild(wd);
         });
         popup.appendChild(weekdays);
 
         const days = document.createElement('div');
         days.className = 'dp-days';
+        Object.assign(days.style, { display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:'2px' });
 
         const firstDay = new Date(year, month, 1).getDay();
         const startOffset = (firstDay + 6) % 7;
@@ -713,9 +718,12 @@
         const daysInPrev = new Date(year, month, 0).getDate();
         const todayStr = today.toISOString().split('T')[0];
 
+        const dayBase = { textAlign:'center', padding:'5px 0', fontSize:'13px', borderRadius:'6px', cursor:'pointer' };
+
         for (let i = startOffset - 1; i >= 0; i--) {
           const day = document.createElement('div');
           day.className = 'dp-day other-month';
+          Object.assign(day.style, { ...dayBase, color:'var(--text-3)', cursor:'default' });
           day.textContent = daysInPrev - i;
           days.appendChild(day);
         }
@@ -724,9 +732,17 @@
           const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
           const day = document.createElement('div');
           day.className = 'dp-day';
-          if (dateStr === todayStr) day.classList.add('today');
-          if (dateStr === currentValue) day.classList.add('selected');
+          const isToday = dateStr === todayStr;
+          const isSelected = dateStr === currentValue;
+          Object.assign(day.style, {
+            ...dayBase,
+            color: isSelected ? '#fff' : isToday ? 'var(--accent)' : 'var(--text)',
+            background: isSelected ? 'var(--accent)' : '',
+            fontWeight: (isToday || isSelected) ? '700' : '',
+          });
           day.textContent = d;
+          day.addEventListener('mouseenter', () => { if (!isSelected) day.style.background = 'var(--sep)'; });
+          day.addEventListener('mouseleave', () => { if (!isSelected) day.style.background = ''; });
           day.addEventListener('click', (e) => {
             e.stopPropagation();
             popup.remove();
@@ -741,6 +757,7 @@
         for (let d = 1; d <= remaining; d++) {
           const day = document.createElement('div');
           day.className = 'dp-day other-month';
+          Object.assign(day.style, { ...dayBase, color:'var(--text-3)', cursor:'default' });
           day.textContent = d;
           days.appendChild(day);
         }

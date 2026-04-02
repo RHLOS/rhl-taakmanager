@@ -171,6 +171,32 @@
       return true;
     }
 
+    function sortItems(items) {
+      if (!currentSort) return items;
+      const s = [...items];
+      const dir = currentSort.dir === 'asc' ? 1 : -1;
+      s.sort((a, b) => {
+        let va, vb;
+        const projA = allProjecten.find(p => p.id === a.taak_id) ||
+          (() => { const st = allSubtaken.find(st => st.id === a.subtaak_id); return allProjecten.find(p => p.id === st?.taak_id); })();
+        const projB = allProjecten.find(p => p.id === b.taak_id) ||
+          (() => { const st = allSubtaken.find(st => st.id === b.subtaak_id); return allProjecten.find(p => p.id === st?.taak_id); })();
+        switch(currentSort.col) {
+          case 'project': va = (projA?.taak || '').toLowerCase(); vb = (projB?.taak || '').toLowerCase(); break;
+          case 'cat': va = projA?.categorie || ''; vb = projB?.categorie || ''; break;
+          case 'prio': va = (a.prio_ster || a.prioriteit) ? 0 : 1; vb = (b.prio_ster || b.prioriteit) ? 0 : 1; break;
+          case 'taak': va = (a.tekst || '').toLowerCase(); vb = (b.tekst || '').toLowerCase(); break;
+          case 'deadline': va = a.deadline || '9999-12-31'; vb = b.deadline || '9999-12-31'; break;
+          case 'geschat': va = a.tijdsinschatting || ''; vb = b.tijdsinschatting || ''; break;
+          default: va = a.volgorde || 0; vb = b.volgorde || 0;
+        }
+        if (va < vb) return -1 * dir;
+        if (va > vb) return 1 * dir;
+        return 0;
+      });
+      return s;
+    }
+
     function sortProjecten(projects) {
       if (!currentSort) return projects;
       const s = [...projects];

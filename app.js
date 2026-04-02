@@ -803,7 +803,6 @@
               const volgorde = bestaande.length + 1;
               await post('subtaken', {
                 taak_id: parentId,
-                sub_id: '',
                 tekst: tekst.trim(),
                 volgorde: volgorde
               });

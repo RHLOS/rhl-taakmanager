@@ -670,110 +670,58 @@
 
       const MAANDEN = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
       const WEEKDAGEN = ['Ma','Di','Wo','Do','Vr','Za','Zo'];
+      const todayStr = today.toISOString().split('T')[0];
 
       const popup = document.createElement('div');
-      popup.className = 'date-picker-popup';
-      Object.assign(popup.style, { position:'fixed', width:'228px', background:'var(--card)', border:'1px solid var(--sep)', borderRadius:'10px', padding:'12px', zIndex:'2000', boxShadow:'0 8px 32px rgba(0,0,0,.6)', userSelect:'none' });
+      popup.style.cssText = 'position:fixed;width:228px;background:#1c1c1e;border:1px solid #3a3a3c;border-radius:10px;padding:12px;z-index:2000;box-shadow:0 8px 32px rgba(0,0,0,.6);user-select:none;font-family:inherit;color:#f5f5f7;';
 
       function render() {
-        popup.innerHTML = '';
-
-        const header = document.createElement('div');
-        header.className = 'dp-header';
-        Object.assign(header.style, { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'8px' });
-        const prevBtn = document.createElement('button');
-        prevBtn.className = 'dp-nav';
-        prevBtn.textContent = '‹';
-        prevBtn.addEventListener('click', (e) => { e.stopPropagation(); month--; if (month < 0) { month = 11; year--; } render(); });
-        const title = document.createElement('span');
-        title.textContent = MAANDEN[month] + ' ' + year;
-        const nextBtn = document.createElement('button');
-        nextBtn.className = 'dp-nav';
-        nextBtn.textContent = '›';
-        nextBtn.addEventListener('click', (e) => { e.stopPropagation(); month++; if (month > 11) { month = 0; year++; } render(); });
-        header.appendChild(prevBtn);
-        header.appendChild(title);
-        header.appendChild(nextBtn);
-        popup.appendChild(header);
-
-        const weekdays = document.createElement('div');
-        weekdays.className = 'dp-weekdays';
-        Object.assign(weekdays.style, { display:'grid', gridTemplateColumns:'repeat(7,1fr)', marginBottom:'4px' });
-        WEEKDAGEN.forEach(d => {
-          const wd = document.createElement('div');
-          wd.className = 'dp-weekday';
-          wd.textContent = d;
-          Object.assign(wd.style, { textAlign:'center', fontSize:'11px', color:'var(--text-3)', padding:'2px 0' });
-          weekdays.appendChild(wd);
-        });
-        popup.appendChild(weekdays);
-
-        const days = document.createElement('div');
-        days.className = 'dp-days';
-        Object.assign(days.style, { display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:'2px' });
-
         const firstDay = new Date(year, month, 1).getDay();
         const startOffset = (firstDay + 6) % 7;
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const daysInPrev = new Date(year, month, 0).getDate();
-        const todayStr = today.toISOString().split('T')[0];
 
-        const dayBase = { textAlign:'center', padding:'5px 0', fontSize:'13px', borderRadius:'6px', cursor:'pointer' };
-
+        let dayCells = '';
         for (let i = startOffset - 1; i >= 0; i--) {
-          const day = document.createElement('div');
-          day.className = 'dp-day other-month';
-          Object.assign(day.style, { ...dayBase, color:'var(--text-3)', cursor:'default' });
-          day.textContent = daysInPrev - i;
-          days.appendChild(day);
+          dayCells += `<div style="text-align:center;padding:5px 0;font-size:13px;color:#636366;">${daysInPrev - i}</div>`;
         }
-
         for (let d = 1; d <= daysInMonth; d++) {
           const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-          const day = document.createElement('div');
-          day.className = 'dp-day';
           const isToday = dateStr === todayStr;
           const isSelected = dateStr === currentValue;
-          Object.assign(day.style, {
-            ...dayBase,
-            color: isSelected ? '#fff' : isToday ? 'var(--accent)' : 'var(--text)',
-            background: isSelected ? 'var(--accent)' : '',
-            fontWeight: (isToday || isSelected) ? '700' : '',
-          });
-          day.textContent = d;
-          day.addEventListener('mouseenter', () => { if (!isSelected) day.style.background = 'var(--sep)'; });
-          day.addEventListener('mouseleave', () => { if (!isSelected) day.style.background = ''; });
-          day.addEventListener('click', (e) => {
-            e.stopPropagation();
-            popup.remove();
-            document.removeEventListener('click', outsideHandler);
-            onSelect(dateStr);
-          });
-          days.appendChild(day);
+          const bg = isSelected ? 'background:#0a84ff;' : '';
+          const col = isSelected ? 'color:#fff;' : isToday ? 'color:#0a84ff;' : 'color:#f5f5f7;';
+          const fw = (isToday || isSelected) ? 'font-weight:700;' : '';
+          dayCells += `<div class="dp-day" data-date="${dateStr}" style="text-align:center;padding:5px 0;font-size:13px;border-radius:6px;cursor:pointer;${bg}${col}${fw}">${d}</div>`;
         }
-
         const total = startOffset + daysInMonth;
         const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
         for (let d = 1; d <= remaining; d++) {
-          const day = document.createElement('div');
-          day.className = 'dp-day other-month';
-          Object.assign(day.style, { ...dayBase, color:'var(--text-3)', cursor:'default' });
-          day.textContent = d;
-          days.appendChild(day);
+          dayCells += `<div style="text-align:center;padding:5px 0;font-size:13px;color:#636366;">${d}</div>`;
         }
 
-        popup.appendChild(days);
+        const wdHtml = WEEKDAGEN.map(d => `<div style="text-align:center;font-size:11px;color:#636366;padding:2px 0;">${d}</div>`).join('');
 
-        const clearBtn = document.createElement('button');
-        clearBtn.className = 'dp-clear';
-        clearBtn.textContent = 'Deadline wissen';
-        clearBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          popup.remove();
-          document.removeEventListener('click', outsideHandler);
-          onSelect('');
+        popup.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <button class="dp-prev" style="background:none;border:none;color:#0a84ff;cursor:pointer;font-size:20px;padding:0 6px;line-height:1;border-radius:6px;">‹</button>
+            <span style="font-size:13px;font-weight:600;text-transform:capitalize;">${MAANDEN[month]} ${year}</span>
+            <button class="dp-next" style="background:none;border:none;color:#0a84ff;cursor:pointer;font-size:20px;padding:0 6px;line-height:1;border-radius:6px;">›</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;">${wdHtml}</div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">${dayCells}</div>
+          <button class="dp-clear" style="display:block;width:100%;margin-top:8px;padding:5px;background:none;border:1px solid #3a3a3c;border-radius:6px;color:#98989d;font-size:12px;cursor:pointer;font-family:inherit;">Deadline wissen</button>
+        `;
+
+        popup.querySelector('.dp-prev').addEventListener('click', (e) => { e.stopPropagation(); month--; if (month < 0) { month = 11; year--; } render(); });
+        popup.querySelector('.dp-next').addEventListener('click', (e) => { e.stopPropagation(); month++; if (month > 11) { month = 0; year++; } render(); });
+        popup.querySelector('.dp-clear').addEventListener('click', (e) => { e.stopPropagation(); popup.remove(); document.removeEventListener('click', outsideHandler); onSelect(''); });
+
+        popup.querySelectorAll('.dp-day').forEach(el => {
+          el.addEventListener('mouseenter', () => { if (el.dataset.date !== currentValue) el.style.background = '#3a3a3c'; });
+          el.addEventListener('mouseleave', () => { if (el.dataset.date !== currentValue) el.style.background = ''; });
+          el.addEventListener('click', (e) => { e.stopPropagation(); popup.remove(); document.removeEventListener('click', outsideHandler); onSelect(el.dataset.date); });
         });
-        popup.appendChild(clearBtn);
       }
 
       render();

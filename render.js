@@ -113,9 +113,9 @@
     }
 
     function renderInbox(tbody) {
-      const inboxSubs = allSubtaken.filter(s => !s.gedaan && s.inbox);
-      const inboxSubSubs = allSubsubtaken.filter(s => !s.gedaan && s.inbox);
-      const inboxProjecten = allProjecten.filter(p => !p.gedaan && p.inbox);
+      const inboxSubs = allSubtaken.filter(s => !s.gedaan && isActief(s) && s.inbox);
+      const inboxSubSubs = allSubsubtaken.filter(s => !s.gedaan && isActief(s) && s.inbox);
+      const inboxProjecten = allProjecten.filter(p => !p.gedaan && isActief(p) && p.inbox);
 
       if (inboxSubs.length === 0 && inboxSubSubs.length === 0 && inboxProjecten.length === 0) {
         tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
@@ -189,9 +189,13 @@
       });
     }
 
+    function subCat(sub) { return allProjecten.find(p => p.id === sub.taak_id)?.categorie || 'Werk'; }
+    function subsubCat(ss) { const sub = allSubtaken.find(s => s.id === ss.subtaak_id); return sub ? subCat(sub) : 'Werk'; }
+    function matchesCat(cat) { return !catFilter || cat === catFilter; }
+
     function renderVandaag(tbody) {
-      const subs = allSubtaken.filter(s => !s.gedaan && isActief(s) && s.deadline && daysUntil(s.deadline) <= 0);
-      const subsubs = allSubsubtaken.filter(ss => !ss.gedaan && isActief(ss) && ss.deadline && daysUntil(ss.deadline) <= 0);
+      const subs = allSubtaken.filter(s => !s.gedaan && isActief(s) && s.deadline && daysUntil(s.deadline) <= 0 && matchesCat(subCat(s)));
+      const subsubs = allSubsubtaken.filter(ss => !ss.gedaan && isActief(ss) && ss.deadline && daysUntil(ss.deadline) <= 0 && matchesCat(subsubCat(ss)));
 
       if (subs.length === 0 && subsubs.length === 0) {
         tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:40px;color:var(--text-2);">Geen verlopen of vandaag vervallende taken</td></tr>`;
@@ -242,8 +246,8 @@
     }
 
     function renderWeek(tbody) {
-      const subs = allSubtaken.filter(s => !s.gedaan && isActief(s) && s.deadline && daysUntil(s.deadline) >= 0 && daysUntil(s.deadline) <= 7);
-      const subsubs = allSubsubtaken.filter(ss => !ss.gedaan && isActief(ss) && ss.deadline && daysUntil(ss.deadline) >= 0 && daysUntil(ss.deadline) <= 7);
+      const subs = allSubtaken.filter(s => !s.gedaan && isActief(s) && s.deadline && daysUntil(s.deadline) >= 0 && daysUntil(s.deadline) <= 7 && matchesCat(subCat(s)));
+      const subsubs = allSubsubtaken.filter(ss => !ss.gedaan && isActief(ss) && ss.deadline && daysUntil(ss.deadline) >= 0 && daysUntil(ss.deadline) <= 7 && matchesCat(subsubCat(ss)));
 
       if (subs.length === 0 && subsubs.length === 0) {
         tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:40px;color:var(--text-2);">Geen taken met deadline deze week</td></tr>`;
@@ -294,8 +298,8 @@
     }
 
     function renderPrioriteit(tbody) {
-      const subs = allSubtaken.filter(s => !s.gedaan && isActief(s) && s.prio_ster);
-      const subsubs = allSubsubtaken.filter(ss => !ss.gedaan && isActief(ss) && ss.prioriteit);
+      const subs = allSubtaken.filter(s => !s.gedaan && isActief(s) && s.prio_ster && matchesCat(subCat(s)));
+      const subsubs = allSubsubtaken.filter(ss => !ss.gedaan && isActief(ss) && ss.prioriteit && matchesCat(subsubCat(ss)));
 
       if (subs.length === 0 && subsubs.length === 0) {
         tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:40px;color:var(--text-2);">Geen prioriteit taken</td></tr>`;

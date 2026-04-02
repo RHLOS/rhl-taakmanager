@@ -241,6 +241,58 @@
       });
     }
 
+    function renderWeek(tbody) {
+      const subs = allSubtaken.filter(s => !s.gedaan && isActief(s) && s.deadline && daysUntil(s.deadline) >= 0 && daysUntil(s.deadline) <= 7);
+      const subsubs = allSubsubtaken.filter(ss => !ss.gedaan && isActief(ss) && ss.deadline && daysUntil(ss.deadline) >= 0 && daysUntil(ss.deadline) <= 7);
+
+      if (subs.length === 0 && subsubs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:40px;color:var(--text-2);">Geen taken met deadline deze week</td></tr>`;
+        return;
+      }
+
+      subs.forEach(sub => {
+        const project = allProjecten.find(p => p.id === sub.taak_id);
+        const cat = project ? project.categorie : 'Werk';
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="row-taak">
+            <td class="col-nr-cell"></td>
+            <td class="cd"><span class="cb" data-id="${sub.id}" data-table="subtaken">○</span></td>
+            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
+            <td>${catBadge(cat)}</td>
+            <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
+            <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
+            <td></td>
+            <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
+            <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
+            <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
+            <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
+            <td class="col-add"><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
+          </tr>
+        `);
+      });
+
+      subsubs.forEach(ss => {
+        const sub = allSubtaken.find(s => s.id === ss.subtaak_id);
+        const project = sub ? allProjecten.find(p => p.id === sub.taak_id) : null;
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="row-subtaak">
+            <td class="col-nr-cell"></td>
+            <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
+            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+            <td></td>
+            <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
+            <td><span style="color:var(--text-3);font-size:11px;">${esc(sub?.tekst || '?')}</span></td>
+            <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${esc(ss.tekst)}</span></td>
+            <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
+            <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
+            <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
+            <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
+            <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
+          </tr>
+        `);
+      });
+    }
+
     function renderPrioriteit(tbody) {
       const subs = allSubtaken.filter(s => !s.gedaan && isActief(s) && s.prio_ster);
       const subsubs = allSubsubtaken.filter(ss => !ss.gedaan && isActief(ss) && ss.prioriteit);

@@ -337,6 +337,8 @@
         renderInbox(tbody);
       } else if (currentView === 'vandaag') {
         renderVandaag(tbody);
+      } else if (currentView === 'week') {
+        renderWeek(tbody);
       } else if (currentView === 'prioriteit') {
         renderPrioriteit(tbody);
       } else if (filtered.length === 0) {

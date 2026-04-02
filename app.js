@@ -625,24 +625,12 @@
       document.querySelectorAll('.editable-dl').forEach(el => {
         el.addEventListener('click', (e) => {
           e.stopPropagation();
-          if (el.querySelector('input')) return;
-
           const id = el.dataset.id;
           const table = el.dataset.table;
           const raw = el.dataset.raw || '';
           const current = el.textContent.trim();
 
-          const input = document.createElement('input');
-          input.className = 'edit-input';
-          input.type = 'date';
-          input.value = raw;
-          input.style.width = '130px';
-          el.textContent = '';
-          el.appendChild(input);
-          input.focus();
-
-          const save = async () => {
-            const val = input.value;
+          showDatePicker(el, raw, async (val) => {
             if (val) {
               el.dataset.raw = val;
               const days = daysUntil(val);
@@ -653,7 +641,6 @@
               el.className = 'editable-dl dl';
               el.textContent = '—';
             }
-
             if (val !== raw) {
               try {
                 await patch(table, id, { deadline: val || null });
@@ -662,15 +649,132 @@
                 alert('Opslaan mislukt: ' + err.message);
               }
             }
-          };
-
-          input.addEventListener('blur', save);
-          input.addEventListener('change', () => input.blur());
-          input.addEventListener('keydown', (ev) => {
-            if (ev.key === 'Escape') { el.textContent = current; }
           });
         });
       });
+    }
+
+    function showDatePicker(anchorEl, currentValue, onSelect) {
+      document.querySelectorAll('.date-picker-popup').forEach(p => p.remove());
+
+      const today = new Date();
+      let year, month;
+      if (currentValue) {
+        const d = new Date(currentValue + 'T00:00:00');
+        year = d.getFullYear();
+        month = d.getMonth();
+      } else {
+        year = today.getFullYear();
+        month = today.getMonth();
+      }
+
+      const MAANDEN = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+      const WEEKDAGEN = ['Ma','Di','Wo','Do','Vr','Za','Zo'];
+
+      const popup = document.createElement('div');
+      popup.className = 'date-picker-popup';
+
+      function render() {
+        popup.innerHTML = '';
+
+        const header = document.createElement('div');
+        header.className = 'dp-header';
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'dp-nav';
+        prevBtn.textContent = '‹';
+        prevBtn.addEventListener('click', (e) => { e.stopPropagation(); month--; if (month < 0) { month = 11; year--; } render(); });
+        const title = document.createElement('span');
+        title.textContent = MAANDEN[month] + ' ' + year;
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'dp-nav';
+        nextBtn.textContent = '›';
+        nextBtn.addEventListener('click', (e) => { e.stopPropagation(); month++; if (month > 11) { month = 0; year++; } render(); });
+        header.appendChild(prevBtn);
+        header.appendChild(title);
+        header.appendChild(nextBtn);
+        popup.appendChild(header);
+
+        const weekdays = document.createElement('div');
+        weekdays.className = 'dp-weekdays';
+        WEEKDAGEN.forEach(d => {
+          const wd = document.createElement('div');
+          wd.className = 'dp-weekday';
+          wd.textContent = d;
+          weekdays.appendChild(wd);
+        });
+        popup.appendChild(weekdays);
+
+        const days = document.createElement('div');
+        days.className = 'dp-days';
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const startOffset = (firstDay + 6) % 7;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPrev = new Date(year, month, 0).getDate();
+        const todayStr = today.toISOString().split('T')[0];
+
+        for (let i = startOffset - 1; i >= 0; i--) {
+          const day = document.createElement('div');
+          day.className = 'dp-day other-month';
+          day.textContent = daysInPrev - i;
+          days.appendChild(day);
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          const day = document.createElement('div');
+          day.className = 'dp-day';
+          if (dateStr === todayStr) day.classList.add('today');
+          if (dateStr === currentValue) day.classList.add('selected');
+          day.textContent = d;
+          day.addEventListener('click', (e) => {
+            e.stopPropagation();
+            popup.remove();
+            document.removeEventListener('click', outsideHandler);
+            onSelect(dateStr);
+          });
+          days.appendChild(day);
+        }
+
+        const total = startOffset + daysInMonth;
+        const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
+        for (let d = 1; d <= remaining; d++) {
+          const day = document.createElement('div');
+          day.className = 'dp-day other-month';
+          day.textContent = d;
+          days.appendChild(day);
+        }
+
+        popup.appendChild(days);
+
+        const clearBtn = document.createElement('button');
+        clearBtn.className = 'dp-clear';
+        clearBtn.textContent = 'Deadline wissen';
+        clearBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          popup.remove();
+          document.removeEventListener('click', outsideHandler);
+          onSelect('');
+        });
+        popup.appendChild(clearBtn);
+      }
+
+      render();
+      document.body.appendChild(popup);
+
+      const rect = anchorEl.getBoundingClientRect();
+      let top = rect.bottom + 4;
+      let left = rect.left;
+      if (left + 240 > window.innerWidth) left = window.innerWidth - 244;
+      if (top + 300 > window.innerHeight) top = rect.top - 304;
+      popup.style.top = top + 'px';
+      popup.style.left = left + 'px';
+
+      function outsideHandler() {
+        popup.remove();
+        document.removeEventListener('click', outsideHandler);
+      }
+      setTimeout(() => document.addEventListener('click', outsideHandler), 0);
     }
 
     // ═══ Werkelijk: klik om minuten in te voeren ═══

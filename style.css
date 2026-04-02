@@ -466,3 +466,83 @@
     .ctx span { background: rgba(255,255,255,.08); }
     .col-popup { background: #1c1c1e; border-color: var(--sep); }
     .select-popup { background: #1c1c1e; border-color: var(--sep); }
+
+  /* ── Date picker calendar popup ── */
+  .date-picker-popup {
+    position: fixed;
+    background: var(--card);
+    border: 1px solid var(--sep);
+    border-radius: 10px;
+    padding: 12px;
+    z-index: 2000;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    width: 228px;
+    user-select: none;
+  }
+  .dp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .dp-header span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    text-transform: capitalize;
+  }
+  .dp-nav {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0 6px;
+    border-radius: 6px;
+    line-height: 1;
+  }
+  .dp-nav:hover { background: var(--sep); }
+  .dp-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 4px;
+  }
+  .dp-weekday {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-3);
+    padding: 2px 0;
+  }
+  .dp-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+  .dp-day {
+    text-align: center;
+    padding: 5px 0;
+    font-size: 13px;
+    color: var(--text);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .dp-day:hover:not(.other-month) { background: var(--sep); }
+  .dp-day.other-month { color: var(--text-3); cursor: default; }
+  .dp-day.today { color: var(--accent); font-weight: 700; }
+  .dp-day.selected { background: var(--accent); color: #fff; font-weight: 600; }
+  .dp-day.selected:hover { background: var(--accent); }
+  .dp-clear {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 5px;
+    background: none;
+    border: 1px solid var(--sep);
+    border-radius: 6px;
+    color: var(--text-2);
+    font-size: 12px;
+    cursor: pointer;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  .dp-clear:hover { background: var(--sep); }

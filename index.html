@@ -84,45 +84,53 @@
   <!-- ═══ MAIN ═══ -->
   <div class="main">
 
-    <!-- Top bar -->
-    <div class="topbar">
-      <h1 id="viewTitle">Alle taken</h1>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div class="saving-indicator" id="savingIndicator">
-          <div class="saving-dot"></div> <span>Opslaan...</span>
+    <!-- Vaste bovenstrook -->
+    <div class="main-top">
+
+      <!-- Top bar -->
+      <div class="topbar">
+        <h1 id="viewTitle">Alle taken</h1>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="saving-indicator" id="savingIndicator">
+            <div class="saving-dot"></div> <span>Opslaan...</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Metrics -->
-    <div class="metrics">
-      <div class="metric">
-        <div class="num" id="mTotal">–</div>
-        <div class="lbl">Aantal projecten</div>
+      <!-- Metrics -->
+      <div class="metrics">
+        <div class="metric">
+          <div class="num" id="mTotal">–</div>
+          <div class="lbl">Aantal projecten</div>
+        </div>
+        <div class="metric">
+          <div class="num" id="mOpen">–</div>
+          <div class="lbl">Aantal open taken</div>
+        </div>
+        <div class="metric">
+          <div class="num" id="mAlles">–</div>
+          <div class="lbl">Alle open taken</div>
+        </div>
+        <div class="metric prio" id="tilePrio" style="cursor:pointer;" title="Toon prioriteit taken">
+          <div class="num" id="mPrio">–</div>
+          <div class="lbl">Aantal prioriteit taken</div>
+        </div>
       </div>
-      <div class="metric">
-        <div class="num" id="mOpen">–</div>
-        <div class="lbl">Aantal open taken</div>
-      </div>
-      <div class="metric">
-        <div class="num" id="mAlles">–</div>
-        <div class="lbl">Alle open taken</div>
-      </div>
-      <div class="metric prio" id="tilePrio" style="cursor:pointer;" title="Toon prioriteit taken">
-        <div class="num" id="mPrio">–</div>
-        <div class="lbl">Aantal prioriteit taken</div>
-      </div>
-    </div>
 
-    <!-- Toolbar -->
-    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
-      <button class="btn-new">+ Nieuwe taak</button>
-      <button class="filter-dd-btn" id="btnCollapseAll">▶ Alles inklappen</button>
-      <button class="filter-dd-btn" id="btnExpandAll">▼ Alles uitklappen</button>
-      <button class="filter-dd-btn cat-filter-btn" id="btnFilterWerk" data-cat="Werk">Werk</button>
-      <button class="filter-dd-btn cat-filter-btn" id="btnFilterPrive" data-cat="Privé">Privé</button>
-      <button class="filter-dd-btn" id="btnAllesVerwerken" style="display:none;">↗ Alles verwerken</button>
-    </div>
+      <!-- Toolbar -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button class="btn-new">+ Nieuwe taak</button>
+        <button class="filter-dd-btn" id="btnCollapseAll">▶ Alles inklappen</button>
+        <button class="filter-dd-btn" id="btnExpandAll">▼ Alles uitklappen</button>
+        <button class="filter-dd-btn cat-filter-btn" id="btnFilterWerk" data-cat="Werk">Werk</button>
+        <button class="filter-dd-btn cat-filter-btn" id="btnFilterPrive" data-cat="Privé">Privé</button>
+        <button class="filter-dd-btn" id="btnAllesVerwerken" style="display:none;">↗ Alles verwerken</button>
+      </div>
+
+    </div><!-- /main-top -->
+
+    <!-- Scrollgebied -->
+    <div class="main-scroll">
 
     <!-- Tabel -->
     <div class="table-wrap">
@@ -148,6 +156,8 @@
     </div>
 
     <div class="footer">R.H.L. Consultancy · Taakmanager</div>
+
+    </div><!-- /main-scroll -->
   </div>
 
   <!-- ═══ ANALYSE PANEL ═══ -->

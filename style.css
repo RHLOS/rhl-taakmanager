@@ -98,8 +98,19 @@
        ═══════════════════════════════════ */
     .main {
       margin-left: var(--sidebar-w);
-      flex: 1; padding: 20px 32px;
-      min-width: 0;
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column;
+      height: 100dvh; overflow: hidden; padding: 0;
+    }
+    .main-top {
+      flex-shrink: 0;
+      padding: 20px 32px 12px;
+      background: var(--bg);
+    }
+    .main-scroll {
+      flex: 1; min-height: 0;
+      overflow-y: auto; overflow-x: auto;
+      padding: 0 32px 20px;
     }
 
     /* ── Top bar: titel + knop ── */
@@ -202,7 +213,6 @@
       background: var(--card);
       border-radius: 12px;
       box-shadow: 0 1px 2px rgba(0,0,0,.04);
-      overflow-x: auto;
     }
     table { width: 100%; border-collapse: collapse; min-width: 960px; }
 

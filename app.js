@@ -338,7 +338,38 @@
       document.getElementById('viewTitle').textContent = getViewTitle();
     }
 
+    function saveExpandState() {
+      const open = { projects: new Set(), taken: new Set() };
+      document.querySelectorAll('.row-project').forEach(row => {
+        if (row.querySelector('.chev.open')) open.projects.add(row.dataset.projectId);
+      });
+      document.querySelectorAll('.row-taak').forEach(row => {
+        if (row.querySelector('.chev.open')) open.taken.add(row.dataset.taakId);
+      });
+      return open;
+    }
+
+    function restoreExpandState(open) {
+      document.querySelectorAll('.row-project').forEach(row => {
+        const id = row.dataset.projectId;
+        if (open.projects.has(id)) {
+          const chev = row.querySelector('.chev');
+          if (chev) chev.classList.add('open');
+          document.querySelectorAll(`.row-taak[data-parent="${id}"]`).forEach(r => r.classList.remove('collapsed'));
+        }
+      });
+      document.querySelectorAll('.row-taak').forEach(row => {
+        const id = row.dataset.taakId;
+        if (open.taken.has(id)) {
+          const chev = row.querySelector('.chev');
+          if (chev) chev.classList.add('open');
+          document.querySelectorAll(`.row-subtaak[data-parent-taak="${id}"]`).forEach(r => r.classList.remove('collapsed'));
+        }
+      });
+    }
+
     function renderAll() {
+      const expandState = saveExpandState();
       const tbody = document.getElementById('tbody');
       tbody.innerHTML = '';
 
@@ -387,6 +418,7 @@
       document.getElementById('btnFilterPrive').style.display = isInbox ? 'none' : '';
 
       attachToggle();
+      restoreExpandState(expandState);
       attachCheckboxes();
       attachStars();
       attachEditable();

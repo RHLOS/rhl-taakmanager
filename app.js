@@ -408,8 +408,11 @@
 
       const openAll = allProjecten.filter(p => !p.gedaan);
       document.getElementById('mTotal').textContent = openAll.length;
-      document.getElementById('mOpen').textContent = allSubtaken.filter(s => !s.gedaan).length;
+      document.getElementById('mOpen').textContent = allSubtaken.filter(s => !s.gedaan && isActief(s)).length;
       document.getElementById('mPrio').textContent = openAll.filter(p => projectIsPrio(p)).length;
+      document.getElementById('mAlles').textContent =
+        allSubtaken.filter(s => !s.gedaan && isActief(s)).length +
+        allSubsubtaken.filter(s => !s.gedaan && isActief(s)).length;
 
       updateSidebar();
       const isInbox = currentView === 'inbox';

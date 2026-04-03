@@ -4,7 +4,7 @@
     let subsubsBySubtaak = new Map();
     let currentSort = null;
     let activeFilters = {};
-    let currentView = 'alle';
+    let currentView = 'inbox';
     let searchQuery = '';
     let catFilter = null;
 

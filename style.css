@@ -161,7 +161,7 @@
     #btnFilterPrive.active { background: var(--orange); color: #fff; border-color: var(--orange); }
 
     /* ── Kolom-header filter/sort ── */
-    .th-filter { cursor: pointer; position: relative; }
+    .th-filter { cursor: pointer; position: sticky; top: 0; z-index: 2; }
     .th-filter:hover { color: var(--accent); }
     .th-arrow { font-size: 8px; color: var(--text-3); }
     .th-filter:hover .th-arrow { color: var(--accent); }

@@ -240,9 +240,7 @@
     .col-taak  { width: 18%; }
     .col-subtaak { }
     .col-deadline { width: 90px; }
-    .col-geschat  { width: 75px; }
-    .col-werkelijk { width: 70px; }
-    .col-context { width: 100px; }
+.col-context { width: 100px; }
     .col-add { width: 52px; text-align: center; white-space: nowrap; }
     .add-btn {
       font-size: 16px; color: var(--green); cursor: pointer;

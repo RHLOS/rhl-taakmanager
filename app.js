@@ -39,8 +39,7 @@
         case 'project': return [...new Set(allProjecten.filter(p => !p.gedaan).map(p => p.taak))].sort();
         case 'taak': return [...new Set(allSubtaken.filter(s => !s.gedaan).map(s => s.tekst))].sort();
         case 'deadline': return ['Vandaag', 'Deze week', 'Heeft deadline', 'Geen deadline'];
-        case 'geschat': return GESCHAT_OPTIES.filter(o => o);
-        case 'context': return CONTEXT_OPTIES;
+case 'context': return CONTEXT_OPTIES;
         default: return [];
       }
     }
@@ -187,8 +186,7 @@
           case 'prio': va = (a.prio_ster || a.prioriteit) ? 0 : 1; vb = (b.prio_ster || b.prioriteit) ? 0 : 1; break;
           case 'taak': va = (a.tekst || '').toLowerCase(); vb = (b.tekst || '').toLowerCase(); break;
           case 'deadline': va = a.deadline || '9999-12-31'; vb = b.deadline || '9999-12-31'; break;
-          case 'geschat': va = a.tijdsinschatting || ''; vb = b.tijdsinschatting || ''; break;
-          default: va = a.volgorde || 0; vb = b.volgorde || 0;
+default: va = a.volgorde || 0; vb = b.volgorde || 0;
         }
         if (va < vb) return -1 * dir;
         if (va > vb) return 1 * dir;
@@ -427,8 +425,7 @@
       attachEditable();
       attachNotities();
       attachDeadlines();
-      attachWerkelijk();
-      attachSelects();
+attachSelects();
       attachAddButtons();
       attachDeleteButtons();
       attachInboxVerwerkt();
@@ -777,54 +774,7 @@
       setTimeout(() => document.addEventListener('click', outsideHandler), 0);
     }
 
-    // ═══ Werkelijk: klik om minuten in te voeren ═══
-    function attachWerkelijk() {
-      document.querySelectorAll('.editable-num').forEach(el => {
-        el.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (el.querySelector('input')) return;
-
-          const id = el.dataset.id;
-          const table = el.dataset.table;
-          const current = el.textContent.trim();
-          const currentNum = parseInt(current) || '';
-
-          const input = document.createElement('input');
-          input.className = 'edit-input';
-          input.type = 'number';
-          input.min = '0';
-          input.placeholder = 'min';
-          input.value = currentNum;
-          input.style.width = '60px';
-          el.textContent = '';
-          el.appendChild(input);
-          input.focus();
-          input.select();
-
-          const save = async () => {
-            const val = parseInt(input.value) || null;
-            el.textContent = val ? val + 'm' : '—';
-
-            if (val !== (parseInt(current) || null)) {
-              try {
-                await patch(table, id, { tijd_uitgevoerd: val });
-              } catch (err) {
-                el.textContent = current;
-                alert('Opslaan mislukt: ' + err.message);
-              }
-            }
-          };
-
-          input.addEventListener('blur', save);
-          input.addEventListener('keydown', (ev) => {
-            if (ev.key === 'Enter') input.blur();
-            if (ev.key === 'Escape') { el.textContent = current; }
-          });
-        });
-      });
-    }
-
-    // ═══ Geschat & Context: dropdown selectie ═══
+    // ═══ Context: dropdown selectie ═══
     function attachSelects() {
       document.querySelectorAll('.editable-select').forEach(el => {
         el.addEventListener('click', (e) => {
@@ -839,30 +789,7 @@
           const popup = document.createElement('div');
           popup.className = 'select-popup';
 
-          if (type === 'geschat') {
-            const current = el.textContent.trim();
-            GESCHAT_OPTIES.forEach(opt => {
-              const label = document.createElement('label');
-              const radio = document.createElement('input');
-              radio.type = 'radio';
-              radio.name = 'geschat_' + id;
-              radio.value = opt;
-              radio.checked = (opt === current) || (opt === '' && current === '—');
-              label.appendChild(radio);
-              label.appendChild(document.createTextNode(opt || 'Geen'));
-              label.addEventListener('click', async () => {
-                el.textContent = opt || '—';
-                popup.remove();
-                try {
-                  await patch(table, id, { [field]: opt || null });
-                } catch (err) {
-                  el.textContent = current;
-                  alert('Opslaan mislukt: ' + err.message);
-                }
-              });
-              popup.appendChild(label);
-            });
-          } else if (type === 'context') {
+          if (type === 'context') {
             let selected = [];
             try { selected = JSON.parse(el.dataset.raw || '[]'); } catch(e) {}
 

@@ -29,17 +29,7 @@
       return `<span class="editable-dl dl ${cls}" data-id="${id}" data-table="${table}" data-field="deadline" data-raw="${date || ''}">${display || '—'}</span>`;
     }
 
-    function editableWerkelijk(val, id, table) {
-      const display = val ? val + 'm' : '';
-      return `<span class="editable-num tijd" data-id="${id}" data-table="${table}" data-field="tijd_uitgevoerd">${display || '—'}</span>`;
-    }
-
-    const GESCHAT_OPTIES = ['', '<15 min', '<30 min', '<60 min', '<90 min', '<120 min'];
     const CONTEXT_OPTIES = ['@Kantoor', '@Thuis', '@Onderweg', '@Computer', '@Telefoon', '@Online'];
-
-    function editableGeschat(val, id, table) {
-      return `<span class="editable-select tijd" data-id="${id}" data-table="${table}" data-field="tijdsinschatting" data-type="geschat">${val || '—'}</span>`;
-    }
 
     function editableContext(ctx, id, table) {
       const arr = Array.isArray(ctx) ? ctx : (ctx ? [ctx] : []);
@@ -62,8 +52,6 @@
           <td></td>
           <td></td>
           <td>${editableDeadline(project.deadline, project.id, 'taken')}</td>
-          <td>${editableGeschat(project.tijdsinschatting, project.id, 'taken')}</td>
-          <td>${editableWerkelijk(project.tijd_uitgevoerd, project.id, 'taken')}</td>
           <td>${editableContext(project.context, project.id, 'taken')}</td>
           <td class="col-add"><button class="add-btn" data-add="subtaak" data-parent-id="${project.id}" data-cat="${cat}" title="Taak toevoegen">+</button><button class="del-btn" data-del-id="${project.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
         </tr>
@@ -84,8 +72,6 @@
             <td>${hasSubs ? '<span class="chev">▶</span> ' : ''}<span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
             <td></td>
             <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
-            <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
-            <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
             <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
             <td class="col-add"><button class="add-btn" data-add="subsubtaak" data-parent-id="${sub.id}" title="Subtaak toevoegen">+</button><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
@@ -102,8 +88,6 @@
               <td></td>
               <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${esc(ss.tekst)}</span></td>
               <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
-              <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
-              <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
               <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
               <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
             </tr>
@@ -136,8 +120,6 @@
             <td><span style="color:var(--text-3);font-size:11px;">nieuw project</span></td>
             <td></td>
             <td>${editableDeadline(p.deadline, p.id, 'taken')}</td>
-            <td>${editableGeschat(p.tijdsinschatting, p.id, 'taken')}</td>
-            <td>${editableWerkelijk(p.tijd_uitgevoerd, p.id, 'taken')}</td>
             <td>${editableContext(p.context, p.id, 'taken')}</td>
             <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${p.id}" data-verwerkt-table="taken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${p.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
           </tr>
@@ -158,8 +140,6 @@
             <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
             <td></td>
             <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
-            <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
-            <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
             <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
             <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${sub.id}" data-verwerkt-table="subtaken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
@@ -180,8 +160,6 @@
             <td><span style="color:var(--text-3);font-size:11px;">${esc(taakNaam)}</span></td>
             <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${ss.tekst}</span></td>
             <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
-            <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
-            <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
             <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
             <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${ss.id}" data-verwerkt-table="sub_subtaken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
           </tr>
@@ -215,8 +193,6 @@
             <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
             <td></td>
             <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
-            <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
-            <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
             <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
             <td class="col-add"><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
@@ -236,8 +212,6 @@
             <td><span style="color:var(--text-3);font-size:11px;">${esc(sub?.tekst || '?')}</span></td>
             <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${esc(ss.tekst)}</span></td>
             <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
-            <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
-            <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
             <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
             <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
           </tr>
@@ -267,8 +241,6 @@
             <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
             <td></td>
             <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
-            <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
-            <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
             <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
             <td class="col-add"><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
@@ -288,8 +260,6 @@
             <td><span style="color:var(--text-3);font-size:11px;">${esc(sub?.tekst || '?')}</span></td>
             <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${esc(ss.tekst)}</span></td>
             <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
-            <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
-            <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
             <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
             <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
           </tr>
@@ -319,8 +289,6 @@
             <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
             <td></td>
             <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
-            <td>${editableGeschat(sub.tijdsinschatting, sub.id, 'subtaken')}</td>
-            <td>${editableWerkelijk(sub.tijd_uitgevoerd, sub.id, 'subtaken')}</td>
             <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
             <td class="col-add"><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
@@ -340,8 +308,6 @@
             <td><span style="color:var(--text-3);font-size:11px;">${esc(sub?.tekst || '?')}</span></td>
             <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${esc(ss.tekst)}</span></td>
             <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
-            <td>${editableGeschat(ss.tijdsinschatting, ss.id, 'sub_subtaken')}</td>
-            <td>${editableWerkelijk(ss.tijd_uitgevoerd, ss.id, 'sub_subtaken')}</td>
             <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
             <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
           </tr>

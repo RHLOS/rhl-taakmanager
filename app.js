@@ -294,17 +294,49 @@ default: va = a.volgorde || 0; vb = b.volgorde || 0;
       }
     }
 
+    function countItemsWithDeadline(mode) {
+      let count = 0;
+      allProjecten.filter(p => !p.gedaan && isActief(p)).forEach(p => {
+        const dl = p.deadline ? daysUntil(p.deadline) : null;
+        if (mode === 'vandaag' && dl !== null && dl <= 0) count++;
+        else if (mode === 'week' && dl !== null && dl >= 0 && dl <= 7) count++;
+        getSubsFor(p.id).filter(s => !s.gedaan && isActief(s)).forEach(s => {
+          const d = s.deadline ? daysUntil(s.deadline) : null;
+          if (mode === 'vandaag' && d !== null && d <= 0) count++;
+          else if (mode === 'week' && d !== null && d >= 0 && d <= 7) count++;
+          getSubsubsFor(s.id).filter(ss => !ss.gedaan && isActief(ss)).forEach(ss => {
+            const dss = ss.deadline ? daysUntil(ss.deadline) : null;
+            if (mode === 'vandaag' && dss !== null && dss <= 0) count++;
+            else if (mode === 'week' && dss !== null && dss >= 0 && dss <= 7) count++;
+          });
+        });
+      });
+      return count;
+    }
+
+    function countPrio() {
+      let count = 0;
+      allProjecten.filter(p => !p.gedaan && isActief(p)).forEach(p => {
+        if (p.prioriteit === 'hoog') count++;
+        getSubsFor(p.id).filter(s => !s.gedaan && isActief(s)).forEach(s => {
+          if (s.prio_ster) count++;
+          getSubsubsFor(s.id).filter(ss => !ss.gedaan && isActief(ss) && ss.prio_ster).forEach(() => count++);
+        });
+      });
+      return count;
+    }
+
     function updateSidebar() {
-      const open = allProjecten.filter(p => !p.gedaan);
-      const openSubs = allSubtaken.filter(s => !s.gedaan);
+      const openSubs = allSubtaken.filter(s => !s.gedaan && isActief(s));
+      const openSubsubs = allSubsubtaken.filter(ss => !ss.gedaan && isActief(ss));
 
       const el = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val || ''; };
-      el('badgeAlle', openSubs.length);
+      el('badgeAlle', openSubs.length + openSubsubs.length);
       const inboxCount = countInbox();
       el('badgeInbox', inboxCount || '');
-      el('badgeVandaag', open.filter(p => projectHasDeadline(p, 'vandaag')).length || '');
-      el('badgeWeek', open.filter(p => projectHasDeadline(p, 'week')).length || '');
-      el('badgePrio', open.filter(p => projectIsPrio(p)).length || '');
+      el('badgeVandaag', countItemsWithDeadline('vandaag') || '');
+      el('badgeWeek', countItemsWithDeadline('week') || '');
+      el('badgePrio', countPrio() || '');
       const voltooidCount = allSubtaken.filter(s => s.gedaan && isActief(s)).length +
         allSubsubtaken.filter(s => s.gedaan && isActief(s)).length;
       el('badgeVoltooid', voltooidCount || '');
@@ -319,8 +351,11 @@ default: va = a.volgorde || 0; vb = b.volgorde || 0;
 
       const container = document.getElementById('sidebarProjecten');
       container.innerHTML = '';
+      const open = allProjecten.filter(p => !p.gedaan && isActief(p));
       open.forEach(p => {
-        const count = getSubsFor(p.id).filter(s => !s.gedaan && isActief(s)).length;
+        const subs = getSubsFor(p.id).filter(s => !s.gedaan && isActief(s));
+        const subsubs = subs.reduce((acc, s) => acc + getSubsubsFor(s.id).filter(ss => !ss.gedaan && isActief(ss)).length, 0);
+        const count = subs.length + subsubs;
         const isActive = currentView === `project:${p.id}`;
         const div = document.createElement('div');
         div.className = 'sidebar-item' + (isActive ? ' active' : '');

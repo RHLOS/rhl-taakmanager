@@ -364,6 +364,8 @@ default: va = a.volgorde || 0; vb = b.volgorde || 0;
         div.addEventListener('click', () => {
           currentView = `project:${p.id}`;
           renderAll();
+          document.querySelectorAll('.chev').forEach(c => c.classList.add('open'));
+          document.querySelectorAll('.row-taak, .row-subtaak').forEach(r => r.classList.remove('collapsed'));
         });
         container.appendChild(div);
       });

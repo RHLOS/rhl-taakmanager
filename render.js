@@ -38,7 +38,7 @@ function editableContext(ctx, id, table) {
     function renderProject(project, subtaken, subsubtaken, tbody) {
       const cat = project.categorie;
       const isPrio = project.prioriteit === 'hoog';
-      const openSubs = getSubsFor(project.id).filter(s => !s.gedaan && isActief(s));
+      const openSubs = filterSubsByActiveFilters(getSubsFor(project.id).filter(s => !s.gedaan && isActief(s)));
 
       tbody.insertAdjacentHTML('beforeend', `
         <tr class="row-project" data-project-id="${project.id}">
@@ -56,7 +56,7 @@ function editableContext(ctx, id, table) {
       `);
 
       openSubs.forEach((sub, si) => {
-        const subs = getSubsubsFor(sub.id).filter(ss => !ss.gedaan && isActief(ss));
+        const subs = filterSubsByActiveFilters(getSubsubsFor(sub.id).filter(ss => !ss.gedaan && isActief(ss)));
         const hasSubs = subs.length > 0;
         const taakNr = `${project.nr}.${si + 1}`;
 

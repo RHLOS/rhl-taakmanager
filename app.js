@@ -141,6 +141,18 @@
     document.addEventListener('click', closePopups);
 
     // ═══ Filter/sort logica ═══
+    function filterSubsByActiveFilters(items) {
+      for (const [col, selected] of Object.entries(activeFilters)) {
+        if (col === 'context') {
+          items = items.filter(item => {
+            const ctx = Array.isArray(item.context) ? item.context : (item.context ? [item.context] : []);
+            return [...selected].some(v => ctx.includes(v));
+          });
+        }
+      }
+      return items;
+    }
+
     function projectMatchesFilter(project) {
       for (const [col, selected] of Object.entries(activeFilters)) {
         switch(col) {

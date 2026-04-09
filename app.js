@@ -165,6 +165,12 @@
             if (selected.has('Deze week') && days !== null && days >= 0 && days <= 7) match = true;
             if (!match) return false;
             break;
+          case 'context':
+            const projectCtx = Array.isArray(project.context) ? project.context : (project.context ? [project.context] : []);
+            const subsCtx = getSubsFor(project.id).flatMap(s => Array.isArray(s.context) ? s.context : (s.context ? [s.context] : []));
+            const allCtx = [...new Set([...projectCtx, ...subsCtx])];
+            if (![...selected].some(v => allCtx.includes(v))) return false;
+            break;
         }
       }
       return true;
@@ -186,7 +192,10 @@
           case 'prio': va = (a.prio_ster || a.prioriteit) ? 0 : 1; vb = (b.prio_ster || b.prioriteit) ? 0 : 1; break;
           case 'taak': va = (a.tekst || '').toLowerCase(); vb = (b.tekst || '').toLowerCase(); break;
           case 'deadline': va = a.deadline || '9999-12-31'; vb = b.deadline || '9999-12-31'; break;
-default: va = a.volgorde || 0; vb = b.volgorde || 0;
+          case 'context':
+            va = (Array.isArray(a.context) ? a.context : (a.context ? [a.context] : [])).join(',').toLowerCase();
+            vb = (Array.isArray(b.context) ? b.context : (b.context ? [b.context] : [])).join(',').toLowerCase(); break;
+          default: va = a.volgorde || 0; vb = b.volgorde || 0;
         }
         if (va < vb) return -1 * dir;
         if (va > vb) return 1 * dir;
@@ -207,6 +216,9 @@ default: va = a.volgorde || 0; vb = b.volgorde || 0;
           case 'prio': va = a.prioriteit === 'hoog' ? 0 : 1; vb = b.prioriteit === 'hoog' ? 0 : 1; break;
           case 'deadline':
             va = a.deadline || '9999-12-31'; vb = b.deadline || '9999-12-31'; break;
+          case 'context':
+            va = (Array.isArray(a.context) ? a.context : (a.context ? [a.context] : [])).join(',').toLowerCase();
+            vb = (Array.isArray(b.context) ? b.context : (b.context ? [b.context] : [])).join(',').toLowerCase(); break;
           default: va = a.nr; vb = b.nr;
         }
         if (va < vb) return -1 * dir;

@@ -1,5 +1,5 @@
     // ═══ Kolom-header filter/sort popups ═══
-    let allProjecten = [], allSubtaken = [], allSubsubtaken = [];
+    let allProjecten = [], allSubtaken = [], allSubsubtaken = [], allContexten = [];
     let subsByProject = new Map();
     let subsubsBySubtaak = new Map();
     let currentSort = null;
@@ -39,7 +39,7 @@
         case 'project': return [...new Set(allProjecten.filter(p => !p.gedaan).map(p => p.taak))].sort();
         case 'taak': return [...new Set(allSubtaken.filter(s => !s.gedaan).map(s => s.tekst))].sort();
         case 'deadline': return ['Vandaag', 'Deze week', 'Heeft deadline', 'Geen deadline'];
-case 'context': return CONTEXT_OPTIES;
+        case 'context': return allContexten;
         default: return [];
       }
     }
@@ -471,14 +471,16 @@ attachSelects();
 
     // ═══ Init ═══
     async function reloadData() {
-      const [projecten, subtaken, subsubtaken] = await Promise.all([
+      const [projecten, subtaken, subsubtaken, contexten] = await Promise.all([
         api('taken', 'order=nr.asc'),
         api('subtaken', 'order=volgorde.asc'),
-        api('sub_subtaken', 'order=volgorde.asc')
+        api('sub_subtaken', 'order=volgorde.asc'),
+        api('contexts', 'order=name.asc')
       ]);
       allProjecten = projecten;
       allSubtaken = subtaken;
       allSubsubtaken = subsubtaken;
+      allContexten = contexten.map(c => c.name);
       buildIndexes();
     }
 
@@ -496,15 +498,17 @@ attachSelects();
       tbody.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--text-2);font-size:12px;">Laden...</td></tr>`;
 
       try {
-        const [projecten, subtaken, subsubtaken] = await Promise.all([
+        const [projecten, subtaken, subsubtaken, contexten] = await Promise.all([
           api('taken', 'order=nr.asc'),
           api('subtaken', 'order=volgorde.asc'),
-          api('sub_subtaken', 'order=volgorde.asc')
+          api('sub_subtaken', 'order=volgorde.asc'),
+          api('contexts', 'order=name.asc')
         ]);
 
         allProjecten = projecten;
         allSubtaken = subtaken;
         allSubsubtaken = subsubtaken;
+        allContexten = contexten.map(c => c.name);
         buildIndexes();
 
         await cleanupPrullenmand();
@@ -830,7 +834,7 @@ attachSelects();
             let selected = [];
             try { selected = JSON.parse(el.dataset.raw || '[]'); } catch(e) {}
 
-            CONTEXT_OPTIES.forEach(opt => {
+            allContexten.forEach(opt => {
               const label = document.createElement('label');
               const cb = document.createElement('input');
               cb.type = 'checkbox';

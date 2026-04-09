@@ -29,9 +29,7 @@
       return `<span class="editable-dl dl ${cls}" data-id="${id}" data-table="${table}" data-field="deadline" data-raw="${date || ''}">${display || '—'}</span>`;
     }
 
-    const CONTEXT_OPTIES = ['@Kantoor', '@Thuis', '@Onderweg', '@Computer', '@Telefoon', '@Online'];
-
-    function editableContext(ctx, id, table) {
+function editableContext(ctx, id, table) {
       const arr = Array.isArray(ctx) ? ctx : (ctx ? [ctx] : []);
       const display = arr.length > 0 ? arr.join(', ') : '';
       return `<span class="editable-select" data-id="${id}" data-table="${table}" data-field="context" data-type="context" data-raw='${JSON.stringify(arr)}'>${display || '—'}</span>`;

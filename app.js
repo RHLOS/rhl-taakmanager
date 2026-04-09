@@ -852,6 +852,46 @@ attachSelects();
               popup.appendChild(label);
             });
 
+            // + Nieuwe context
+            const addRow = document.createElement('div');
+            addRow.style.cssText = 'display:flex;gap:6px;padding:6px 10px;border-top:1px solid var(--sep);';
+            const addInput = document.createElement('input');
+            addInput.placeholder = '+ Nieuwe context';
+            addInput.style.cssText = 'flex:1;padding:4px 8px;border:1px solid var(--sep);border-radius:6px;font-size:12px;background:var(--card);color:var(--text-1);font-family:inherit;';
+            const addBtn = document.createElement('button');
+            addBtn.textContent = 'Toevoegen';
+            addBtn.style.cssText = 'padding:4px 10px;border:none;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap;';
+            addBtn.addEventListener('click', async (e) => {
+              e.stopPropagation();
+              const naam = addInput.value.trim();
+              if (!naam) return;
+              try {
+                await post('contexts', { name: naam });
+                allContexten = [...allContexten, naam].sort();
+                // Voeg checkbox toe aan popup
+                const label = document.createElement('label');
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = naam;
+                cb.checked = true;
+                selected.push(naam);
+                cb.addEventListener('change', () => {
+                  if (cb.checked) selected.push(naam);
+                  else selected = selected.filter(s => s !== naam);
+                });
+                label.appendChild(cb);
+                label.appendChild(document.createTextNode(naam));
+                popup.insertBefore(label, addRow);
+                addInput.value = '';
+              } catch (err) {
+                alert('Toevoegen mislukt: ' + err.message);
+              }
+            });
+            addInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addBtn.click(); });
+            addRow.appendChild(addInput);
+            addRow.appendChild(addBtn);
+            popup.appendChild(addRow);
+
             const saveBtn = document.createElement('div');
             saveBtn.style.cssText = 'padding:6px 14px;text-align:center;';
             saveBtn.innerHTML = '<button style="padding:4px 16px;border:none;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;">Opslaan</button>';

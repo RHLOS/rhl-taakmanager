@@ -979,6 +979,22 @@ attachSelects();
     }
 
     // ═══ Verwijder knoppen ═══
+    async function setCascadeVerwijderd(id, table, timestamp) {
+      await patch(table, id, { verwijderd_op: timestamp });
+      if (table === 'taken') {
+        for (const sub of allSubtaken.filter(s => s.taak_id === id)) {
+          await patch('subtaken', sub.id, { verwijderd_op: timestamp });
+          for (const ss of allSubsubtaken.filter(s => s.subtaak_id === sub.id)) {
+            await patch('sub_subtaken', ss.id, { verwijderd_op: timestamp });
+          }
+        }
+      } else if (table === 'subtaken') {
+        for (const ss of allSubsubtaken.filter(s => s.subtaak_id === id)) {
+          await patch('sub_subtaken', ss.id, { verwijderd_op: timestamp });
+        }
+      }
+    }
+
     function attachDeleteButtons() {
       document.querySelectorAll('.del-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
@@ -990,39 +1006,10 @@ attachSelects();
           if (!bevestig) return;
 
           try {
-            await patch(table, id, { verwijderd_op: new Date().toISOString() });
-
-            if (table === 'taken') {
-              const subs = allSubtaken.filter(s => s.taak_id === id);
-              for (const sub of subs) {
-                await patch('subtaken', sub.id, { verwijderd_op: new Date().toISOString() });
-                const subsubs = allSubsubtaken.filter(ss => ss.subtaak_id === sub.id);
-                for (const ss of subsubs) {
-                  await patch('sub_subtaken', ss.id, { verwijderd_op: new Date().toISOString() });
-                }
-              }
-            } else if (table === 'subtaken') {
-              const subsubs = allSubsubtaken.filter(ss => ss.subtaak_id === id);
-              for (const ss of subsubs) {
-                await patch('sub_subtaken', ss.id, { verwijderd_op: new Date().toISOString() });
-              }
-            }
-
+            await setCascadeVerwijderd(id, table, new Date().toISOString());
             await refreshUI();
             showToast('Naar prullenmand verplaatst', async () => {
-              await patch(table, id, { verwijderd_op: null });
-              if (table === 'taken') {
-                for (const sub of allSubtaken.filter(s => s.taak_id === id)) {
-                  await patch('subtaken', sub.id, { verwijderd_op: null });
-                  for (const ss of allSubsubtaken.filter(s => s.subtaak_id === sub.id)) {
-                    await patch('sub_subtaken', ss.id, { verwijderd_op: null });
-                  }
-                }
-              } else if (table === 'subtaken') {
-                for (const ss of allSubsubtaken.filter(s => s.subtaak_id === id)) {
-                  await patch('sub_subtaken', ss.id, { verwijderd_op: null });
-                }
-              }
+              await setCascadeVerwijderd(id, table, null);
               await refreshUI();
             });
           } catch (err) {

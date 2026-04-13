@@ -2,21 +2,6 @@
     function catBadge(cat) {
       return cat === 'Werk' ? '<span class="cat w">W</span>' : '<span class="cat p">P</span>';
     }
-    function starHtml(isOn) {
-      return `<span class="star ${isOn ? 'on' : 'off'}">★</span>`;
-    }
-    function deadlineHtml(d) {
-      if (!d) return '';
-      const days = daysUntil(d);
-      const cls = days !== null && days <= 7 ? 'urgent' : 'normal';
-      return `<span class="dl ${cls}">${formatDate(d)}</span>`;
-    }
-    function contextHtml(ctx) {
-      if (!ctx) return '';
-      const arr = Array.isArray(ctx) ? ctx : [ctx];
-      if (arr.length === 0) return '';
-      return `<div class="ctx">${arr.map(c => `<span>${c}</span>`).join('')}</div>`;
-    }
 
     function starHtmlData(isOn, id, table, field) {
       return `<span class="star ${isOn ? 'on' : 'off'}" data-id="${id}" data-table="${table}" data-field="${field}">★</span>`;
@@ -30,7 +15,7 @@
     }
 
 function editableContext(ctx, id, table) {
-      const arr = Array.isArray(ctx) ? ctx : (ctx ? [ctx] : []);
+      const arr = normalizeContext(ctx);
       const display = arr.length > 0 ? arr.join(', ') : '';
       return `<span class="editable-select" data-id="${id}" data-table="${table}" data-field="context" data-type="context" data-raw='${JSON.stringify(arr)}'>${display || '—'}</span>`;
     }

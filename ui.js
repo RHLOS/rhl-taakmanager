@@ -1,3 +1,8 @@
+    // ═══ Gedeelde helpers ═══
+    function normalizeContext(ctx) {
+      return Array.isArray(ctx) ? ctx : (ctx ? [ctx] : []);
+    }
+
     // ═══ Modal helpers ═══
     function showModal(title, bodyHtml, buttons) {
       return new Promise(resolve => {

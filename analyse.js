@@ -318,7 +318,7 @@
       const open = getOpenItems().filter(i => i.context && i.context.length > 0);
       const counts = {};
       open.forEach(i => {
-        (Array.isArray(i.context) ? i.context : [i.context]).forEach(c => {
+        normalizeContext(i.context).forEach(c => {
           counts[c] = (counts[c] || 0) + 1;
         });
       });

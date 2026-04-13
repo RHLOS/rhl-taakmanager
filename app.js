@@ -145,7 +145,7 @@
       for (const [col, selected] of Object.entries(activeFilters)) {
         if (col === 'context') {
           items = items.filter(item => {
-            const ctx = Array.isArray(item.context) ? item.context : (item.context ? [item.context] : []);
+            const ctx = normalizeContext(item.context);
             return [...selected].some(v => ctx.includes(v));
           });
         }
@@ -178,8 +178,8 @@
             if (!match) return false;
             break;
           case 'context':
-            const projectCtx = Array.isArray(project.context) ? project.context : (project.context ? [project.context] : []);
-            const subsCtx = getSubsFor(project.id).flatMap(s => Array.isArray(s.context) ? s.context : (s.context ? [s.context] : []));
+            const projectCtx = normalizeContext(project.context);
+            const subsCtx = getSubsFor(project.id).flatMap(s => normalizeContext(s.context));
             const allCtx = [...new Set([...projectCtx, ...subsCtx])];
             if (![...selected].some(v => allCtx.includes(v))) return false;
             break;
@@ -205,8 +205,8 @@
           case 'taak': va = (a.tekst || '').toLowerCase(); vb = (b.tekst || '').toLowerCase(); break;
           case 'deadline': va = a.deadline || '9999-12-31'; vb = b.deadline || '9999-12-31'; break;
           case 'context':
-            va = (Array.isArray(a.context) ? a.context : (a.context ? [a.context] : [])).join(',').toLowerCase();
-            vb = (Array.isArray(b.context) ? b.context : (b.context ? [b.context] : [])).join(',').toLowerCase(); break;
+            va = normalizeContext(a.context).join(',').toLowerCase();
+            vb = normalizeContext(b.context).join(',').toLowerCase(); break;
           default: va = a.volgorde || 0; vb = b.volgorde || 0;
         }
         if (va < vb) return -1 * dir;
@@ -229,8 +229,8 @@
           case 'deadline':
             va = a.deadline || '9999-12-31'; vb = b.deadline || '9999-12-31'; break;
           case 'context':
-            va = (Array.isArray(a.context) ? a.context : (a.context ? [a.context] : [])).join(',').toLowerCase();
-            vb = (Array.isArray(b.context) ? b.context : (b.context ? [b.context] : [])).join(',').toLowerCase(); break;
+            va = normalizeContext(a.context).join(',').toLowerCase();
+            vb = normalizeContext(b.context).join(',').toLowerCase(); break;
           default: va = a.nr; vb = b.nr;
         }
         if (va < vb) return -1 * dir;
@@ -484,7 +484,6 @@
       attachCheckboxes();
       attachStars();
       attachEditable();
-      attachNotities();
       attachDeadlines();
 attachSelects();
       attachAddButtons();
@@ -506,6 +505,11 @@ attachSelects();
       allSubsubtaken = subsubtaken;
       allContexten = contexten.map(c => c.name);
       buildIndexes();
+    }
+
+    async function refreshUI() {
+      await reloadData();
+      renderAll();
     }
 
     async function cleanupPrullenmand() {
@@ -614,8 +618,7 @@ attachSelects();
       ];
       try {
         await Promise.all(items.map(i => patch(i.table, i.id, { inbox: false })));
-        await reloadData();
-        renderAll();
+        await refreshUI();
       } catch (err) {
         alert('Verwerken mislukt: ' + err.message);
       }
@@ -629,51 +632,6 @@ attachSelects();
       document.querySelectorAll('.chev').forEach(c => c.classList.add('open'));
       document.querySelectorAll('.row-taak, .row-subtaak').forEach(r => r.classList.remove('collapsed'));
     });
-
-    // ═══ Tekstvelden: klik om te bewerken ═══
-    function attachNotities() {
-      document.querySelectorAll('.notitie-cel').forEach(el => {
-        el.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (el.querySelector('textarea')) return;
-
-          const id = el.dataset.id;
-          const table = el.dataset.table;
-          const current = el.dataset.notitie || '';
-
-          const ta = document.createElement('textarea');
-          ta.className = 'edit-input notitie-ta';
-          ta.value = current;
-          ta.rows = 3;
-          el.innerHTML = '';
-          el.appendChild(ta);
-          ta.focus();
-
-          const save = async () => {
-            const val = ta.value.trim();
-            el.dataset.notitie = val;
-            el.innerHTML = val ? '📝' : '<span class="notitie-add">+</span>';
-            if (val !== current) {
-              try {
-                await patch(table, id, { notities: val || null });
-              } catch (err) {
-                el.innerHTML = current ? '📝' : '<span class="notitie-add">+</span>';
-                el.dataset.notitie = current;
-                alert('Opslaan mislukt: ' + err.message);
-              }
-            }
-          };
-
-          ta.addEventListener('blur', save);
-          ta.addEventListener('keydown', (ev) => {
-            if (ev.key === 'Escape') {
-              el.dataset.notitie = current;
-              el.innerHTML = current ? '📝' : '<span class="notitie-add">+</span>';
-            }
-          });
-        });
-      });
-    }
 
     function attachEditable() {
       document.querySelectorAll('.editable').forEach(el => {
@@ -979,8 +937,7 @@ attachSelects();
                 volgorde: volgorde
               });
             }
-            await reloadData();
-            renderAll();
+            await refreshUI();
           } catch (err) {
             alert('Toevoegen mislukt: ' + err.message);
           }
@@ -1014,8 +971,7 @@ attachSelects();
             body: JSON.stringify({ waarde: String(nr + 1) })
           });
 
-          await reloadData();
-          renderAll();
+          await refreshUI();
         } catch (err) {
           alert('Toevoegen mislukt: ' + err.message);
         }
@@ -1052,8 +1008,7 @@ attachSelects();
               }
             }
 
-            await reloadData();
-            renderAll();
+            await refreshUI();
             showToast('Naar prullenmand verplaatst', async () => {
               await patch(table, id, { verwijderd_op: null });
               if (table === 'taken') {
@@ -1068,8 +1023,7 @@ attachSelects();
                   await patch('sub_subtaken', ss.id, { verwijderd_op: null });
                 }
               }
-              await reloadData();
-              renderAll();
+              await refreshUI();
             });
           } catch (err) {
             showToast('Verwijderen mislukt: ' + err.message);
@@ -1087,8 +1041,7 @@ attachSelects();
           const table = btn.dataset.verwerktTable;
           try {
             await patch(table, id, { inbox: false });
-            await reloadData();
-            renderAll();
+            await refreshUI();
           } catch (err) {
             alert('Verwerken mislukt: ' + err.message);
           }
@@ -1105,8 +1058,7 @@ attachSelects();
           const table = btn.dataset.restoreTable;
           try {
             await patch(table, id, { verwijderd_op: null });
-            await reloadData();
-            renderAll();
+            await refreshUI();
           } catch (err) {
             alert('Herstellen mislukt: ' + err.message);
           }
@@ -1121,8 +1073,7 @@ attachSelects();
           const table = btn.dataset.permTable;
           try {
             await del(table, id);
-            await reloadData();
-            renderAll();
+            await refreshUI();
           } catch (err) {
             alert('Verwijderen mislukt: ' + err.message);
           }
@@ -1142,8 +1093,7 @@ attachSelects();
           if (cb.classList.contains('done')) {
             try {
               await patch(table, id, { gedaan: false, gedaan_datum: null });
-              await reloadData();
-              renderAll();
+              await refreshUI();
             } catch (err) {
               alert('Terugzetten mislukt: ' + err.message);
             }
@@ -1159,12 +1109,10 @@ attachSelects();
               gedaan: true,
               gedaan_datum: new Date().toISOString().split('T')[0]
             });
-            await reloadData();
-            renderAll();
+            await refreshUI();
             showToast('Taak afgerond', async () => {
               await patch(table, id, { gedaan: false, gedaan_datum: null });
-              await reloadData();
-              renderAll();
+              await refreshUI();
             });
           } catch (err) {
             cb.textContent = '○';

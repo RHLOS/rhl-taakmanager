@@ -1210,7 +1210,6 @@ attachSelects();
 
     // ═══ Sidebar navigatie ═══
     document.querySelectorAll('.sidebar-item[data-view]').forEach(item => {
-      if (item.dataset.view === 'beheer') return;
       item.addEventListener('click', () => {
         currentView = item.dataset.view;
         renderAll();

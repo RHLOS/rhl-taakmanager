@@ -1,6 +1,6 @@
 # RHL Taakmanager — Overdrachtsdocument
 
-**Laatste update:** 1 april 2026
+**Laatste update:** 13 april 2026
 **Project:** rhl-taakmanager
 **Repo:** RHLOS/rhl-taakmanager
 **Branch:** `main` (feature branch al gemerged)
@@ -75,11 +75,36 @@ De gebruiker heeft een beperkt maandbudget. Hoog verbruik stopt de doorontwikkel
 | `sub_subtaken` | Subtaken binnen een taak |
 | `afgerond_log` | Historie van afgeronde taken |
 | `meta` | Instellingen (volgend_nr, laatste_update) |
+| `contexts` | Beschikbare contexten (name kolom), dynamisch beheerd vanuit de app |
 | `laag_prioriteit` + `laag_items` | Oude structuur, niet meer in gebruik |
 
 Alle drie hoofdtabellen hebben: `gedaan`, `gedaan_datum`, `inbox`, `verwijderd_op`, `deadline`, `tijdsinschatting`, `tijd_uitgevoerd`, `context`.
 
-### 4. Claude MCP koppeling
+`contexts` tabel heeft een RLS SELECT-policy en INSERT-policy voor anon:
+```sql
+CREATE POLICY "allow anon read" ON contexts FOR SELECT TO anon USING (true);
+CREATE POLICY "allow anon insert" ON contexts FOR INSERT TO anon WITH CHECK (true);
+```
+
+### 4. Supabase Edge Function — dagelijkse reminder
+
+- **Functienaam:** `dagelijkse-reminder`
+- **Deployed op:** project `fhkttfzqdjynzmtjbujv`
+- Haalt alle open taken/subtaken/sub_subtaken op met deadline ≤ vandaag
+- Stuurt HTML-e-mail via **Resend API** (`onboarding@resend.dev` → `raimon@rhlconsultancy.nl`)
+- `verify_jwt: false` (aangeroepen door pg_cron, geen JWT beschikbaar)
+- **Cron:** `0 7 * * *` (7:00 UTC = 8:00 CET) via pg_cron + pg_net:
+```sql
+SELECT cron.schedule('dagelijkse-reminder', '0 7 * * *',
+  $$SELECT net.http_post(
+    url := 'https://fhkttfzqdjynzmtjbujv.supabase.co/functions/v1/dagelijkse-reminder',
+    headers := '{"Content-Type":"application/json","Authorization":"Bearer <service_role_key>"}'::jsonb,
+    body := '{}'::jsonb
+  )$$
+);
+```
+
+### 5. Claude MCP koppeling
 
 - Supabase MCP server geconfigureerd in Claude Desktop
 - Config: `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -88,7 +113,7 @@ Alle drie hoofdtabellen hebben: `gedaan`, `gedaan_datum`, `inbox`, `verwijderd_o
 - Claude Chat kan direct taken lezen, aanmaken, afvinken en verwijderen
 - **TODO voor gebruiker:** Project-instructie in Claude Chat aanpassen zodat `inbox=true` automatisch wordt meegezet bij nieuwe taken
 
-### 5. GitHub Pages
+### 6. GitHub Pages
 
 - URL: https://rhlos.github.io/rhl-taakmanager/
 - Deployt vanaf `main` branch
@@ -99,18 +124,19 @@ Alle drie hoofdtabellen hebben: `gedaan`, `gedaan_datum`, `inbox`, `verwijderd_o
 ## Alle werkende features
 
 ### Tabel
-- **Kolommen:** ✓, P(ster), W/P, Project, Taak, Subtaak, Deadline, Geschat, Werkelijk, Context, +/🗑
+- **Kolommen:** ✓, P(ster), W/P, Project, Taak, Subtaak, Deadline, Context, +/🗑
+- ~~Geschat en Werkelijk~~ → **verwijderd** in sessie april 2026
 - **Drie niveaus:** Projecten → Taken → Subtaken
 - **Hiërarchische nummering:** Project = 1, Taak = 1.1, Subtaak = 1.1.1 (berekend bij render, niet in DB)
 - In/uitklappen per project en per taak
 - Alles inklappen / uitklappen knoppen in toolbar
+- **Sticky kolomtitels** — scrollen laat titels niet verdwijnen (z-index fix + `.th-filter` niet meer `position: relative`)
 
 ### Bewerkbaar
 - Tekstvelden: klik om te bewerken, slaat direct op naar Supabase
 - Deadline: date picker
-- Geschat: dropdown (<15 min t/m <120 min)
-- Werkelijk: number input (minuten)
-- Context: multi-select (@Kantoor, @Thuis, @Onderweg, @Computer, @Telefoon, @Online)
+- Context: multi-select, opties dynamisch geladen uit `contexts` tabel in Supabase
+- **Nieuwe context aanmaken** vanuit de context-dropdown zelf (`+ Nieuwe context` knop onderaan popup)
 - Prio ster: klik om te togglen
 - Checkbox: klik om af te vinken (met undo toast, 5 sec)
 
@@ -120,15 +146,23 @@ Alle drie hoofdtabellen hebben: `gedaan`, `gedaan_datum`, `inbox`, `verwijderd_o
 - **Vandaag & Verlopen** — taken met deadline vandaag of eerder (individuele rijen)
 - **Prioriteit** — taken met prio-ster (individuele rijen)
 - **Voltooid** — klik op ✓ om taak terug te zetten naar actief
-- **Projecten** (dynamisch, inklapbaar, met tellingen per project)
+- **Projecten** (dynamisch, inklapbaar, met tellingen per project — tellen taken + subtaken + sub-subtaken)
 - **Prullenmand** (soft-delete, herstel, auto-cleanup na 7 dagen)
 - **📊 Analyse** (eigen panel, vervangt tabelweergave)
+- **Sidebar-badges** tellen taken + subtaken (niet alleen projecten)
+- **Klikken op project in sidebar** → main view navigeert naar dat project én klapt automatisch alles uit
 
 ### Toolbar
 - WERK (blauw) / PRIVÉ (oranje) filterknoppen — actief = gemarkeerd, klik nogmaals = reset
 - + Nieuwe taak (groen)
 - "Alles verwerken" knop (alleen zichtbaar in Inbox-weergave)
 - Inklappen / Uitklappen knoppen
+
+### Filters en sortering
+- Kolom-header filters voor: P, W/P, Project, Taak, Deadline, Context
+- Context-filter filtert op subtaakniveau (niet alleen op projectniveau) via `filterSubsByActiveFilters()`
+- Sortering werkt ook op Context
+- Filter wissen werkt correct
 
 ### Soft delete
 - 🗑 knop altijd zichtbaar (niet alleen bij hover)
@@ -146,6 +180,11 @@ Alle drie hoofdtabellen hebben: `gedaan`, `gedaan_datum`, `inbox`, `verwijderd_o
 - 6 grafieken via Chart.js: productiviteit, werk/privé, geschat vs werkelijk, deadline compliance, context analyse, project voortgang (CSS)
 - Filters: Week/Maand + Alles/Werk/Privé
 - Grafieken staan in `analyse.js`, styling in `analyse.css`
+
+### Dagelijkse e-mailreminder
+- Elke dag 8:00 CET een e-mail met taken/subtaken waarvan deadline ≤ vandaag
+- Via Supabase Edge Function + Resend API
+- Getriggerd door pg_cron (7:00 UTC)
 
 ### Overig
 - Zoekfunctie, kolom-header filters en sortering
@@ -202,11 +241,16 @@ Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
 | 1 | ~~Feature branch mergen naar `main`~~ ✅ | ~~Hoog~~ |
 | 2 | ~~Notities/beschrijving per taak~~ ✅ (kolom later verwijderd) | ~~Gemiddeld~~ |
 | 3 | ~~Apple Dark thema~~ ✅ | ~~Gemiddeld~~ |
-| 4 | Mobiele PWA bouwen (zie plan hieronder) | Hoog — wacht op stabiele desktop |
-| 5 | Claude Chat inbox-instructie aanpassen (door gebruiker zelf) | Gemiddeld |
-| 6 | Authenticatie | Laag (1 gebruiker) |
-| 7 | Beheer-sectie (sidebar knop bestaat al) | Laag |
-| 8 | Offline support mobiele app (Service Worker) | Later |
+| 4 | ~~Kolommen Geschat & Werkelijk verwijderd~~ ✅ | ~~Gemiddeld~~ |
+| 5 | ~~Dagelijkse e-mailreminder (Resend + Edge Function)~~ ✅ | ~~Hoog~~ |
+| 6 | ~~Dynamische context-opties uit Supabase~~ ✅ | ~~Gemiddeld~~ |
+| 7 | ~~Nieuwe context aanmaken vanuit app~~ ✅ | ~~Gemiddeld~~ |
+| 8 | ~~Context filter op subtaakniveau~~ ✅ | ~~Gemiddeld~~ |
+| 9 | Mobiele PWA bouwen (zie plan hieronder) | Hoog — wacht op stabiele desktop |
+| 10 | ~~Claude Chat inbox-instructie aanpassen~~ ✅ (door gebruiker gedaan) | ~~Gemiddeld~~ |
+| 11 | Authenticatie | Later (niet nodig bij 1 gebruiker) |
+| 12 | ~~Beheer-sectie~~ ✅ (knop verwijderd, niet nodig) | ~~Laag~~ |
+| 13 | Offline support mobiele app (Service Worker) | Later (pas bij PWA) |
 
 ---
 
@@ -245,7 +289,7 @@ Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
 
 **Taak detail**
 - Naam (bewerkbaar)
-- Deadline, Geschat, Context — allemaal bewerkbaar
+- Deadline, Context — allemaal bewerkbaar
 - Subtaken zichtbaar en bewerkbaar
 - Afvinken (→ gaat naar Voltooid)
 - Verwijderen
@@ -261,7 +305,7 @@ Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
 
 ## SQL scripts die AL uitgevoerd zijn (NIET opnieuw uitvoeren)
 
-`schema.sql`, `import.sql`, `sub_subtaken.sql`, `update_v2.sql`, `hernummer.sql`, `inbox.sql`, handmatige `ALTER TABLE ... ADD COLUMN verwijderd_op timestamptz`
+`schema.sql`, `import.sql`, `sub_subtaken.sql`, `update_v2.sql`, `hernummer.sql`, `inbox.sql`, handmatige `ALTER TABLE ... ADD COLUMN verwijderd_op timestamptz`, pg_cron/pg_net extensions, RLS policies op `contexts` tabel, cron job `dagelijkse-reminder`
 
 ---
 
@@ -294,10 +338,18 @@ Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
 
 ---
 
-## Technische aandachtspunten voor volgende sessie
+## Hoe de code werkt — referentie
 
-- **`buildIndexes()`** wordt aangeroepen in zowel `init()` als `reloadData()` — dit is bewust en noodzakelijk (bug die één keer voorkwam: alleen in reloadData stond het, waardoor eerste load leeg bleef)
+> Deze sectie is documentatie voor de AI-assistent, geen openstaande actiepunten.
+
+- **`buildIndexes()`** wordt aangeroepen in zowel `init()` als `reloadData()` — bewust en noodzakelijk (bug die één keer voorkwam: alleen in reloadData stond het, waardoor eerste load leeg bleef)
 - **`catFilter`** is een state-variabele in `app.js` voor WERK/PRIVÉ filtering, wordt toegepast in `getViewProjects()`
+- **`allContexten`** is een globale array in `app.js`, geladen vanuit de `contexts` tabel bij init/reloadData
+- **`filterSubsByActiveFilters(items)`** in `app.js` — filtert subtaken op context. Wordt aangeroepen in `render.js` voor zowel subtaken als sub-subtaken binnen `renderProject()`
+- **Sticky header:** `thead th` heeft `z-index: 2`. `.th-filter` staat op `position: sticky; top: 0; z-index: 2;` — NIET `position: relative`, anders werkt sticky niet
+- **Sidebar-badges:** `countItemsWithDeadline(mode)` en `countPrio()` tellen taken + subtaken. Project-badge telt ook sub-subtaken mee
+- **Auto-expand bij project-klik:** sidebar click handler roept `renderAll()` aan + zet alle `.chev` op `.open` + verwijdert `.collapsed` van alle rows
 - **Toolbar-knoppen** worden per view getoond/verborgen in `renderAll()` via `style.display`
 - **Supabase MCP** in Claude Code: gebruik `mcp__a7e63fc8-f838-4adc-a37a-edeb0796093c__execute_sql` met `project_id: "fhkttfzqdjynzmtjbujv"`
 - **Soft delete:** alle drie tabellen hebben `verwijderd_op timestamptz`. Queries filteren altijd op `verwijderd_op IS NULL`
+- **Edge Function `dagelijkse-reminder`**: `verify_jwt: false` — wordt aangeroepen door pg_cron zonder JWT. Resend API key staat in de functie zelf (server-side, niet in de frontend)

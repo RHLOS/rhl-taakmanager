@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Taken">
+  <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="manifest.json">
+  <title>Taken — R.H.L.</title>
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+  <div class="screen" id="screen-inbox">
+    <header class="topbar">
+      <h1>Inbox</h1>
+      <span class="count" id="inboxCount">0</span>
+    </header>
+
+    <main class="content">
+      <ul class="task-list" id="taskList"></ul>
+      <p class="empty" id="emptyState" hidden>Inbox is leeg</p>
+    </main>
+
+    <button class="fab" id="fabAdd" aria-label="Nieuwe taak">+</button>
+  </div>
+
+  <!-- Modal voor nieuwe taak -->
+  <div class="modal-overlay" id="modalOverlay" hidden>
+    <div class="modal">
+      <h2>Nieuwe taak</h2>
+      <input type="text" id="newTaskInput" placeholder="Wat moet er gedaan worden?" autocomplete="off">
+      <div class="modal-buttons">
+        <button class="btn-cancel" id="btnCancel">Annuleren</button>
+        <button class="btn-save" id="btnSave">Toevoegen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast voor feedback -->
+  <div class="toast" id="toast" hidden></div>
+
+  <!-- Saving indicator -->
+  <div class="saving-indicator" id="savingIndicator" hidden></div>
+
+  <script src="ui.js"></script>
+  <script src="api.js"></script>
+  <script src="mobile.js"></script>
+</body>
+</html>

@@ -8,6 +8,12 @@
   <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)">
   <title>Taakmanager — R.H.L.</title>
+  <script>
+    // Auto-redirect naar mobiele versie op kleine schermen
+    if (window.matchMedia('(max-width: 768px)').matches) {
+      window.location.replace('mobile.html');
+    }
+  </script>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="analyse.css">

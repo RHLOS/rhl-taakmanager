@@ -9,13 +9,15 @@
   <meta name="theme-color" content="#000000">
   <link rel="manifest" href="manifest.json">
   <title>Taken — R.H.L.</title>
-  <link rel="stylesheet" href="mobile.css">
+  <link rel="stylesheet" href="mobile.css?v=2">
 </head>
 <body>
-  <div class="screen" id="screen-inbox">
+  <!-- Hoofdscherm: weergave (inbox, vandaag, project, etc.) -->
+  <div class="screen" id="screenMain">
     <header class="topbar">
-      <h1>Inbox</h1>
-      <span class="count" id="inboxCount">0</span>
+      <button class="menu-btn" id="btnMenu" aria-label="Menu">☰</button>
+      <h1 id="viewTitle">Inbox</h1>
+      <span class="count" id="viewCount">0</span>
     </header>
 
     <main class="content">
@@ -24,6 +26,46 @@
     </main>
 
     <button class="fab" id="fabAdd" aria-label="Nieuwe taak">+</button>
+  </div>
+
+  <!-- Menu/sidebar scherm -->
+  <div class="screen menu-screen" id="screenMenu" hidden>
+    <header class="topbar">
+      <button class="menu-btn" id="btnCloseMenu" aria-label="Sluiten">✕</button>
+      <h1>Menu</h1>
+    </header>
+
+    <nav class="menu-list">
+      <button class="menu-item" data-view="inbox">
+        <span class="menu-icon">📬</span>
+        <span class="menu-label">Inbox</span>
+        <span class="menu-count" id="countInbox">0</span>
+      </button>
+      <button class="menu-item" data-view="vandaag">
+        <span class="menu-icon">🔴</span>
+        <span class="menu-label">Vandaag &amp; Verlopen</span>
+        <span class="menu-count" id="countVandaag">0</span>
+      </button>
+      <button class="menu-item" data-view="prioriteit">
+        <span class="menu-icon">⭐</span>
+        <span class="menu-label">Prioriteit</span>
+        <span class="menu-count" id="countPrio">0</span>
+      </button>
+      <button class="menu-item" data-view="voltooid">
+        <span class="menu-icon">✅</span>
+        <span class="menu-label">Voltooid</span>
+        <span class="menu-count" id="countVoltooid">0</span>
+      </button>
+
+      <div class="menu-section-title">PROJECTEN</div>
+      <div id="projectList"></div>
+
+      <button class="menu-item" data-view="prullenmand">
+        <span class="menu-icon">🗑</span>
+        <span class="menu-label">Prullenmand</span>
+        <span class="menu-count" id="countPrullen">0</span>
+      </button>
+    </nav>
   </div>
 
   <!-- Modal voor nieuwe taak -->
@@ -44,8 +86,8 @@
   <!-- Saving indicator -->
   <div class="saving-indicator" id="savingIndicator" hidden></div>
 
-  <script src="ui.js"></script>
-  <script src="api.js"></script>
-  <script src="mobile.js"></script>
+  <script src="ui.js?v=2"></script>
+  <script src="api.js?v=2"></script>
+  <script src="mobile.js?v=2"></script>
 </body>
 </html>

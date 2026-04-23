@@ -1,6 +1,6 @@
 # RHL Taakmanager — Overdrachtsdocument
 
-**Laatste update:** 13 april 2026
+**Laatste update:** 23 april 2026
 **Project:** rhl-taakmanager
 **Repo:** RHLOS/rhl-taakmanager
 **Branch:** `main` (feature branch al gemerged)
@@ -54,11 +54,16 @@ De gebruiker heeft een beperkt maandbudget. Hoog verbruik stopt de doorontwikkel
 | `api.js` | Supabase config + API helpers | ~51 |
 | `ui.js` | Modals, toast, saving indicator, datum helpers | ~134 |
 | `render.js` | Render functies (tabel, inbox, voltooid, prullenmand) | ~379 |
-| `app.js` | State, filters, attach-functies, init | ~1079 |
+| `app.js` | State, filters, attach-functies, init | ~1100 |
 | `analyse.js` | Analyse dashboard logica + grafieken | ~400 |
 | `analyse.css` | Analyse dashboard styling | ~160 |
+| `mobile.html` | Mobiele PWA (apart scherm, auto-redirect) | ~95 |
+| `mobile.css` | Mobiele styling (Apple Dark) | ~395 |
+| `mobile.js` | Mobiele logica: views, render, swipe | ~330 |
 
-**Laadvolgorde scripts:** ui.js → api.js → render.js → app.js → analyse.js
+**Laadvolgorde scripts (desktop):** ui.js → api.js → render.js → app.js → analyse.js
+**Laadvolgorde scripts (mobile):** ui.js → api.js → mobile.js
+**Auto-redirect:** `index.html` stuurt viewports ≤768px door naar `mobile.html`
 
 ### 2. Supabase backend
 
@@ -163,12 +168,14 @@ SELECT cron.schedule('dagelijkse-reminder', '0 7 * * *',
 - Context-filter filtert op subtaakniveau (niet alleen op projectniveau) via `filterSubsByActiveFilters()`
 - Sortering werkt ook op Context
 - Filter wissen werkt correct
+- **"Alles / Geen" snelle toggle** bovenaan elke filter-popup — één klik om alle vinkjes te wissen of juist aan te zetten
 
 ### Soft delete
 - 🗑 knop altijd zichtbaar (niet alleen bij hover)
 - Taak verdwijnt naar Prullenmand (verwijderd_op timestamp)
 - Herstelbaar vanuit Prullenmand
 - Auto-cleanup na 7 dagen
+- **In prullenmand-weergave:** de groene "+ Nieuwe taak" knop verandert in een rode "🗑 Alles verwijderen" knop → hard delete alle soft-deleted items (met bevestigingsdialoog)
 
 ### Statistiek-tiles (boven tabel)
 - **Tile 1:** Aantal projecten
@@ -246,7 +253,7 @@ Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
 | 6 | ~~Dynamische context-opties uit Supabase~~ ✅ | ~~Gemiddeld~~ |
 | 7 | ~~Nieuwe context aanmaken vanuit app~~ ✅ | ~~Gemiddeld~~ |
 | 8 | ~~Context filter op subtaakniveau~~ ✅ | ~~Gemiddeld~~ |
-| 9 | Mobiele PWA bouwen (zie plan hieronder) | Hoog — wacht op stabiele desktop |
+| 9 | Mobiele PWA — Inbox + menu + multi-view ✅ / Project-detail + Taak-detail nog te bouwen | In uitvoering |
 | 10 | ~~Claude Chat inbox-instructie aanpassen~~ ✅ (door gebruiker gedaan) | ~~Gemiddeld~~ |
 | 11 | Authenticatie | Later (niet nodig bij 1 gebruiker) |
 | 12 | ~~Beheer-sectie~~ ✅ (knop verwijderd, niet nodig) | ~~Laag~~ |
@@ -254,52 +261,60 @@ Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
 
 ---
 
-## Mobiele app — plan (nog niet gebouwd)
-
-**Wachten tot desktop stabiel is** voordat we dit bouwen.
+## Mobiele app — stand van zaken (april 2026)
 
 ### Techniek
 - PWA (Progressive Web App) — geen App Store, geen Swift, geen Xcode nodig
-- Aparte pagina: `mobile.html` in dezelfde repo → `https://rhlos.github.io/rhl-taakmanager/mobile.html`
+- Aparte pagina: `mobile.html` → `https://rhlos.github.io/rhl-taakmanager/mobile.html`
 - Zelfde Supabase backend → data altijd gesynchroniseerd met desktop
-- Deelt `api.js` met desktop
-- Eigen CSS en render logica (niet automatisch gesynchroniseerd met desktop)
+- Deelt `api.js` en `ui.js` met desktop (niet gedeeld via shared.js — gewoon hergebruik van dezelfde files)
+- `mobile.js` en `mobile.css` zijn eigen bestanden (niet automatisch gesync met desktop)
 - Installatie: Safari op iPhone → "Zet op beginscherm"
+- Cache-busting: `?v=2` achter alle mobile asset-refs in `mobile.html`
+- Auto-redirect in `index.html` stuurt viewports ≤768px door naar `mobile.html`
 
-### Geïnspireerd op Microsoft To Do (GTD-stijl)
+### ✅ Gebouwd (v1 + v2)
 
-### Schermopbouw
+**Inbox scherm (opening)**
+- Lijst van inbox-taken (filtert op `inbox=true && !verwijderd_op && !gedaan`)
+- Afvinken → toggle gedaan + gedaan_datum
+- 🗑 knop → soft-delete naar prullenmand
+- `+` FAB → modal met tekstveld → nieuwe taak (auto `inbox=true, categorie='Werk', prioriteit='normaal'`)
+- Sync met desktop werkt (nieuwe taak verschijnt direct in desktop inbox)
 
-**Home (Inbox)**
-- Lijst van inbox-taken
-- Swipe links → verwijderen
-- Tik op taak → Taak detail scherm
-- `+` knop onderaan → nieuwe taak aanmaken (automatisch inbox=true)
+**Menu / sidebar (full-screen)**
+- Toegang via ☰ knop of swipe vanaf linkerrand (clientX<30, dx>80)
+- Sluiten via ✕ of swipe naar links (dx<-80)
+- Items: Inbox, Vandaag & Verlopen, Prioriteit, Voltooid, Prullenmand
+- Projectenlijst (dynamisch uit allTaken), elk met telling open subtaken + sub-subtaken
+- Actieve view gehighlight in blauw
+- Counts worden live bijgewerkt
 
-**Menu (slide-in van links)**
-- Inbox / Vandaag & Verlopen / Prioriteit / Voltooid
-- Projectenlijst (ingeklapt, uitklapbaar)
-- Tik op project → Project detail scherm
+**Multi-view rendering**
+- State: `currentView` = `'inbox' | 'vandaag' | 'prioriteit' | 'voltooid' | 'prullenmand' | 'project:<id>'`
+- `getViewItems()` filtert `allFlat()` per view
+- Voor `project:<id>` toont subtaken + sub-subtaken van dat project
+- Project-detailscherm is nu een "platte lijst" (geen hiërarchie) — nog te verbeteren (zie "Nog te bouwen")
 
-**Project detail**
-- Lijst van taken binnen het project
-- Taken uitklapbaar → subtaken zichtbaar
-- Tik op taak → Taak detail scherm
-- `+` knop → nieuwe taak aan dit project toevoegen
+### Nog te bouwen
 
-**Taak detail**
-- Naam (bewerkbaar)
-- Deadline, Context — allemaal bewerkbaar
-- Subtaken zichtbaar en bewerkbaar
-- Afvinken (→ gaat naar Voltooid)
-- Verwijderen
+**Project-detailscherm v2 (hiërarchisch)**
+- Taken uitklapbaar → sub-subtaken zichtbaar onder de taak
+- `+` knop → subtaak toevoegen binnen het project
 
-### Design
-- Zelfde stijl als desktop: Apple Dark thema
-- Dark mode volgt systeeminstelling
+**Taak-detailscherm**
+- Tik op taak in lijst → apart detail-scherm
+- Bewerkbaar: naam, deadline, context, prio-ster
+- Subtaken zichtbaar + aan te vinken vanuit hier
+- Verwijderen met bevestiging
 
-### Nog niet besloten
-- Offline support (Service Worker + IndexedDB) — later toe te voegen
+**Eventueel later**
+- Undo-toast bij soft-delete (5 sec, net als desktop)
+- Zoekveld bovenaan
+- Offline support (Service Worker + IndexedDB) — expliciet later, nog niet besloten
+
+### iPhone testen (geparkeerde vraag)
+Gebruiker test via GitHub Pages in Safari op iPhone. Instructie: https://rhlos.github.io/rhl-taakmanager/ automatisch redirect → mobile.html. "Zet op beginscherm" voor PWA-installatie. Volgende sessie: bespreken of we een lokale dev-server willen voor snellere feedback-loop.
 
 ---
 
@@ -312,14 +327,17 @@ Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
 ## Bestanden in de repo
 
 ```
-├── index.html
+├── index.html                          # Auto-redirect naar mobile.html op ≤768px
 ├── style.css                           # Apple Dark thema (altijd donker)
-├── api.js                              # Supabase config + fetch helpers
-├── ui.js                               # Modals, toast, datum
-├── render.js                           # Tabel render functies
-├── app.js                              # State, logica, init
+├── api.js                              # Supabase config + fetch helpers (gedeeld met mobile)
+├── ui.js                               # Modals, toast, datum (gedeeld met mobile)
+├── render.js                           # Desktop tabel render functies
+├── app.js                              # Desktop state, logica, init
 ├── analyse.js                          # Analyse dashboard
 ├── analyse.css                         # Analyse dashboard styling
+├── mobile.html                         # Mobiele PWA
+├── mobile.css                          # Mobiele styling (Apple Dark)
+├── mobile.js                           # Mobiele logica + swipe
 ├── manifest.json                       # PWA
 ├── taken.json                          # Originele dataset (referentie)
 ├── OVERDRACHT.md                       # Dit document
@@ -338,6 +356,22 @@ Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
 
 ---
 
+## Sessie april 2026 — wat is er gedaan
+
+1. **Opschoning** (vóór mobiele bouw):
+   - Dode functies verwijderd uit `render.js` (`starHtml`, `deadlineHtml`, `contextHtml`)
+   - Dode CSS verwijderd uit `style.css`
+   - Ontbrekende CSS-variabelen toegevoegd (`--border`, `--bg2`)
+   - `normalizeContext()` helper in `ui.js`, `refreshUI()` helper in `app.js`
+   - `manifest.json` gefixt (theme-kleuren Apple Dark)
+   - `setCascadeVerwijderd()` geëxtraheerd — cascade delete+undo logica op één plek
+2. **Mobiele PWA v1:** Inbox, menu, multi-view, swipe gestures, auto-redirect
+3. **Filter UX:** "Alles / Geen" snelle toggle in filter-popups
+4. **Prullenmand UX:** "Alles verwijderen" knop (hard delete met bevestiging)
+5. **Analyse-layout:** fix waar paneel onder sidebar viel, Geschat-grafiek verwijderd
+
+---
+
 ## Hoe de code werkt — referentie
 
 > Deze sectie is documentatie voor de AI-assistent, geen openstaande actiepunten.
@@ -353,3 +387,9 @@ Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
 - **Supabase MCP** in Claude Code: gebruik `mcp__a7e63fc8-f838-4adc-a37a-edeb0796093c__execute_sql` met `project_id: "fhkttfzqdjynzmtjbujv"`
 - **Soft delete:** alle drie tabellen hebben `verwijderd_op timestamptz`. Queries filteren altijd op `verwijderd_op IS NULL`
 - **Edge Function `dagelijkse-reminder`**: `verify_jwt: false` — wordt aangeroepen door pg_cron zonder JWT. Resend API key staat in de functie zelf (server-side, niet in de frontend)
+- **Mobiele app state:** `allTaken, allSubtaken, allSubsubtaken, currentView, viewItems` in `mobile.js`. Views worden berekend met `getViewItems()` via `allFlat()` + filters
+- **Mobiele swipe:** `touchstart` registreert `clientX, clientY`. `touchend` checkt `dy<60` voor horizontale beweging, dan `touchStartX<30 && dx>80` voor menu-open, of `dx<-80` voor menu-sluiten
+- **Cache busting mobile:** alle script/css refs in `mobile.html` hebben `?v=2` query. Bump dit getal bij grote wijzigingen aan `mobile.js`/`mobile.css`
+- **`.screen[hidden]` in mobile.css** is noodzakelijk omdat `.screen` `display: flex` heeft, wat het HTML `hidden` attribuut overschrijft
+- **Hard delete volgorde** in prullenmand-leegmaken: eerst `sub_subtaken`, dan `subtaken`, dan `taken` (FK constraints)
+- **btn-new dual-mode:** in `renderAll()` wordt `.btn-new` tekst en `.btn-danger` class per view gezet. De click-handler zelf vertakt op `currentView === 'prullenmand'`

@@ -130,6 +130,8 @@
       transition: background .15s;
     }
     .btn-new:hover { background: #28a745; }
+    .btn-new.btn-danger { background: var(--red); }
+    .btn-new.btn-danger:hover { background: #d63e33; }
 
     /* ── Metrics ── */
     .metrics { display: flex; gap: 8px; margin-bottom: 20px; }

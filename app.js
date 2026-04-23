@@ -500,9 +500,17 @@
 
       updateSidebar();
       const isInbox = currentView === 'inbox';
+      const isPrullen = currentView === 'prullenmand';
       document.getElementById('btnAllesVerwerken').style.display = isInbox ? '' : 'none';
       document.getElementById('btnFilterWerk').style.display = isInbox ? 'none' : '';
       document.getElementById('btnFilterPrive').style.display = isInbox ? 'none' : '';
+
+      // In prullenmand-weergave wordt "+ Nieuwe taak" vervangen door "🗑 Alles verwijderen"
+      const btnNew = document.querySelector('.btn-new');
+      if (btnNew) {
+        btnNew.textContent = isPrullen ? '🗑 Alles verwijderen' : '+ Nieuwe taak';
+        btnNew.classList.toggle('btn-danger', isPrullen);
+      }
 
       attachToggle();
       restoreExpandState(expandState);
@@ -976,6 +984,34 @@ attachSelects();
       if (btnNewBound) return;
       btnNewBound = true;
       document.querySelector('.btn-new').addEventListener('click', async () => {
+        // In prullenmand-weergave: alles permanent verwijderen
+        if (currentView === 'prullenmand') {
+          const total = allProjecten.filter(isVerwijderd).length +
+                        allSubtaken.filter(isVerwijderd).length +
+                        allSubsubtaken.filter(isVerwijderd).length;
+          if (total === 0) {
+            showToast('Prullenmand is al leeg');
+            return;
+          }
+          const ok = await modalConfirm(
+            'Prullenmand leegmaken',
+            `Weet je zeker dat je ${total} item${total === 1 ? '' : 's'} definitief wil verwijderen? Dit kan niet ongedaan gemaakt worden.`,
+            'Definitief verwijderen',
+            true
+          );
+          if (!ok) return;
+          try {
+            await delWhere('sub_subtaken', 'verwijderd_op=not.is.null');
+            await delWhere('subtaken', 'verwijderd_op=not.is.null');
+            await delWhere('taken', 'verwijderd_op=not.is.null');
+            await refreshUI();
+            showToast('Prullenmand geleegd');
+          } catch (err) {
+            showToast('Verwijderen mislukt: ' + err.message);
+          }
+          return;
+        }
+
         const result = await modalNewProject('Nieuw project');
         if (!result) return;
 

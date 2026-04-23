@@ -242,47 +242,7 @@
       });
     }
 
-    // ── Grafiek 3: Geschat vs Werkelijk ──
-    function renderGeschatWerkelijk() {
-      destroyChart('geschat');
-
-      const afgerond = getAfgerondItems().filter(i => i.tijdsinschatting && i.tijd_uitgevoerd);
-      const GESCHAT_MIN = { '<15 min': 15, '<30 min': 30, '<60 min': 60, '<90 min': 90, '<120 min': 120 };
-      const catLabels = Object.keys(GESCHAT_MIN);
-
-      const gemGeschat = catLabels.map(cat => GESCHAT_MIN[cat]);
-      const gemWerkelijk = catLabels.map(cat => {
-        const items = afgerond.filter(i => i.tijdsinschatting === cat);
-        if (items.length === 0) return 0;
-        return Math.round(items.reduce((s, i) => s + i.tijd_uitgevoerd, 0) / items.length);
-      });
-
-      const heeftData = gemWerkelijk.some(v => v > 0);
-      if (!heeftData) {
-        document.getElementById('chartGeschat').parentElement.innerHTML =
-          '<div class="chart-empty">Geen data (vul Geschat + Werkelijk in bij taken)</div>';
-        return;
-      }
-
-      const ctx = document.getElementById('chartGeschat').getContext('2d');
-      chartInstances['geschat'] = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: catLabels,
-          datasets: [
-            { label: 'Geschat (max)', data: gemGeschat, backgroundColor: '#0071e399', borderRadius: 4 },
-            { label: 'Werkelijk (gem)', data: gemWerkelijk, backgroundColor: '#ff3b3099', borderRadius: 4 }
-          ]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 10 } } },
-          scales: { y: { beginAtZero: true, ticks: { font: { size: 10 } }, grid: { color: 'rgba(128,128,128,.1)' } }, x: { ticks: { font: { size: 9 } }, grid: { display: false } } }
-        }
-      });
-    }
-
-    // ── Grafiek 4: Deadline compliance ──
+    // ── Grafiek 3: Deadline compliance ──
     function renderDeadlineCompliance() {
       destroyChart('deadline');
 
@@ -393,7 +353,6 @@
       renderKpis();
       renderProductiviteit();
       renderWerkPrive();
-      renderGeschatWerkelijk();
       renderDeadlineCompliance();
       renderContext();
       renderProjectVoortgang();

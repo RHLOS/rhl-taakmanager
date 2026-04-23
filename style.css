@@ -199,14 +199,15 @@
     .col-popup label:hover { background: rgba(10,132,255,.1); }
     .col-popup input[type="checkbox"] { accent-color: var(--accent); }
     .col-popup-toggle {
-      padding: 2px 14px 6px; font-size: 11px; color: var(--text-2);
-      display: flex; align-items: center; gap: 4px;
+      padding: 4px 14px 8px; font-size: 13px; color: var(--text-2);
+      display: flex; align-items: center; gap: 6px;
     }
     .col-popup-link {
-      background: none; border: none; padding: 0; cursor: pointer;
-      color: var(--accent); font-size: 11px; font-family: inherit;
+      background: none; border: none; padding: 2px 6px; cursor: pointer;
+      color: var(--accent); font-size: 13px; font-weight: 600;
+      font-family: inherit; border-radius: 4px;
     }
-    .col-popup-link:hover { text-decoration: underline; }
+    .col-popup-link:hover { background: rgba(10,132,255,.12); text-decoration: underline; }
     .col-popup-actions {
       display: flex; gap: 6px; padding: 8px 14px 4px; justify-content: flex-end;
     }

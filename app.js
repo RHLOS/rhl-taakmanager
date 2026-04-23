@@ -83,6 +83,31 @@
         popup.appendChild(filterTitle);
 
         const checkboxes = [];
+
+        // Snelle toggle: Alles / Geen
+        const toggleRow = document.createElement('div');
+        toggleRow.className = 'col-popup-toggle';
+        const allLink = document.createElement('button');
+        allLink.type = 'button';
+        allLink.className = 'col-popup-link';
+        allLink.textContent = 'Alles';
+        allLink.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          checkboxes.forEach(cb => { cb.checked = true; });
+        });
+        const noneLink = document.createElement('button');
+        noneLink.type = 'button';
+        noneLink.className = 'col-popup-link';
+        noneLink.textContent = 'Geen';
+        noneLink.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          checkboxes.forEach(cb => { cb.checked = false; });
+        });
+        toggleRow.appendChild(allLink);
+        toggleRow.appendChild(document.createTextNode(' · '));
+        toggleRow.appendChild(noneLink);
+        popup.appendChild(toggleRow);
+
         options.forEach(opt => {
           const label = document.createElement('label');
           const cb = document.createElement('input');

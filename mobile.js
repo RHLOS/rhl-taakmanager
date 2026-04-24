@@ -177,8 +177,9 @@
         </li>
       `).join('');
 
-      // FAB alleen tonen in inbox (en later project-view met add)
-      document.getElementById('fabAdd').style.display = currentView === 'inbox' ? 'flex' : 'none';
+      // FAB tonen in inbox en project-view (nieuwe taak / nieuwe subtaak)
+      const showFab = currentView === 'inbox' || currentView.startsWith('project:');
+      document.getElementById('fabAdd').style.display = showFab ? 'flex' : 'none';
     }
 
     // ═══ Render menu ═══
@@ -290,8 +291,19 @@
     // ═══ Nieuwe taak modal ═══
     const overlay = document.getElementById('modalOverlay');
     const input = document.getElementById('newTaskInput');
+    let addCtx = { mode: 'inbox' }; // mode: 'inbox' | 'subtaak' | 'subsubtaak'
 
-    function openModal() {
+    const ADD_TITLES = { inbox: 'Nieuwe taak', subtaak: 'Nieuwe taak', subsubtaak: 'Nieuwe subtaak' };
+    const ADD_PLACEHOLDERS = {
+      inbox: 'Wat moet er gedaan worden?',
+      subtaak: 'Naam van de taak',
+      subsubtaak: 'Naam van de subtaak'
+    };
+
+    function openModal(ctx) {
+      addCtx = ctx || { mode: 'inbox' };
+      document.getElementById('modalTitle').textContent = ADD_TITLES[addCtx.mode] || 'Nieuw';
+      input.placeholder = ADD_PLACEHOLDERS[addCtx.mode] || '';
       overlay.hidden = false;
       input.value = '';
       setTimeout(() => input.focus(), 50);
@@ -302,7 +314,22 @@
       input.blur();
     }
 
-    document.getElementById('fabAdd').addEventListener('click', openModal);
+    document.getElementById('fabAdd').addEventListener('click', () => {
+      if (currentView === 'inbox') openModal({ mode: 'inbox' });
+      else if (currentView.startsWith('project:')) {
+        openModal({ mode: 'subtaak', parentId: currentView.slice('project:'.length) });
+      }
+    });
+
+    document.getElementById('btnAddChild').addEventListener('click', () => {
+      if (!detailItem) return;
+      if (detailItem.table === 'taken') {
+        openModal({ mode: 'subtaak', parentId: detailItem.id });
+      } else if (detailItem.table === 'subtaken') {
+        openModal({ mode: 'subsubtaak', parentId: detailItem.id });
+      }
+    });
+
     document.getElementById('btnCancel').addEventListener('click', closeModal);
 
     overlay.addEventListener('click', (e) => {
@@ -319,26 +346,29 @@
       const tekst = input.value.trim();
       if (!tekst) return;
       try {
-        const meta = await api('meta', 'sleutel=eq.volgend_nr&select=waarde');
-        const nr = parseInt(meta[0]?.waarde || '99');
-
-        await post('taken', {
-          nr: nr,
-          taak: tekst,
-          categorie: 'Werk',
-          prioriteit: 'normaal',
-          inbox: true
-        });
-
-        await fetch(`${SB}/rest/v1/meta?sleutel=eq.volgend_nr`, {
-          method: 'PATCH',
-          headers: hdrs,
-          body: JSON.stringify({ waarde: String(nr + 1) })
-        });
-
+        if (addCtx.mode === 'inbox') {
+          const meta = await api('meta', 'sleutel=eq.volgend_nr&select=waarde');
+          const nr = parseInt(meta[0]?.waarde || '99');
+          await post('taken', {
+            nr, taak: tekst, categorie: 'Werk', prioriteit: 'normaal', inbox: true
+          });
+          await fetch(`${SB}/rest/v1/meta?sleutel=eq.volgend_nr`, {
+            method: 'PATCH', headers: hdrs, body: JSON.stringify({ waarde: String(nr + 1) })
+          });
+        } else if (addCtx.mode === 'subtaak') {
+          const bestaande = allSubtaken.filter(s => s.taak_id === addCtx.parentId && !s.verwijderd_op);
+          await post('subtaken', {
+            taak_id: addCtx.parentId, tekst, volgorde: bestaande.length + 1
+          });
+        } else if (addCtx.mode === 'subsubtaak') {
+          const bestaande = allSubsubtaken.filter(ss => ss.subtaak_id === addCtx.parentId && !ss.verwijderd_op);
+          await post('sub_subtaken', {
+            subtaak_id: addCtx.parentId, tekst, volgorde: bestaande.length + 1
+          });
+        }
         closeModal();
         await loadData();
-        showToast('Taak toegevoegd');
+        showToast('Toegevoegd');
       } catch (err) {
         showToast('Toevoegen mislukt: ' + err.message);
       }

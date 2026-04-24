@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#000000">
   <link rel="manifest" href="manifest.json">
   <title>Taken — R.H.L.</title>
-  <link rel="stylesheet" href="mobile.css?v=2">
+  <link rel="stylesheet" href="mobile.css?v=3">
 </head>
 <body>
   <!-- Hoofdscherm: weergave (inbox, vandaag, project, etc.) -->
@@ -68,14 +68,68 @@
     </nav>
   </div>
 
+  <!-- Taak-detailscherm -->
+  <div class="screen detail-screen" id="screenDetail" hidden>
+    <header class="topbar">
+      <button class="menu-btn" id="btnBackDetail" aria-label="Terug">←</button>
+      <h1 id="detailTitle">Taak</h1>
+    </header>
+
+    <main class="content detail-content">
+      <div class="detail-section">
+        <textarea id="detailName" class="detail-name" rows="2" placeholder="Naam"></textarea>
+      </div>
+
+      <div class="detail-section detail-meta">
+        <div class="detail-row">
+          <span class="detail-label">Deadline</span>
+          <input type="date" id="detailDeadline" class="detail-input">
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Context</span>
+          <button type="button" id="detailContextBtn" class="detail-input detail-context-btn">Kies…</button>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Prioriteit</span>
+          <button type="button" id="detailPrio" class="prio-star" aria-label="Prioriteit togglen">☆</button>
+        </div>
+      </div>
+
+      <div class="detail-section" id="detailChildSection" hidden>
+        <div class="detail-section-head">
+          <h3 class="detail-section-title" id="detailChildTitle">Subtaken</h3>
+          <button type="button" id="btnAddChild" class="btn-add-child" aria-label="Toevoegen">+</button>
+        </div>
+        <ul class="task-list" id="detailChildList"></ul>
+        <p class="empty" id="detailChildEmpty" hidden>Nog geen items</p>
+      </div>
+
+      <div class="detail-section">
+        <button type="button" id="btnDetailDelete" class="btn-delete-full">🗑  Verwijderen</button>
+      </div>
+    </main>
+  </div>
+
   <!-- Modal voor nieuwe taak -->
   <div class="modal-overlay" id="modalOverlay" hidden>
     <div class="modal">
-      <h2>Nieuwe taak</h2>
+      <h2 id="modalTitle">Nieuwe taak</h2>
       <input type="text" id="newTaskInput" placeholder="Wat moet er gedaan worden?" autocomplete="off">
       <div class="modal-buttons">
         <button class="btn-cancel" id="btnCancel">Annuleren</button>
         <button class="btn-save" id="btnSave">Toevoegen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal voor context selecteren -->
+  <div class="modal-overlay" id="ctxOverlay" hidden>
+    <div class="modal">
+      <h2>Context</h2>
+      <div class="ctx-list" id="ctxList"></div>
+      <div class="modal-buttons">
+        <button class="btn-cancel" id="btnCtxCancel">Annuleren</button>
+        <button class="btn-save" id="btnCtxSave">Opslaan</button>
       </div>
     </div>
   </div>
@@ -86,8 +140,8 @@
   <!-- Saving indicator -->
   <div class="saving-indicator" id="savingIndicator" hidden></div>
 
-  <script src="ui.js?v=2"></script>
-  <script src="api.js?v=2"></script>
-  <script src="mobile.js?v=2"></script>
+  <script src="ui.js?v=3"></script>
+  <script src="api.js?v=3"></script>
+  <script src="mobile.js?v=3"></script>
 </body>
 </html>

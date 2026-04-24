@@ -1,7 +1,9 @@
     // ═══ Mobile state ═══
-    let allTaken = [], allSubtaken = [], allSubsubtaken = [];
+    let allTaken = [], allSubtaken = [], allSubsubtaken = [], allContexten = [];
     let currentView = 'inbox'; // 'inbox' | 'vandaag' | 'prioriteit' | 'voltooid' | 'prullenmand' | 'project:<id>'
     let viewItems = []; // items voor de huidige view (vlakke lijst)
+    let detailItem = null; // huidige item in detail-scherm (null = niet open)
+    let detailCtxSelected = []; // context-selectie in modal
 
     // ═══ View configuratie ═══
     const VIEW_TITLES = {
@@ -42,16 +44,19 @@
     // ═══ Data laden ═══
     async function loadData() {
       try {
-        const [taken, subs, subsubs] = await Promise.all([
+        const [taken, subs, subsubs, ctxs] = await Promise.all([
           api('taken', 'order=nr.asc'),
           api('subtaken', 'order=volgorde.asc'),
-          api('sub_subtaken', 'order=volgorde.asc')
+          api('sub_subtaken', 'order=volgorde.asc'),
+          api('contexts', 'order=name.asc')
         ]);
         allTaken = taken;
         allSubtaken = subs;
         allSubsubtaken = subsubs;
+        allContexten = ctxs.map(c => c.name);
         renderView();
         renderMenu();
+        if (detailItem) refreshDetail();
       } catch (err) {
         showToast('Laden mislukt: ' + err.message);
       }
@@ -94,6 +99,47 @@
       if (item.table === 'subtaken') return !!item.raw.prio_ster;
       if (item.table === 'sub_subtaken') return !!item.raw.prioriteit;
       return false;
+    }
+
+    function prioPatch(table, val) {
+      if (table === 'taken') return { prioriteit: val ? 'hoog' : 'normaal' };
+      if (table === 'subtaken') return { prio_ster: val };
+      if (table === 'sub_subtaken') return { prioriteit: val };
+      return {};
+    }
+
+    function getContextArray(raw) {
+      const c = raw.context;
+      if (!c) return [];
+      return Array.isArray(c) ? c : [c];
+    }
+
+    function nameField(table) {
+      return table === 'taken' ? 'taak' : 'tekst';
+    }
+
+    function hasChildren(table) {
+      return table === 'taken' || table === 'subtaken';
+    }
+
+    function getChildren(id, table) {
+      if (table === 'taken') {
+        return allSubtaken
+          .filter(s => s.taak_id === id && !s.verwijderd_op)
+          .map(s => toFlat(s, 'subtaken'));
+      }
+      if (table === 'subtaken') {
+        return allSubsubtaken
+          .filter(ss => ss.subtaak_id === id && !ss.verwijderd_op)
+          .map(ss => toFlat(ss, 'sub_subtaken'));
+      }
+      return [];
+    }
+
+    function findItem(id, table) {
+      const arr = table === 'taken' ? allTaken : table === 'subtaken' ? allSubtaken : allSubsubtaken;
+      const raw = arr.find(x => x.id === id);
+      return raw ? toFlat(raw, table) : null;
     }
 
     // ═══ Render hoofdscherm ═══
@@ -197,39 +243,49 @@
     });
 
     // ═══ Task interactions ═══
-    document.getElementById('taskList').addEventListener('click', async (e) => {
-      const btn = e.target.closest('[data-action]');
-      if (!btn) return;
-      const li = btn.closest('.task-item');
-      const id = li.dataset.id;
-      const table = li.dataset.table;
-      const action = btn.dataset.action;
-
-      if (action === 'toggle') {
-        const item = viewItems.find(i => i.id === id && i.table === table);
-        if (!item) return;
-        const nieuw = !item.gedaan;
-        try {
-          await patch(table, id, {
-            gedaan: nieuw,
-            gedaan_datum: nieuw ? new Date().toISOString().split('T')[0] : null
-          });
-          await loadData();
-        } catch (err) {
-          showToast('Opslaan mislukt');
-        }
+    async function toggleDone(id, table) {
+      const item = findItem(id, table);
+      if (!item) return;
+      const nieuw = !item.gedaan;
+      try {
+        await patch(table, id, {
+          gedaan: nieuw,
+          gedaan_datum: nieuw ? new Date().toISOString().split('T')[0] : null
+        });
+        await loadData();
+      } catch (err) {
+        showToast('Opslaan mislukt');
       }
+    }
 
-      if (action === 'delete') {
-        try {
-          await patch(table, id, { verwijderd_op: new Date().toISOString() });
-          await loadData();
-          showToast('Naar prullenmand');
-        } catch (err) {
-          showToast('Verwijderen mislukt');
-        }
+    async function softDelete(id, table) {
+      try {
+        await patch(table, id, { verwijderd_op: new Date().toISOString() });
+        await loadData();
+        showToast('Naar prullenmand');
+      } catch (err) {
+        showToast('Verwijderen mislukt');
       }
-    });
+    }
+
+    function wireRowInteractions(listEl) {
+      listEl.addEventListener('click', async (e) => {
+        const li = e.target.closest('.task-item');
+        if (!li) return;
+        const id = li.dataset.id;
+        const table = li.dataset.table;
+        const actionBtn = e.target.closest('[data-action]');
+        if (actionBtn) {
+          const action = actionBtn.dataset.action;
+          if (action === 'toggle') await toggleDone(id, table);
+          else if (action === 'delete') await softDelete(id, table);
+          return;
+        }
+        openDetail(id, table);
+      });
+    }
+
+    wireRowInteractions(document.getElementById('taskList'));
 
     // ═══ Nieuwe taak modal ═══
     const overlay = document.getElementById('modalOverlay');
@@ -288,6 +344,195 @@
       }
     }
 
+    // ═══ Detail-scherm ═══
+    function openDetail(id, table) {
+      const item = findItem(id, table);
+      if (!item) return;
+      detailItem = item;
+      fillDetail(item);
+      document.getElementById('screenMain').hidden = true;
+      document.getElementById('screenMenu').hidden = true;
+      document.getElementById('screenDetail').hidden = false;
+      document.getElementById('fabAdd').style.display = 'none';
+    }
+
+    function closeDetail() {
+      detailItem = null;
+      document.getElementById('screenDetail').hidden = true;
+      showMain();
+      renderView(); // FAB-weergave herstellen
+    }
+
+    function refreshDetail() {
+      if (!detailItem) return;
+      const fresh = findItem(detailItem.id, detailItem.table);
+      if (!fresh) { closeDetail(); return; }
+      fillDetail(fresh);
+    }
+
+    function fillDetail(item) {
+      detailItem = item;
+      const raw = item.raw;
+
+      const titleMap = { taken: 'Project', subtaken: 'Taak', sub_subtaken: 'Subtaak' };
+      document.getElementById('detailTitle').textContent = titleMap[item.table] || 'Taak';
+
+      const nameEl = document.getElementById('detailName');
+      if (document.activeElement !== nameEl) nameEl.value = item.tekst || '';
+
+      const ddlEl = document.getElementById('detailDeadline');
+      if (document.activeElement !== ddlEl) ddlEl.value = raw.deadline || '';
+
+      const ctxs = getContextArray(raw);
+      const ctxBtn = document.getElementById('detailContextBtn');
+      if (ctxs.length) {
+        ctxBtn.textContent = ctxs.join(', ');
+        ctxBtn.classList.remove('empty');
+      } else {
+        ctxBtn.textContent = 'Kies…';
+        ctxBtn.classList.add('empty');
+      }
+
+      const prioBtn = document.getElementById('detailPrio');
+      const p = isPrio(item);
+      prioBtn.textContent = p ? '★' : '☆';
+      prioBtn.classList.toggle('active', p);
+
+      const childSec = document.getElementById('detailChildSection');
+      if (hasChildren(item.table)) {
+        childSec.hidden = false;
+        document.getElementById('detailChildTitle').textContent =
+          item.table === 'taken' ? 'Taken' : 'Subtaken';
+        renderDetailChildren(item.id, item.table);
+      } else {
+        childSec.hidden = true;
+      }
+    }
+
+    function renderDetailChildren(parentId, parentTable) {
+      const children = getChildren(parentId, parentTable);
+      const list = document.getElementById('detailChildList');
+      const empty = document.getElementById('detailChildEmpty');
+      if (children.length === 0) {
+        list.innerHTML = '';
+        empty.hidden = false;
+        return;
+      }
+      empty.hidden = true;
+      list.innerHTML = children.map(item => `
+        <li class="task-item" data-id="${item.id}" data-table="${item.table}">
+          <button class="task-checkbox ${item.gedaan ? 'done' : ''}" data-action="toggle">${item.gedaan ? '✓' : ''}</button>
+          <span class="task-text ${item.gedaan ? 'done' : ''}">${esc(item.tekst || '')}</span>
+          <button class="task-delete" data-action="delete" aria-label="Verwijderen">🗑</button>
+        </li>
+      `).join('');
+    }
+
+    wireRowInteractions(document.getElementById('detailChildList'));
+
+    document.getElementById('btnBackDetail').addEventListener('click', closeDetail);
+
+    document.getElementById('detailName').addEventListener('blur', async (e) => {
+      if (!detailItem) return;
+      const newText = e.target.value.trim();
+      if (!newText || newText === detailItem.tekst) return;
+      try {
+        await patch(detailItem.table, detailItem.id, { [nameField(detailItem.table)]: newText });
+        await loadData();
+      } catch (err) {
+        showToast('Opslaan mislukt');
+      }
+    });
+
+    document.getElementById('detailDeadline').addEventListener('change', async (e) => {
+      if (!detailItem) return;
+      try {
+        await patch(detailItem.table, detailItem.id, { deadline: e.target.value || null });
+        await loadData();
+      } catch (err) {
+        showToast('Opslaan mislukt');
+      }
+    });
+
+    document.getElementById('detailPrio').addEventListener('click', async () => {
+      if (!detailItem) return;
+      const cur = isPrio(detailItem);
+      try {
+        await patch(detailItem.table, detailItem.id, prioPatch(detailItem.table, !cur));
+        await loadData();
+      } catch (err) {
+        showToast('Opslaan mislukt');
+      }
+    });
+
+    document.getElementById('btnDetailDelete').addEventListener('click', async () => {
+      if (!detailItem) return;
+      if (!confirm('Weet je zeker dat je dit wilt verwijderen?')) return;
+      const id = detailItem.id, table = detailItem.table;
+      closeDetail();
+      try {
+        await patch(table, id, { verwijderd_op: new Date().toISOString() });
+        await loadData();
+        showToast('Naar prullenmand');
+      } catch (err) {
+        showToast('Verwijderen mislukt');
+      }
+    });
+
+    // ═══ Context-modal ═══
+    const ctxOverlay = document.getElementById('ctxOverlay');
+    const ctxListEl = document.getElementById('ctxList');
+
+    function openCtxModal() {
+      if (!detailItem) return;
+      detailCtxSelected = [...getContextArray(detailItem.raw)];
+      renderCtxList();
+      ctxOverlay.hidden = false;
+    }
+
+    function closeCtxModal() { ctxOverlay.hidden = true; }
+
+    function renderCtxList() {
+      if (allContexten.length === 0) {
+        ctxListEl.innerHTML = '<div class="ctx-empty">Nog geen contexten — maak eerst een aan op desktop</div>';
+        return;
+      }
+      ctxListEl.innerHTML = allContexten.map(name => `
+        <div class="ctx-item ${detailCtxSelected.includes(name) ? 'on' : ''}" data-name="${esc(name)}">
+          <span class="ctx-check">✓</span>
+          <span>${esc(name)}</span>
+        </div>
+      `).join('');
+    }
+
+    ctxListEl.addEventListener('click', (e) => {
+      const item = e.target.closest('.ctx-item');
+      if (!item) return;
+      const name = item.dataset.name;
+      if (detailCtxSelected.includes(name)) {
+        detailCtxSelected = detailCtxSelected.filter(n => n !== name);
+      } else {
+        detailCtxSelected.push(name);
+      }
+      renderCtxList();
+    });
+
+    document.getElementById('btnCtxCancel').addEventListener('click', closeCtxModal);
+    ctxOverlay.addEventListener('click', (e) => { if (e.target === ctxOverlay) closeCtxModal(); });
+
+    document.getElementById('btnCtxSave').addEventListener('click', async () => {
+      if (!detailItem) return;
+      try {
+        await patch(detailItem.table, detailItem.id, {
+          context: detailCtxSelected.length > 0 ? detailCtxSelected : null
+        });
+        closeCtxModal();
+        await loadData();
+      } catch (err) {
+        showToast('Opslaan mislukt');
+      }
+    });
+
     // ═══ Swipe gestures ═══
     // Swipe van linkerrand naar rechts → open menu
     // Swipe in menu naar links → sluit menu
@@ -313,7 +558,9 @@
 
       // Open menu: swipe van linkerrand (<30px) naar rechts, minstens 80px
       if (!menuOpen && touchStartX < 30 && dx > 80) {
-        showMenu();
+        const detailOpen = !document.getElementById('screenDetail').hidden;
+        if (detailOpen) closeDetail();
+        else showMenu();
       }
       // Sluit menu: swipe naar links in menu, minstens 80px
       if (menuOpen && dx < -80) {

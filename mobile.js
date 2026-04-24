@@ -263,7 +263,14 @@
       try {
         await patch(table, id, { verwijderd_op: new Date().toISOString() });
         await loadData();
-        showToast('Naar prullenmand');
+        showToast('Naar prullenmand', async () => {
+          try {
+            await patch(table, id, { verwijderd_op: null });
+            await loadData();
+          } catch (err) {
+            showToast('Herstellen mislukt');
+          }
+        });
       } catch (err) {
         showToast('Verwijderen mislukt');
       }
@@ -503,7 +510,14 @@
       try {
         await patch(table, id, { verwijderd_op: new Date().toISOString() });
         await loadData();
-        showToast('Naar prullenmand');
+        showToast('Naar prullenmand', async () => {
+          try {
+            await patch(table, id, { verwijderd_op: null });
+            await loadData();
+          } catch (err) {
+            showToast('Herstellen mislukt');
+          }
+        });
       } catch (err) {
         showToast('Verwijderen mislukt');
       }

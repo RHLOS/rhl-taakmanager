@@ -1,6 +1,6 @@
 # RHL Taakmanager — Overdrachtsdocument
 
-**Laatste update:** 23 april 2026
+**Laatste update:** 24 april 2026
 **Project:** rhl-taakmanager
 **Repo:** RHLOS/rhl-taakmanager
 **Branch:** `main` (feature branch al gemerged)
@@ -57,9 +57,9 @@ De gebruiker heeft een beperkt maandbudget. Hoog verbruik stopt de doorontwikkel
 | `app.js` | State, filters, attach-functies, init | ~1100 |
 | `analyse.js` | Analyse dashboard logica + grafieken | ~400 |
 | `analyse.css` | Analyse dashboard styling | ~160 |
-| `mobile.html` | Mobiele PWA (apart scherm, auto-redirect) | ~95 |
-| `mobile.css` | Mobiele styling (Apple Dark) | ~395 |
-| `mobile.js` | Mobiele logica: views, render, swipe | ~330 |
+| `mobile.html` | Mobiele PWA (apart scherm, auto-redirect) | ~147 |
+| `mobile.css` | Mobiele styling (Apple Dark) | ~588 |
+| `mobile.js` | Mobiele logica: views, render, detail, swipe | ~616 |
 
 **Laadvolgorde scripts (desktop):** ui.js → api.js → render.js → app.js → analyse.js
 **Laadvolgorde scripts (mobile):** ui.js → api.js → mobile.js
@@ -253,7 +253,7 @@ Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
 | 6 | ~~Dynamische context-opties uit Supabase~~ ✅ | ~~Gemiddeld~~ |
 | 7 | ~~Nieuwe context aanmaken vanuit app~~ ✅ | ~~Gemiddeld~~ |
 | 8 | ~~Context filter op subtaakniveau~~ ✅ | ~~Gemiddeld~~ |
-| 9 | Mobiele PWA — Inbox + menu + multi-view ✅ / Project-detail + Taak-detail nog te bouwen | In uitvoering |
+| 9 | ~~Mobiele PWA — Inbox + menu + multi-view + taak-detail + + knoppen + undo-toast~~ ✅ | ~~Hoog~~ |
 | 10 | ~~Claude Chat inbox-instructie aanpassen~~ ✅ (door gebruiker gedaan) | ~~Gemiddeld~~ |
 | 11 | Authenticatie | Later (niet nodig bij 1 gebruiker) |
 | 12 | ~~Beheer-sectie~~ ✅ (knop verwijderd, niet nodig) | ~~Laag~~ |
@@ -270,15 +270,15 @@ Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
 - Deelt `api.js` en `ui.js` met desktop (niet gedeeld via shared.js — gewoon hergebruik van dezelfde files)
 - `mobile.js` en `mobile.css` zijn eigen bestanden (niet automatisch gesync met desktop)
 - Installatie: Safari op iPhone → "Zet op beginscherm"
-- Cache-busting: `?v=2` achter alle mobile asset-refs in `mobile.html`
+- Cache-busting: `?v=4` achter alle mobile asset-refs in `mobile.html`
 - Auto-redirect in `index.html` stuurt viewports ≤768px door naar `mobile.html`
 
-### ✅ Gebouwd (v1 + v2)
+### ✅ Gebouwd (v1 + v2 + v3)
 
 **Inbox scherm (opening)**
 - Lijst van inbox-taken (filtert op `inbox=true && !verwijderd_op && !gedaan`)
 - Afvinken → toggle gedaan + gedaan_datum
-- 🗑 knop → soft-delete naar prullenmand
+- 🗑 knop → soft-delete naar prullenmand + undo-toast 5 sec
 - `+` FAB → modal met tekstveld → nieuwe taak (auto `inbox=true, categorie='Werk', prioriteit='normaal'`)
 - Sync met desktop werkt (nieuwe taak verschijnt direct in desktop inbox)
 
@@ -293,23 +293,25 @@ Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
 **Multi-view rendering**
 - State: `currentView` = `'inbox' | 'vandaag' | 'prioriteit' | 'voltooid' | 'prullenmand' | 'project:<id>'`
 - `getViewItems()` filtert `allFlat()` per view
-- Voor `project:<id>` toont subtaken + sub-subtaken van dat project
-- Project-detailscherm is nu een "platte lijst" (geen hiërarchie) — nog te verbeteren (zie "Nog te bouwen")
-
-### Nog te bouwen
-
-**Project-detailscherm v2 (hiërarchisch)**
-- Taken uitklapbaar → sub-subtaken zichtbaar onder de taak
-- `+` knop → subtaak toevoegen binnen het project
+- Voor `project:<id>` toont subtaken + sub-subtaken van dat project (platte lijst — uitklapbare hiërarchie nog pending)
+- FAB in project-view → modal "Nieuwe taak" (subtaak onder dit project)
 
 **Taak-detailscherm**
-- Tik op taak in lijst → apart detail-scherm
-- Bewerkbaar: naam, deadline, context, prio-ster
-- Subtaken zichtbaar + aan te vinken vanuit hier
-- Verwijderen met bevestiging
+- Tik op een taak-rij (niet op ✓/🗑 knop) → apart scherm
+- Velden: naam (textarea, opslaan op blur), deadline (date-picker), context (multi-select modal), prio-ster (toggle)
+- Subtaken-sectie met `+` knop: bij project → nieuwe subtaak, bij taak → nieuwe sub-subtaak. Kinderen afvinkbaar, soft-delete met undo.
+- 🗑 Verwijderen (onderaan) → confirm() → soft-delete met undo-toast
+- ← Terug-knop of swipe-van-linkerrand → terug naar vorige view
+- Context modal: lijst van bestaande contexten uit `allContexten`, multi-select met checkmarks, Opslaan patcht `context: array | null`
 
-**Eventueel later**
-- Undo-toast bij soft-delete (5 sec, net als desktop)
+**Undo-toast**
+- Gebruikt `showToast(message, undoFn)` uit `ui.js` (gedeeld met desktop)
+- 5 sec zichtbaar, dan fade-out via `.toast.hiding` class
+- Knop "Ongedaan maken" zet `verwijderd_op = null` en reloadt data
+
+### Eventueel later
+
+- Project-detailscherm v2 met uitklapbare hiërarchie (taken → sub-subtaken inline)
 - Zoekveld bovenaan
 - Offline support (Service Worker + IndexedDB) — expliciet later, nog niet besloten
 
@@ -369,6 +371,11 @@ Gebruiker test via GitHub Pages in Safari op iPhone. Instructie: https://rhlos.g
 3. **Filter UX:** "Alles / Geen" snelle toggle in filter-popups
 4. **Prullenmand UX:** "Alles verwijderen" knop (hard delete met bevestiging)
 5. **Analyse-layout:** fix waar paneel onder sidebar viel, Geschat-grafiek verwijderd
+6. **Mobiele PWA v3 (24 april):**
+   - Taak-detailscherm (naam, deadline, context-modal, prio-ster, kinderen, verwijderen)
+   - `+` knop in project-view en detail-scherm → nieuwe subtaak / sub-subtaak
+   - Undo-toast (5 sec "Ongedaan maken") bij soft-delete, shared via `showToast()` in `ui.js`
+   - Swipe-van-linkerrand in detail-scherm = terug (i.p.v. menu openen)
 
 ---
 
@@ -387,7 +394,10 @@ Gebruiker test via GitHub Pages in Safari op iPhone. Instructie: https://rhlos.g
 - **Supabase MCP** in Claude Code: gebruik `mcp__a7e63fc8-f838-4adc-a37a-edeb0796093c__execute_sql` met `project_id: "fhkttfzqdjynzmtjbujv"`
 - **Soft delete:** alle drie tabellen hebben `verwijderd_op timestamptz`. Queries filteren altijd op `verwijderd_op IS NULL`
 - **Edge Function `dagelijkse-reminder`**: `verify_jwt: false` — wordt aangeroepen door pg_cron zonder JWT. Resend API key staat in de functie zelf (server-side, niet in de frontend)
-- **Mobiele app state:** `allTaken, allSubtaken, allSubsubtaken, currentView, viewItems` in `mobile.js`. Views worden berekend met `getViewItems()` via `allFlat()` + filters
+- **Mobiele app state:** `allTaken, allSubtaken, allSubsubtaken, allContexten, currentView, viewItems, detailItem, detailCtxSelected, addCtx` in `mobile.js`. Views via `getViewItems()` → `allFlat()` + filters
+- **Mobiel detail-scherm:** `openDetail(id,table)` → `fillDetail()` zet alle velden; `wireRowInteractions(el)` hergebruikt voor zowel `#taskList` als `#detailChildList` (row-click = detail, button-click = actie); `addCtx = {mode, parentId}` bepaalt wat `saveNewTask()` aanmaakt (inbox/subtaak/subsubtaak)
+- **Prio-veld per tabel** (verschillend): `taken.prioriteit === 'hoog'` (string), `subtaken.prio_ster` (bool), `sub_subtaken.prioriteit` (bool) → helpers `isPrio()` en `prioPatch()` in `mobile.js`
+- **Context DB-shape:** array van strings (Postgres text[]) of `null`. `normalizeContext()` accepteert beide; patch gebruikt `context: array | null`
 - **Mobiele swipe:** `touchstart` registreert `clientX, clientY`. `touchend` checkt `dy<60` voor horizontale beweging, dan `touchStartX<30 && dx>80` voor menu-open, of `dx<-80` voor menu-sluiten
 - **Cache busting mobile:** alle script/css refs in `mobile.html` hebben `?v=2` query. Bump dit getal bij grote wijzigingen aan `mobile.js`/`mobile.css`
 - **`.screen[hidden]` in mobile.css** is noodzakelijk omdat `.screen` `display: flex` heeft, wat het HTML `hidden` attribuut overschrijft

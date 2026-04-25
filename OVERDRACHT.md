@@ -1,10 +1,21 @@
 # RHL Taakmanager — Overdrachtsdocument
 
-**Laatste update:** 24 april 2026
+**Laatste update:** 25 april 2026
 **Project:** rhl-taakmanager
 **Repo:** RHLOS/rhl-taakmanager
-**Branch:** `main` (feature branch al gemerged)
+**Branch:** `main`
 **GitHub Pages:** https://rhlos.github.io/rhl-taakmanager/
+**Lokaal:** `~/ClaudeCodeZandbak/code/rhl-taakmanager/`
+**Claude Code starten vanuit:** `~/ClaudeCodeZandbak/` (niet vanuit deze submap — dan val je in de gedeelde ClaudeCodeZandbak-context met de andere apps)
+
+---
+
+## Volgende sessie — focus
+
+**Mobiele app v2** — drie items:
+1. **Project-detailscherm v2** — uitklapbare hiërarchie (taken → sub-subtaken inline). Nu nog platte lijst.
+2. **Zoekveld** bovenaan in mobiele app.
+3. **iPhone-testflow bespreken** — lokale dev-server vs huidige flow (push → GitHub Pages refresh in Safari privévenster).
 
 ---
 
@@ -36,7 +47,7 @@ De gebruiker heeft een beperkt maandbudget. Hoog verbruik stopt de doorontwikkel
 3. **Stap voor stap** werken, vragen nummeren
 4. **Bij SQL in Supabase:** altijd zeggen "wis eerst het tekstveld"
 5. **Gebruiker is een leek** — simpel uitleggen
-6. Gebruiker werkt op **MacBook Air**, bestanden in `~/ClaudeCodeZandbak/rhl-taakmanager/`
+6. Gebruiker werkt op **MacBook Air**, bestanden in `~/ClaudeCodeZandbak/code/rhl-taakmanager/`
 7. Gebruiker heeft `gh` CLI, ingelogd als **RHLOS**
 8. **Na elke werkende wijziging:** committen + pushen naar `main`
 9. **Link meesturen** bij elke refresh-verzoek: https://rhlos.github.io/rhl-taakmanager/ (open in privévenster: Cmd+Shift+N)
@@ -201,9 +212,9 @@ SELECT cron.schedule('dagelijkse-reminder', '0 7 * * *',
 
 ---
 
-## Thema — Apple Dark (actief)
+## Thema — Apple Dark (definitief)
 
-Geïmplementeerd op 1 april 2026. `style.css` gebruikt altijd de donkere Apple kleuren — geen lichtmodus meer.
+Geïmplementeerd op 1 april 2026. `style.css` gebruikt altijd de donkere Apple kleuren — geen lichtmodus, geen alternatieve thema's. Beslissing definitief op 25 april.
 
 | Variabele | Waarde | Omschrijving |
 |-----------|--------|-------------|
@@ -219,45 +230,14 @@ Geïmplementeerd op 1 april 2026. `style.css` gebruikt altijd de donkere Apple k
 | `--orange` | `#ff9f0a` | Oranje (Privé) |
 | `--green` | `#30d158` | Groen (afvinken / nieuwe taak) |
 
-### Alternatieve thema's (nog niet gebouwd, kleuren bewaard)
-
-**Optie 2 — Midnight Blue**
-```
---bg: #0d1b2a  --sidebar-bg: #0a1628  --card: #1b2838
---sep: #2a3f5a  --accent: #4fc3f7  --text: #e8f4ff
---text-2: #a8c8f0  --text-3: #4a6fa5
-```
-Sidebar active: `rgba(79,195,247,.15)` / Badge: `rgba(79,195,247,.2)`
-
-**Optie 3 — Indigo Dark**
-```
---bg: #1a1f36  --sidebar-bg: #141929  --card: #252b44
---sep: #353d5e  --accent: #5b8dee  --text: #e8eaf6
---text-2: #b0badd  --text-3: #5b6a9a
-```
-Sidebar active: `rgba(91,141,238,.2)` / Badge: `rgba(91,141,238,.2)`
-
-Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
-
 ---
 
-## Nog te doen
+## Bewust uitgesteld
 
-| # | Item | Prioriteit |
-|---|------|-----------|
-| 1 | ~~Feature branch mergen naar `main`~~ ✅ | ~~Hoog~~ |
-| 2 | ~~Notities/beschrijving per taak~~ ✅ (kolom later verwijderd) | ~~Gemiddeld~~ |
-| 3 | ~~Apple Dark thema~~ ✅ | ~~Gemiddeld~~ |
-| 4 | ~~Kolommen Geschat & Werkelijk verwijderd~~ ✅ | ~~Gemiddeld~~ |
-| 5 | ~~Dagelijkse e-mailreminder (Resend + Edge Function)~~ ✅ | ~~Hoog~~ |
-| 6 | ~~Dynamische context-opties uit Supabase~~ ✅ | ~~Gemiddeld~~ |
-| 7 | ~~Nieuwe context aanmaken vanuit app~~ ✅ | ~~Gemiddeld~~ |
-| 8 | ~~Context filter op subtaakniveau~~ ✅ | ~~Gemiddeld~~ |
-| 9 | ~~Mobiele PWA — Inbox + menu + multi-view + taak-detail + + knoppen + undo-toast~~ ✅ | ~~Hoog~~ |
-| 10 | ~~Claude Chat inbox-instructie aanpassen~~ ✅ (door gebruiker gedaan) | ~~Gemiddeld~~ |
-| 11 | Authenticatie | Later (niet nodig bij 1 gebruiker) |
-| 12 | ~~Beheer-sectie~~ ✅ (knop verwijderd, niet nodig) | ~~Laag~~ |
-| 13 | Offline support mobiele app (Service Worker) | Later (pas bij PWA) |
+| Item | Reden |
+|------|-------|
+| Authenticatie | Niet nodig bij 1 gebruiker |
+| Offline support mobiele app (Service Worker + IndexedDB) | Pas later, eerst v2-features mobiel |
 
 ---
 
@@ -309,14 +289,13 @@ Preview-bestand (lokaal, niet in repo): `preview-thema/index.html`
 - 5 sec zichtbaar, dan fade-out via `.toast.hiding` class
 - Knop "Ongedaan maken" zet `verwijderd_op = null` en reloadt data
 
-### Eventueel later
+### Volgende sessie — mobiel v2
+
+(Zie ook bovenaan dit document — "Volgende sessie — focus".)
 
 - Project-detailscherm v2 met uitklapbare hiërarchie (taken → sub-subtaken inline)
 - Zoekveld bovenaan
-- Offline support (Service Worker + IndexedDB) — expliciet later, nog niet besloten
-
-### iPhone testen (geparkeerde vraag)
-Gebruiker test via GitHub Pages in Safari op iPhone. Instructie: https://rhlos.github.io/rhl-taakmanager/ automatisch redirect → mobile.html. "Zet op beginscherm" voor PWA-installatie. Volgende sessie: bespreken of we een lokale dev-server willen voor snellere feedback-loop.
+- iPhone testflow bespreken: lokale dev-server vs huidige flow (push → GitHub Pages → Safari privévenster Cmd+Shift+N)
 
 ---
 
@@ -343,10 +322,8 @@ Gebruiker test via GitHub Pages in Safari op iPhone. Instructie: https://rhlos.g
 ├── manifest.json                       # PWA
 ├── taken.json                          # Originele dataset (referentie)
 ├── OVERDRACHT.md                       # Dit document
-├── README.md                           # MCP setup instructies
-├── preview-thema/
-│   └── index.html                      # Lokale thema-preview (3 opties)
-├── preview-thema.html                  # Bronbestand thema-preview
+├── README.md                           # Publieke README + MCP setup
+├── CLAUDE.md                           # Project-instructies voor Claude Code
 └── supabase/
     ├── schema.sql
     ├── import.sql
@@ -376,6 +353,11 @@ Gebruiker test via GitHub Pages in Safari op iPhone. Instructie: https://rhlos.g
    - `+` knop in project-view en detail-scherm → nieuwe subtaak / sub-subtaak
    - Undo-toast (5 sec "Ongedaan maken") bij soft-delete, shared via `showToast()` in `ui.js`
    - Swipe-van-linkerrand in detail-scherm = terug (i.p.v. menu openen)
+7. **Opschoning (25 april):**
+   - Apple Dark vastgelegd als definitief thema; `preview-thema.html` + `preview-thema/` verwijderd, alternatieve thema-kleuren uit dit document
+   - Obsolete docs verwijderd: `PLAN_ANALYSE_DASHBOARD.md` (dashboard is gebouwd), `Taakanalyse_Briefing_RHL_v2.md` (oude chat-widget), `ClaudeCode_Briefing_Taakmanager.md` (initiële build-briefing — superseded door dit document)
+   - `code/rhl-taakmanager/.claude/` opgeruimd; permissies (Supabase + Preview MCP) gemerged naar `~/ClaudeCodeZandbak/.claude/settings.local.json`. Project valt voortaan onder de gedeelde "ClaudeCodeZandbak"-context
+   - `CLAUDE.md` voor dit project ingevuld (verwijst naar OVERDRACHT.md voor details)
 
 ---
 

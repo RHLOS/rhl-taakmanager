@@ -298,6 +298,86 @@ function editableContext(ctx, id, table) {
       });
     }
 
+    function renderZoekresultaten(tbody) {
+      const q = (searchQuery || '').toLowerCase();
+      if (!q) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-2);">Typ iets in het zoekveld om te zoeken</td></tr>`;
+        return;
+      }
+
+      const matches = (text) => text && text.toLowerCase().includes(q);
+      const projecten = allProjecten.filter(p => isActief(p) && !p.gedaan && matches(p.taak));
+      const subs = allSubtaken.filter(s => isActief(s) && !s.gedaan && matches(s.tekst));
+      const subsubs = allSubsubtaken.filter(ss => isActief(ss) && !ss.gedaan && matches(ss.tekst));
+      const total = projecten.length + subs.length + subsubs.length;
+
+      if (total === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-2);">Geen resultaten voor "${esc(searchQuery)}"</td></tr>`;
+        return;
+      }
+
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr><td colspan="10" style="padding:14px 16px;background:var(--card);border-bottom:1px solid var(--sep);font-size:13px;color:var(--text-2);">
+          ${total} ${total === 1 ? 'resultaat' : 'resultaten'} voor "<strong style="color:var(--text);">${esc(searchQuery)}</strong>"
+        </td></tr>
+      `);
+
+      projecten.forEach(p => {
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="row-taak">
+            <td class="col-nr-cell"></td>
+            <td class="cd"></td>
+            <td class="cp">${starHtmlData(p.prioriteit === 'hoog', p.id, 'taken', 'prioriteit')}</td>
+            <td>${catBadge(p.categorie)}</td>
+            <td><span class="editable" data-id="${p.id}" data-table="taken" data-field="taak">${esc(p.taak)}</span></td>
+            <td><span style="color:var(--text-3);font-size:11px;">project</span></td>
+            <td></td>
+            <td>${editableDeadline(p.deadline, p.id, 'taken')}</td>
+            <td>${editableContext(p.context, p.id, 'taken')}</td>
+            <td class="col-add"><button class="del-btn" data-del-id="${p.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
+          </tr>
+        `);
+      });
+
+      subs.forEach(sub => {
+        const project = allProjecten.find(p => p.id === sub.taak_id);
+        const cat = project ? project.categorie : 'Werk';
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="row-taak">
+            <td class="col-nr-cell"></td>
+            <td class="cd"><span class="cb" data-id="${sub.id}" data-table="subtaken">○</span></td>
+            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
+            <td>${catBadge(cat)}</td>
+            <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
+            <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
+            <td></td>
+            <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
+            <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
+            <td class="col-add"><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
+          </tr>
+        `);
+      });
+
+      subsubs.forEach(ss => {
+        const sub = allSubtaken.find(s => s.id === ss.subtaak_id);
+        const project = sub ? allProjecten.find(p => p.id === sub.taak_id) : null;
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="row-subtaak">
+            <td class="col-nr-cell"></td>
+            <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
+            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+            <td></td>
+            <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
+            <td><span style="color:var(--text-3);font-size:11px;">${esc(sub?.tekst || '?')}</span></td>
+            <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${esc(ss.tekst)}</span></td>
+            <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
+            <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
+            <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
+          </tr>
+        `);
+      });
+    }
+
     function renderVoltooid(tbody) {
       const items = [
         ...allSubtaken.filter(s => s.gedaan && isActief(s)).map(s => {

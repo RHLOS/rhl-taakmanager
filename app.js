@@ -333,6 +333,7 @@
         case 'week': return 'Deze week';
         case 'prioriteit': return 'Prioriteit';
         case 'voltooid': return 'Voltooid';
+        case 'zoekresultaten': return 'Zoekresultaten';
         default:
           if (currentView.startsWith('project:')) {
             const pid = currentView.split(':')[1];
@@ -453,21 +454,18 @@
     }
 
     function renderAll() {
+      // Auto-clear search wanneer we niet (meer) in de zoekresultaten-view zitten
+      if (currentView !== 'zoekresultaten' && searchQuery) {
+        searchQuery = '';
+        const inp = document.getElementById('searchInput');
+        if (inp) inp.value = '';
+      }
+
       const expandState = saveExpandState();
       const tbody = document.getElementById('tbody');
       tbody.innerHTML = '';
 
       let filtered = getViewProjects().filter(p => projectMatchesFilter(p));
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        filtered = filtered.filter(p => {
-          if (p.taak && p.taak.toLowerCase().includes(q)) return true;
-          const subs = allSubtaken.filter(s => s.taak_id === p.id);
-          if (subs.some(s => s.tekst && s.tekst.toLowerCase().includes(q))) return true;
-          const subIds = subs.map(s => s.id);
-          return allSubsubtaken.some(ss => subIds.includes(ss.subtaak_id) && ss.tekst && ss.tekst.toLowerCase().includes(q));
-        });
-      }
       filtered = sortProjecten(filtered);
 
       if (currentView === 'prullenmand') {
@@ -482,6 +480,8 @@
         renderWeek(tbody);
       } else if (currentView === 'prioriteit') {
         renderPrioriteit(tbody);
+      } else if (currentView === 'zoekresultaten') {
+        renderZoekresultaten(tbody);
       } else if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
           Geen taken in deze weergave
@@ -1214,12 +1214,22 @@ attachSelects();
 
     // ═══ Zoekfunctie ═══
     let searchTimeout;
+    let viewBeforeSearch = currentView;
     document.getElementById('searchInput').addEventListener('input', (e) => {
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
-        searchQuery = e.target.value.trim();
-        if (searchQuery && currentView !== 'alle') {
-          currentView = 'alle';
+        const q = e.target.value.trim();
+        if (q) {
+          if (currentView !== 'zoekresultaten') {
+            viewBeforeSearch = currentView;
+            currentView = 'zoekresultaten';
+          }
+          searchQuery = q;
+        } else {
+          searchQuery = '';
+          if (currentView === 'zoekresultaten') {
+            currentView = viewBeforeSearch;
+          }
         }
         renderAll();
       }, 200);

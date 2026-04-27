@@ -1,6 +1,6 @@
 # RHL Taakmanager — Overdrachtsdocument
 
-**Laatste update:** 25 april 2026
+**Laatste update:** 27 april 2026
 **Project:** rhl-taakmanager
 **Repo:** RHLOS/rhl-taakmanager
 **Branch:** `main`
@@ -165,6 +165,7 @@ SELECT cron.schedule('dagelijkse-reminder', '0 7 * * *',
 - **Projecten** (dynamisch, inklapbaar, met tellingen per project — tellen taken + subtaken + sub-subtaken)
 - **Prullenmand** (soft-delete, herstel, auto-cleanup na 7 dagen)
 - **📊 Analyse** (eigen panel, vervangt tabelweergave)
+- **Zoekresultaten** — typen in het zoekveld in de sidebar opent een aparte view "Zoekresultaten" met platte lijst van matchende taken/subtaken/sub-subtaken (case-insensitive op naam, exclusief verwijderd & gedaan). Veld leegmaken keert terug naar de vorige view; klikken op een ander sidebar-item wist het zoekveld automatisch
 - **Sidebar-badges** tellen taken + subtaken (niet alleen projecten)
 - **Klikken op project in sidebar** → main view navigeert naar dat project én klapt automatisch alles uit
 
@@ -358,6 +359,9 @@ Geïmplementeerd op 1 april 2026. `style.css` gebruikt altijd de donkere Apple k
    - Obsolete docs verwijderd: `PLAN_ANALYSE_DASHBOARD.md` (dashboard is gebouwd), `Taakanalyse_Briefing_RHL_v2.md` (oude chat-widget), `ClaudeCode_Briefing_Taakmanager.md` (initiële build-briefing — superseded door dit document)
    - `code/rhl-taakmanager/.claude/` opgeruimd; permissies (Supabase + Preview MCP) gemerged naar `~/ClaudeCodeZandbak/.claude/settings.local.json`. Project valt voortaan onder de gedeelde "ClaudeCodeZandbak"-context
    - `CLAUDE.md` voor dit project ingevuld (verwijst naar OVERDRACHT.md voor details)
+8. **Spelfout + zoekfunctie (27 april):**
+   - Edge Function `dagelijkse-reminder` v2: typo `taaken` → `taken` in mailbody en subject (concat-bug `taak${...?'en':''}` → `${... ? 'taak' : 'taken'}`). Mail van 28 april zou correct moeten zijn
+   - Zoekfunctie omgebouwd van inline-tabelfilter naar aparte view `currentView='zoekresultaten'` met `renderZoekresultaten()` in `render.js`. Filtert op naam over alle 3 niveaus, exclusief verwijderd + gedaan. Auto-clear bij navigatie via `renderAll()`
 
 ---
 

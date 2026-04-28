@@ -516,6 +516,7 @@
       restoreExpandState(expandState);
       attachCheckboxes();
       attachStars();
+      attachBezig();
       attachEditable();
       attachDeadlines();
 attachSelects();
@@ -1198,6 +1199,36 @@ attachSelects();
           } catch (err) {
             star.classList.toggle('on');
             star.classList.toggle('off');
+            alert('Opslaan mislukt: ' + err.message);
+          }
+        });
+      });
+    }
+
+    // ═══ Bezig-toggle: aan/uit ═══
+    function attachBezig() {
+      document.querySelectorAll('.bz').forEach(el => {
+        el.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = el.dataset.bzId;
+          const table = el.dataset.bzTable;
+          if (!id || !table) return;
+
+          const isOn = el.classList.contains('on');
+          el.classList.toggle('on');
+          el.classList.toggle('off');
+          el.textContent = isOn ? '○' : '●';
+
+          try {
+            await patch(table, id, { bezig: !isOn });
+            // Lokale state bijwerken zodat de Kanban-view straks meteen klopt
+            const arr = table === 'taken' ? allProjecten : table === 'subtaken' ? allSubtaken : allSubsubtaken;
+            const item = arr.find(x => x.id === id);
+            if (item) item.bezig = !isOn;
+          } catch (err) {
+            el.classList.toggle('on');
+            el.classList.toggle('off');
+            el.textContent = isOn ? '●' : '○';
             alert('Opslaan mislukt: ' + err.message);
           }
         });

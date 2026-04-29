@@ -93,6 +93,11 @@
       <!-- Top bar -->
       <div class="topbar">
         <h1 id="viewTitle">Alle taken</h1>
+        <div class="view-switcher" id="viewSwitcher">
+          <button class="vs-btn active" data-mode="lijst">📋 Lijst</button>
+          <button class="vs-btn" data-mode="kanban">▦ Kanban</button>
+          <button class="vs-btn" data-mode="calendar">📅 Calendar</button>
+        </div>
         <div style="display:flex;align-items:center;gap:12px;">
           <div class="saving-indicator" id="savingIndicator">
             <div class="saving-dot"></div> <span>Opslaan...</span>
@@ -121,7 +126,7 @@
       </div>
 
       <!-- Toolbar -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <div id="mainToolbar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
         <button class="btn-new">+ Nieuwe taak</button>
         <button class="filter-dd-btn" id="btnCollapseAll">▶ Alles inklappen</button>
         <button class="filter-dd-btn" id="btnExpandAll">▼ Alles uitklappen</button>
@@ -155,6 +160,14 @@
         </thead>
         <tbody id="tbody"></tbody>
       </table>
+    </div>
+
+    <!-- Kanban board (verschijnt als displayMode='kanban') -->
+    <div id="kanbanContainer" class="kanban-board" style="display:none;"></div>
+
+    <!-- Calendar (komt in stap 4) -->
+    <div id="calendarContainer" class="calendar-board" style="display:none;">
+      <div class="cal-placeholder">📅 Calendar — komt in stap 4</div>
     </div>
 
     <div class="footer">R.H.L. Consultancy · Taakmanager</div>
@@ -236,6 +249,7 @@
   <script src="ui.js"></script>
   <script src="api.js"></script>
   <script src="render.js"></script>
+  <script src="kanban.js?v=1"></script>
   <script src="app.js"></script>
   <script src="analyse.js"></script>
 </body>

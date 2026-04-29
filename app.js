@@ -5,6 +5,7 @@
     let currentSort = null;
     let activeFilters = {};
     let currentView = 'inbox';
+    let displayMode = 'lijst'; // 'lijst' | 'kanban' | 'calendar'
     let searchQuery = '';
     let catFilter = null;
 
@@ -412,6 +413,7 @@
         div.dataset.view = `project:${p.id}`;
         div.innerHTML = `<span class="icon">▸</span> ${p.taak} <span class="badge">${count || ''}</span>`;
         div.addEventListener('click', () => {
+          if (displayMode !== 'lijst') setDisplayMode('lijst');
           currentView = `project:${p.id}`;
           renderAll();
           document.querySelectorAll('.chev').forEach(c => c.classList.add('open'));
@@ -460,6 +462,41 @@
         const inp = document.getElementById('searchInput');
         if (inp) inp.value = '';
       }
+
+      // Display-mode dispatch (Lijst | Kanban | Calendar)
+      const tableWrap = document.querySelector('.table-wrap');
+      const kanbanWrap = document.getElementById('kanbanContainer');
+      const calWrap = document.getElementById('calendarContainer');
+      const toolbar = document.getElementById('mainToolbar');
+      const metricsEl = document.querySelector('.metrics');
+
+      if (displayMode === 'kanban') {
+        if (tableWrap)  tableWrap.style.display = 'none';
+        if (kanbanWrap) kanbanWrap.style.display = '';
+        if (calWrap)    calWrap.style.display = 'none';
+        if (toolbar)    toolbar.style.display = 'none';
+        if (metricsEl)  metricsEl.style.display = '';
+        document.getElementById('viewTitle').textContent = 'Kanban';
+        renderKanban(kanbanWrap);
+        // Geen sidebar-item active in kanban-modus
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        return;
+      }
+      if (displayMode === 'calendar') {
+        if (tableWrap)  tableWrap.style.display = 'none';
+        if (kanbanWrap) kanbanWrap.style.display = 'none';
+        if (calWrap)    calWrap.style.display = '';
+        if (toolbar)    toolbar.style.display = 'none';
+        if (metricsEl)  metricsEl.style.display = '';
+        document.getElementById('viewTitle').textContent = 'Calendar';
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        return;
+      }
+      // Lijst-mode (default)
+      if (tableWrap)  tableWrap.style.display = '';
+      if (kanbanWrap) kanbanWrap.style.display = 'none';
+      if (calWrap)    calWrap.style.display = 'none';
+      if (toolbar)    toolbar.style.display = '';
 
       const expandState = saveExpandState();
       const tbody = document.getElementById('tbody');
@@ -579,6 +616,7 @@ attachSelects();
         bindBtnNew();
 
         document.getElementById('tilePrio').addEventListener('click', () => {
+          if (displayMode !== 'lijst') setDisplayMode('lijst');
           currentView = 'prioriteit';
           document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
           document.querySelector('.sidebar-item[data-view="prioriteit"]')?.classList.add('active');
@@ -1235,9 +1273,25 @@ attachSelects();
       });
     }
 
+    // ═══ View-switcher: Lijst | Kanban | Calendar ═══
+    function setDisplayMode(mode) {
+      displayMode = mode;
+      document.querySelectorAll('.vs-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.mode === mode);
+      });
+    }
+    document.querySelectorAll('.vs-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setDisplayMode(btn.dataset.mode);
+        renderAll();
+      });
+    });
+
     // ═══ Sidebar navigatie ═══
     document.querySelectorAll('.sidebar-item[data-view]').forEach(item => {
       item.addEventListener('click', () => {
+        // Sidebar nav betekent: terug naar Lijst-modus
+        if (displayMode !== 'lijst') setDisplayMode('lijst');
         currentView = item.dataset.view;
         renderAll();
       });

@@ -34,6 +34,7 @@ function editableContext(ctx, id, table) {
           <td class="col-nr-cell">${project.nr}</td>
           <td class="cd"></td>
           <td class="cp">${starHtmlData(isPrio, project.id, 'taken', 'prioriteit')}</td>
+          <td class="cbz"></td>
           <td>${catBadge(cat)}</td>
           <td><span class="chev">▶</span> <span class="editable" data-id="${project.id}" data-table="taken" data-field="taak">${esc(project.taak)}</span></td>
           <td></td>
@@ -53,7 +54,8 @@ function editableContext(ctx, id, table) {
           <tr class="row-taak collapsed" data-parent="${project.id}" data-taak-id="${sub.id}">
             <td class="col-nr-cell">${taakNr}</td>
             <td class="cd">${!hasSubs ? `<span class="cb" data-id="${sub.id}" data-table="subtaken">○</span>` : ''}</td>
-            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}${bezigHtmlData(sub.bezig, sub.id, 'subtaken')}</td>
+            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
+            <td class="cbz">${bezigHtmlData(sub.bezig, sub.id, 'subtaken')}</td>
             <td>${catBadge(cat)}</td>
             <td></td>
             <td>${hasSubs ? '<span class="chev">▶</span> ' : ''}<span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
@@ -69,7 +71,8 @@ function editableContext(ctx, id, table) {
             <tr class="row-subtaak collapsed" data-parent-taak="${sub.id}">
               <td class="col-nr-cell">${taakNr}.${ssi + 1}</td>
               <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
-              <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
+              <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+            <td class="cbz">${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
               <td></td>
               <td></td>
               <td></td>
@@ -89,7 +92,7 @@ function editableContext(ctx, id, table) {
       const inboxProjecten = allProjecten.filter(p => !p.gedaan && isActief(p) && p.inbox);
 
       if (inboxSubs.length === 0 && inboxSubSubs.length === 0 && inboxProjecten.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--text-2);">
           Inbox is leeg
         </td></tr>`;
         return;
@@ -102,6 +105,7 @@ function editableContext(ctx, id, table) {
             <td class="col-nr-cell"></td>
             <td class="cd"></td>
             <td class="cp">${starHtmlData(p.prioriteit === 'hoog', p.id, 'taken', 'prioriteit')}</td>
+            <td class="cbz"></td>
             <td>${catBadge(cat)}</td>
             <td><span class="editable" data-id="${p.id}" data-table="taken" data-field="taak">${p.taak}</span></td>
             <td><span style="color:var(--text-3);font-size:11px;">nieuw project</span></td>
@@ -121,7 +125,8 @@ function editableContext(ctx, id, table) {
           <tr class="row-taak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${sub.id}" data-table="subtaken">○</span></td>
-            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}${bezigHtmlData(sub.bezig, sub.id, 'subtaken')}</td>
+            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
+            <td class="cbz">${bezigHtmlData(sub.bezig, sub.id, 'subtaken')}</td>
             <td>${catBadge(cat)}</td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(projectNaam)}</span></td>
             <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
@@ -141,7 +146,8 @@ function editableContext(ctx, id, table) {
           <tr class="row-subtaak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
-            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
+            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+            <td class="cbz">${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
             <td></td>
             <td><span style="color:var(--text-3);font-size:11px;">${project ? project.taak : '?'}</span></td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(taakNaam)}</span></td>
@@ -163,7 +169,7 @@ function editableContext(ctx, id, table) {
       const subsubs = sortItems(allSubsubtaken.filter(ss => !ss.gedaan && isActief(ss) && ss.deadline && daysUntil(ss.deadline) <= 0 && matchesCat(subsubCat(ss))));
 
       if (subs.length === 0 && subsubs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:40px;color:var(--text-2);">Geen verlopen of vandaag vervallende taken</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="14" style="text-align:center;padding:40px;color:var(--text-2);">Geen verlopen of vandaag vervallende taken</td></tr>`;
         return;
       }
 
@@ -174,7 +180,8 @@ function editableContext(ctx, id, table) {
           <tr class="row-taak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${sub.id}" data-table="subtaken">○</span></td>
-            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}${bezigHtmlData(sub.bezig, sub.id, 'subtaken')}</td>
+            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
+            <td class="cbz">${bezigHtmlData(sub.bezig, sub.id, 'subtaken')}</td>
             <td>${catBadge(cat)}</td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
             <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
@@ -193,7 +200,8 @@ function editableContext(ctx, id, table) {
           <tr class="row-subtaak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
-            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
+            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+            <td class="cbz">${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
             <td></td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(sub?.tekst || '?')}</span></td>
@@ -211,7 +219,7 @@ function editableContext(ctx, id, table) {
       const subsubs = sortItems(allSubsubtaken.filter(ss => !ss.gedaan && isActief(ss) && ss.deadline && daysUntil(ss.deadline) >= 0 && daysUntil(ss.deadline) <= 7 && matchesCat(subsubCat(ss))));
 
       if (subs.length === 0 && subsubs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:40px;color:var(--text-2);">Geen taken met deadline deze week</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="14" style="text-align:center;padding:40px;color:var(--text-2);">Geen taken met deadline deze week</td></tr>`;
         return;
       }
 
@@ -222,7 +230,8 @@ function editableContext(ctx, id, table) {
           <tr class="row-taak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${sub.id}" data-table="subtaken">○</span></td>
-            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}${bezigHtmlData(sub.bezig, sub.id, 'subtaken')}</td>
+            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
+            <td class="cbz">${bezigHtmlData(sub.bezig, sub.id, 'subtaken')}</td>
             <td>${catBadge(cat)}</td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
             <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
@@ -241,7 +250,8 @@ function editableContext(ctx, id, table) {
           <tr class="row-subtaak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
-            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
+            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+            <td class="cbz">${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
             <td></td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(sub?.tekst || '?')}</span></td>
@@ -259,7 +269,7 @@ function editableContext(ctx, id, table) {
       const subsubs = sortItems(allSubsubtaken.filter(ss => !ss.gedaan && isActief(ss) && ss.prioriteit && matchesCat(subsubCat(ss))));
 
       if (subs.length === 0 && subsubs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:40px;color:var(--text-2);">Geen prioriteit taken</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="14" style="text-align:center;padding:40px;color:var(--text-2);">Geen prioriteit taken</td></tr>`;
         return;
       }
 
@@ -270,7 +280,8 @@ function editableContext(ctx, id, table) {
           <tr class="row-taak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${sub.id}" data-table="subtaken">○</span></td>
-            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}${bezigHtmlData(sub.bezig, sub.id, 'subtaken')}</td>
+            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
+            <td class="cbz">${bezigHtmlData(sub.bezig, sub.id, 'subtaken')}</td>
             <td>${catBadge(cat)}</td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
             <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
@@ -289,7 +300,8 @@ function editableContext(ctx, id, table) {
           <tr class="row-subtaak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
-            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
+            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+            <td class="cbz">${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
             <td></td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(sub?.tekst || '?')}</span></td>
@@ -305,7 +317,7 @@ function editableContext(ctx, id, table) {
     function renderZoekresultaten(tbody) {
       const q = (searchQuery || '').toLowerCase();
       if (!q) {
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-2);">Typ iets in het zoekveld om te zoeken</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">Typ iets in het zoekveld om te zoeken</td></tr>`;
         return;
       }
 
@@ -316,12 +328,12 @@ function editableContext(ctx, id, table) {
       const total = projecten.length + subs.length + subsubs.length;
 
       if (total === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-2);">Geen resultaten voor "${esc(searchQuery)}"</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">Geen resultaten voor "${esc(searchQuery)}"</td></tr>`;
         return;
       }
 
       tbody.insertAdjacentHTML('beforeend', `
-        <tr><td colspan="10" style="padding:14px 16px;background:var(--card);border-bottom:1px solid var(--sep);font-size:13px;color:var(--text-2);">
+        <tr><td colspan="11" style="padding:14px 16px;background:var(--card);border-bottom:1px solid var(--sep);font-size:13px;color:var(--text-2);">
           ${total} ${total === 1 ? 'resultaat' : 'resultaten'} voor "<strong style="color:var(--text);">${esc(searchQuery)}</strong>"
         </td></tr>
       `);
@@ -332,6 +344,7 @@ function editableContext(ctx, id, table) {
             <td class="col-nr-cell"></td>
             <td class="cd"></td>
             <td class="cp">${starHtmlData(p.prioriteit === 'hoog', p.id, 'taken', 'prioriteit')}</td>
+            <td class="cbz"></td>
             <td>${catBadge(p.categorie)}</td>
             <td><span class="editable" data-id="${p.id}" data-table="taken" data-field="taak">${esc(p.taak)}</span></td>
             <td><span style="color:var(--text-3);font-size:11px;">project</span></td>
@@ -350,7 +363,8 @@ function editableContext(ctx, id, table) {
           <tr class="row-taak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${sub.id}" data-table="subtaken">○</span></td>
-            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}${bezigHtmlData(sub.bezig, sub.id, 'subtaken')}</td>
+            <td class="cp">${starHtmlData(sub.prio_ster, sub.id, 'subtaken', 'prio_ster')}</td>
+            <td class="cbz">${bezigHtmlData(sub.bezig, sub.id, 'subtaken')}</td>
             <td>${catBadge(cat)}</td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
             <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
@@ -369,7 +383,8 @@ function editableContext(ctx, id, table) {
           <tr class="row-subtaak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
-            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
+            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+            <td class="cbz">${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
             <td></td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(sub?.tekst || '?')}</span></td>
@@ -398,7 +413,7 @@ function editableContext(ctx, id, table) {
       items.sort((a, b) => (b.datum || '').localeCompare(a.datum || ''));
 
       if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--text-2);">
           Geen voltooide taken
         </td></tr>`;
         return;
@@ -438,7 +453,7 @@ function editableContext(ctx, id, table) {
       ];
 
       if (verwijderd.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--text-2);">
           Prullenmand is leeg
         </td></tr>`;
         return;

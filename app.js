@@ -483,7 +483,7 @@
       } else if (currentView === 'zoekresultaten') {
         renderZoekresultaten(tbody);
       } else if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-2);">
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--text-2);">
           Geen taken in deze weergave
         </td></tr>`;
       } else {
@@ -557,7 +557,7 @@ attachSelects();
 
     async function init() {
       const tbody = document.getElementById('tbody');
-      tbody.innerHTML = `<tr><td colspan="11" style="padding:20px;color:var(--text-2);font-size:12px;">Laden...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="12" style="padding:20px;color:var(--text-2);font-size:12px;">Laden...</td></tr>`;
 
       try {
         const [projecten, subtaken, subsubtaken, contexten] = await Promise.all([
@@ -587,7 +587,7 @@ attachSelects();
 
       } catch (err) {
         document.getElementById('tbody').innerHTML = `
-          <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--red);">
+          <tr><td colspan="12" style="text-align:center;padding:40px;color:var(--red);">
             Kan taken niet laden: ${err.message}
           </td></tr>`;
       }

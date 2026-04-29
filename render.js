@@ -33,7 +33,7 @@ function editableContext(ctx, id, table) {
         <tr class="row-project" data-project-id="${project.id}">
           <td class="col-nr-cell">${project.nr}</td>
           <td class="cd"></td>
-          <td class="cp">${starHtmlData(isPrio, project.id, 'taken', 'prioriteit')}${bezigHtmlData(project.bezig, project.id, 'taken')}</td>
+          <td class="cp">${starHtmlData(isPrio, project.id, 'taken', 'prioriteit')}</td>
           <td>${catBadge(cat)}</td>
           <td><span class="chev">▶</span> <span class="editable" data-id="${project.id}" data-table="taken" data-field="taak">${esc(project.taak)}</span></td>
           <td></td>
@@ -101,7 +101,7 @@ function editableContext(ctx, id, table) {
           <tr class="row-taak">
             <td class="col-nr-cell"></td>
             <td class="cd"></td>
-            <td class="cp">${starHtmlData(p.prioriteit === 'hoog', p.id, 'taken', 'prioriteit')}${bezigHtmlData(p.bezig, p.id, 'taken')}</td>
+            <td class="cp">${starHtmlData(p.prioriteit === 'hoog', p.id, 'taken', 'prioriteit')}</td>
             <td>${catBadge(cat)}</td>
             <td><span class="editable" data-id="${p.id}" data-table="taken" data-field="taak">${p.taak}</span></td>
             <td><span style="color:var(--text-3);font-size:11px;">nieuw project</span></td>
@@ -331,7 +331,7 @@ function editableContext(ctx, id, table) {
           <tr class="row-taak">
             <td class="col-nr-cell"></td>
             <td class="cd"></td>
-            <td class="cp">${starHtmlData(p.prioriteit === 'hoog', p.id, 'taken', 'prioriteit')}${bezigHtmlData(p.bezig, p.id, 'taken')}</td>
+            <td class="cp">${starHtmlData(p.prioriteit === 'hoog', p.id, 'taken', 'prioriteit')}</td>
             <td>${catBadge(p.categorie)}</td>
             <td><span class="editable" data-id="${p.id}" data-table="taken" data-field="taak">${esc(p.taak)}</span></td>
             <td><span style="color:var(--text-3);font-size:11px;">project</span></td>

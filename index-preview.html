@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#241F1B">
+  <title>PREVIEW — Taakmanager R.H.L.</title>
+  <style>
+    @media (max-width: 768px) {
+      body { display: none; }
+      #mobile-notice { display: flex !important; }
+    }
+    #mobile-notice {
+      display: none; position: fixed; inset: 0;
+      background: #000; color: #f5f5f7;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 2rem;
+      font-family: -apple-system, sans-serif; font-size: 1.1rem; line-height: 1.6;
+    }
+  </style>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css?v=1">
+  <link rel="stylesheet" href="analyse.css?v=1">
+  <link rel="stylesheet" href="calendar.css?v=1">
+  <!-- ▼ PREVIEW-KLEUREN — dit bestand overschrijft het bovenstaande -->
+  <link rel="stylesheet" href="style-preview.css">
+</head>
+<body>
+
+  <div id="mobile-notice">
+    <p>Deze app werkt alleen op desktop.<br>Open op een groter scherm.</p>
+  </div>
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      R.H.L.<span>Taakmanager</span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="Zoeken...">
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-item active" data-view="alle">
+        <span class="icon">📥</span> Alle taken
+        <span class="badge" id="badgeAlle"></span>
+      </div>
+      <div class="sidebar-item" data-view="inbox">
+        <span class="icon">📬</span> Inbox
+        <span class="badge" id="badgeInbox"></span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Snelle weergaven</div>
+      <div class="sidebar-item" data-view="vandaag">
+        <span class="icon">🔴</span> Vandaag & Verlopen
+        <span class="badge" id="badgeVandaag"></span>
+      </div>
+      <div class="sidebar-item" data-view="week">
+        <span class="icon">📅</span> Deze week
+        <span class="badge" id="badgeWeek"></span>
+      </div>
+      <div class="sidebar-item" data-view="prioriteit">
+        <span class="icon">⭐</span> Prioriteit
+        <span class="badge" id="badgePrio"></span>
+      </div>
+      <div class="sidebar-item" data-view="voltooid">
+        <span class="icon">✅</span> Voltooid
+        <span class="badge" id="badgeVoltooid"></span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title" id="projectenToggle" style="cursor:pointer;user-select:none;">
+        <span class="chev open" id="projectenChev" style="font-size:9px;margin-right:4px;">▶</span>Projecten
+      </div>
+      <div id="sidebarProjecten"></div>
+    </div>
+
+    <div style="flex:1"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-item" id="sidebarAnalyse">
+        <span class="icon">📊</span> Analyse
+      </div>
+      <div class="sidebar-item" data-view="prullenmand">
+        <span class="icon">🗑</span> Prullenmand
+        <span class="badge" id="badgePrullenmand"></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+
+    <!-- Vaste bovenstrook -->
+    <div class="main-top">
+
+      <!-- Top bar -->
+      <div class="topbar">
+        <h1 id="viewTitle">Alle taken</h1>
+        <div class="view-switcher" id="viewSwitcher">
+          <button class="vs-btn active" data-mode="lijst">📋 Lijst</button>
+          <button class="vs-btn" data-mode="kanban">▦ Kanban</button>
+          <button class="vs-btn" data-mode="calendar">📅 Calendar</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="saving-indicator" id="savingIndicator">
+            <div class="saving-dot"></div> <span>Opslaan...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="metrics">
+        <div class="metric">
+          <div class="num" id="mTotal">–</div>
+          <div class="lbl">Aantal projecten</div>
+        </div>
+        <div class="metric">
+          <div class="num" id="mOpen">–</div>
+          <div class="lbl">Aantal open taken</div>
+        </div>
+        <div class="metric">
+          <div class="num" id="mAlles">–</div>
+          <div class="lbl">Alle open taken</div>
+        </div>
+        <div class="metric prio" id="tilePrio" style="cursor:pointer;" title="Toon prioriteit taken">
+          <div class="num" id="mPrio">–</div>
+          <div class="lbl">Aantal prioriteit taken</div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div id="mainToolbar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button class="btn-new">+ Nieuwe taak</button>
+        <button class="filter-dd-btn" id="btnCollapseAll">▶ Alles inklappen</button>
+        <button class="filter-dd-btn" id="btnExpandAll">▼ Alles uitklappen</button>
+        <button class="filter-dd-btn cat-filter-btn" id="btnFilterWerk" data-cat="Werk">Werk</button>
+        <button class="filter-dd-btn cat-filter-btn" id="btnFilterPrive" data-cat="Privé">Privé</button>
+        <button class="filter-dd-btn" id="btnAllesVerwerken" style="display:none;">↗ Alles verwerken</button>
+      </div>
+
+    </div><!-- /main-top -->
+
+    <!-- Scrollgebied -->
+    <div class="main-scroll">
+
+    <!-- Tabel -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-nr">#</th>
+            <th class="col-done">✓</th>
+            <th class="col-prio th-filter" data-col="prio">PRIO <span class="th-arrow">▾</span></th>
+            <th class="col-bezig">BEZIG</th>
+            <th class="col-cat th-filter" data-col="cat">W/P <span class="th-arrow">▾</span></th>
+            <th class="col-project th-filter" data-col="project">Project <span class="th-arrow">▾</span></th>
+            <th class="col-taak th-filter" data-col="taak">Taak <span class="th-arrow">▾</span></th>
+            <th class="col-subtaak">Subtaak</th>
+            <th class="col-deadline th-filter" data-col="deadline">Deadline <span class="th-arrow">▾</span></th>
+<th class="col-context th-filter" data-col="context">Context <span class="th-arrow">▾</span></th>
+            <th class="col-add"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Kanban board (verschijnt als displayMode='kanban') -->
+    <div id="kanbanContainer" class="kanban-board" style="display:none;"></div>
+
+    <!-- Calendar (komt in stap 4) -->
+    <div id="calendarContainer" class="calendar-board" style="display:none;">
+      <div class="cal-placeholder">📅 Calendar — komt in stap 4</div>
+    </div>
+
+    <div class="footer">R.H.L. Consultancy · Taakmanager</div>
+
+    </div><!-- /main-scroll -->
+  </div>
+
+  <!-- ═══ ANALYSE PANEL ═══ -->
+  <div class="analyse-panel" id="analysePanel">
+    <div class="analyse-topbar">
+      <h1>Analyse</h1>
+      <div class="analyse-filters">
+        <button class="analyse-filter-btn active" id="filterWeek">Week</button>
+        <button class="analyse-filter-btn" id="filterMaand">Maand</button>
+        <span style="width:8px;display:inline-block;"></span>
+        <button class="analyse-filter-btn active" id="filterAlles">Alles</button>
+        <button class="analyse-filter-btn" id="filterWerk">Werk</button>
+        <button class="analyse-filter-btn" id="filterPrive">Privé</button>
+      </div>
+    </div>
+
+    <!-- KPI kaarten -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Afgerond deze week</div>
+        <div class="kpi-value" id="kpiDezeWeek">–</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Open taken</div>
+        <div class="kpi-value" id="kpiOpen">–</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Op tijd afgerond</div>
+        <div class="kpi-value" id="kpiOpTijd">–</div>
+        <div class="kpi-sub">van taken met deadline</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Gem. doorlooptijd</div>
+        <div class="kpi-value" id="kpiDoorlooptijd">–</div>
+        <div class="kpi-sub">aangemaakt → afgerond</div>
+      </div>
+    </div>
+
+    <!-- Grafieken -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Productiviteit</div>
+        <div class="chart-canvas-wrap"><canvas id="chartProductiviteit"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Werk / Privé verdeling</div>
+        <div class="chart-canvas-wrap"><canvas id="chartWerkPrive"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Deadline compliance</div>
+        <div class="chart-canvas-wrap"><canvas id="chartDeadline"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Context analyse</div>
+        <div class="chart-canvas-wrap"><canvas id="chartContext"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Project voortgang</div>
+        <div class="project-bars" id="projectVoortgang"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL ═══ -->
+  <div class="modal-overlay" id="modal" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="ui.js?v=1"></script>
+  <script src="api.js?v=1"></script>
+  <script src="render.js?v=1"></script>
+  <script src="kanban.js?v=1"></script>
+  <script src="calendar.js?v=1"></script>
+  <script src="app.js?v=1"></script>
+  <script src="analyse.js?v=1"></script>
+</body>
+</html>

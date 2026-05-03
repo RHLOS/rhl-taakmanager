@@ -1,6 +1,6 @@
 # rhl-taakmanager
 
-Persoonlijke taakmanager voor R.H.L. Consultancy. Webapp (desktop) + PWA (mobiel) + Supabase backend + dagelijkse e-mailreminder. In gebruik door 1 gebruiker.
+Persoonlijke taakmanager voor R.H.L. Consultancy. Webapp (desktop) + Supabase backend + dagelijkse e-mailreminder. In gebruik door 1 gebruiker. (Mobiele PWA wordt verwijderd — zie OVERDRACHT.md.)
 
 ## Context
 
@@ -10,7 +10,7 @@ Voor mijn identiteit, toon en huisstijl: zie @_shared/CLAUDE.md
 
 **Stack:** Vanilla HTML/CSS/JS, Supabase (Postgres + REST), GitHub Pages, Resend (e-mail), Chart.js (analyse).
 
-**Fase:** Productie. Desktop + mobiel v1 in gebruik. Volgende sessie = mobiel v2.
+**Fase:** Productie (desktop). Volgende sessie = mobiele versie verwijderen (te veel onderhoud, niet in gebruik).
 
 **Belangrijk: lees eerst `OVERDRACHT.md`** — dat is het levende overdrachtsdocument met werkafspraken, openstaande items, file-overzicht en code-referentie. Werk daaruit, niet uit dit bestand.
 

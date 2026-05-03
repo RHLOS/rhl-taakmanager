@@ -1,6 +1,6 @@
 # RHL Taakmanager — Overdrachtsdocument
 
-**Laatste update:** 27 april 2026
+**Laatste update:** 29 april 2026
 **Project:** rhl-taakmanager
 **Repo:** RHLOS/rhl-taakmanager
 **Branch:** `main`
@@ -12,10 +12,11 @@
 
 ## Volgende sessie — focus
 
-**Mobiele app v2** — drie items:
-1. **Project-detailscherm v2** — uitklapbare hiërarchie (taken → sub-subtaken inline). Nu nog platte lijst.
-2. **Zoekveld** bovenaan in mobiele app.
-3. **iPhone-testflow bespreken** — lokale dev-server vs huidige flow (push → GitHub Pages refresh in Safari privévenster).
+**Mobiele versie verwijderen.** De mobiele PWA (`mobile.html`, `mobile.css`, `mobile.js` + auto-redirect in `index.html`) is besloten weg te halen — onderhoud kost te veel moeite voor wat het oplevert. Desktop-only, ook vanaf iPhone (de webapp werkt prima in Safari mobile, alleen niet als PWA).
+
+**Nog open uit voorgaande sessies (lager geprioriteerd):**
+- Stap 4 van de view-switcher: **Calendar-view** bouwen (placeholder staat er al). Vragen die nog beantwoord moeten worden vóór bouw: klik op dag = wat? Klik op event = modal of doorklikken naar Lijst?
+- Eventueel: cache-busting `?v=N` op alle desktop scripts/css in `index.html` (mobile heeft het, desktop niet — daarom hard refresh nodig na elke deploy).
 
 ---
 
@@ -68,13 +69,13 @@ De gebruiker heeft een beperkt maandbudget. Hoog verbruik stopt de doorontwikkel
 | `app.js` | State, filters, attach-functies, init | ~1100 |
 | `analyse.js` | Analyse dashboard logica + grafieken | ~400 |
 | `analyse.css` | Analyse dashboard styling | ~160 |
-| `mobile.html` | Mobiele PWA (apart scherm, auto-redirect) | ~147 |
-| `mobile.css` | Mobiele styling (Apple Dark) | ~588 |
-| `mobile.js` | Mobiele logica: views, render, detail, swipe | ~616 |
+| `kanban.js` | Kanban-view (4 kolommen, drag-and-drop) | ~150 |
+| `mobile.html` | Mobiele PWA — wordt verwijderd in volgende sessie | ~147 |
+| `mobile.css` | Mobiele styling — idem | ~588 |
+| `mobile.js` | Mobiele logica — idem | ~616 |
 
-**Laadvolgorde scripts (desktop):** ui.js → api.js → render.js → app.js → analyse.js
-**Laadvolgorde scripts (mobile):** ui.js → api.js → mobile.js
-**Auto-redirect:** `index.html` stuurt viewports ≤768px door naar `mobile.html`
+**Laadvolgorde scripts (desktop):** ui.js → api.js → render.js → kanban.js → app.js → analyse.js
+**Auto-redirect:** `index.html` stuurt viewports ≤768px door naar `mobile.html` — wordt ook verwijderd
 
 ### 2. Supabase backend
 
@@ -200,6 +201,19 @@ SELECT cron.schedule('dagelijkse-reminder', '0 7 * * *',
 - Filters: Week/Maand + Alles/Werk/Privé
 - Grafieken staan in `analyse.js`, styling in `analyse.css`
 
+### View-switcher (Lijst | Kanban | Calendar)
+- Drie knoppen in de topbar wisselen `displayMode` (state in `app.js`)
+- **Lijst** = de bestaande tabel-weergave (driveert op `currentView` voor sidebar-keuzes)
+- **Kanban** = `kanban.js`, 4 kolommen Inbox · Bezig · Werk · Privé, alleen subtaken + sub_subtaken (geen projecten). Classify-volgorde: inbox > bezig > parent.categorie. HTML5 drag-and-drop tussen kolommen patcht de juiste flag (inbox of bezig)
+- **Calendar** = nog placeholder (stap 4)
+- Klikken in sidebar in Kanban/Calendar-modus → automatisch terug naar Lijst
+- Toolbar (+ Nieuwe taak / Werk / Privé / etc.) is verborgen in Kanban/Calendar — alleen relevant voor Lijst
+
+### Bezig-toggle
+- Kolom **BEZIG** naast PRIO in Lijst-weergave (alleen op subtaken + sub_subtaken — projecten zijn containers en hebben de kolom niet)
+- Klik op het rondje togglet `bezig` in de DB. Lokale state wordt direct bijgewerkt zodat Kanban-view consistent blijft
+- DB-veld: `bezig boolean default false` op `subtaken` en `sub_subtaken`
+
 ### Dagelijkse e-mailreminder
 - Elke dag 8:00 CET een e-mail met taken/subtaken waarvan deadline ≤ vandaag
 - Via Supabase Edge Function + Resend API
@@ -317,9 +331,10 @@ Geïmplementeerd op 1 april 2026. `style.css` gebruikt altijd de donkere Apple k
 ├── app.js                              # Desktop state, logica, init
 ├── analyse.js                          # Analyse dashboard
 ├── analyse.css                         # Analyse dashboard styling
-├── mobile.html                         # Mobiele PWA
-├── mobile.css                          # Mobiele styling (Apple Dark)
-├── mobile.js                           # Mobiele logica + swipe
+├── kanban.js                           # Kanban-view (4 kolommen, drag-and-drop)
+├── mobile.html                         # Mobiele PWA — wordt verwijderd in volgende sessie
+├── mobile.css                          # Mobiele styling — idem
+├── mobile.js                           # Mobiele logica + swipe — idem
 ├── manifest.json                       # PWA
 ├── taken.json                          # Originele dataset (referentie)
 ├── OVERDRACHT.md                       # Dit document
@@ -362,6 +377,14 @@ Geïmplementeerd op 1 april 2026. `style.css` gebruikt altijd de donkere Apple k
 8. **Spelfout + zoekfunctie (27 april):**
    - Edge Function `dagelijkse-reminder` v2: typo `taaken` → `taken` in mailbody en subject (concat-bug `taak${...?'en':''}` → `${... ? 'taak' : 'taken'}`). Mail van 28 april zou correct moeten zijn
    - Zoekfunctie omgebouwd van inline-tabelfilter naar aparte view `currentView='zoekresultaten'` met `renderZoekresultaten()` in `render.js`. Filtert op naam over alle 3 niveaus, exclusief verwijderd + gedaan. Auto-clear bij navigatie via `renderAll()`
+9. **Bezig-toggle + Kanban-view (27–29 april):**
+   - **DB:** kolom `bezig boolean default false` op `subtaken` + `sub_subtaken` (NIET op `taken` — projecten zijn containers, geen werk-units)
+   - **Lijst-weergave:** nieuwe kolom **BEZIG** naast **PRIO** (header `P` hernoemd). Groen rondje ○/● (helper `bezigHtmlData` in `render.js`, click-handler `attachBezig` in `app.js`). 13 rij-renders aangepast met split cp/cbz cellen. Colspans verhoogd voor extra kolom
+   - **View-switcher:** drie knoppen 📋 Lijst · ▦ Kanban · 📅 Calendar in topbar. State `displayMode = 'lijst' | 'kanban' | 'calendar'`. Sidebar-clicks resetten naar Lijst-modus. Toolbar verbergt in Kanban/Calendar. Optie (b) gekozen: Kanban/Calendar zijn eigen views, niet een display-mode bovenop currentView
+   - **Kanban-view** in nieuw bestand `kanban.js`: 4 kolommen Inbox · Bezig · Werk · Privé. Alleen subtaken + sub-subtaken (geen projecten). Classify-regel volgorde: `inbox > bezig > parent.categorie`. Sortering binnen kolom: prio eerst, dan deadline. Kaarten tonen project-pad ("A.I. › Nieuwe ideeën"), titel, prio-pill, deadline-pill (oranje of rood bij verlopen), context-pills
+   - **Drag-and-drop:** native HTML5 API. Drop op Inbox → `inbox=true,bezig=false`; op Bezig → `bezig=true,inbox=false`; op Werk/Privé → `bezig=false,inbox=false` (kaart komt in kolom matching parent.categorie). Re-render na elke drop
+   - **Calendar:** placeholder, nog niet gebouwd
+   - Cache-busting `?v=1` op `kanban.js` (rest van scripts heeft nog niets)
 
 ---
 

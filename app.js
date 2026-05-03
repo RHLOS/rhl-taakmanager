@@ -490,6 +490,7 @@
         if (metricsEl)  metricsEl.style.display = '';
         document.getElementById('viewTitle').textContent = 'Calendar';
         document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        renderCalendar(calWrap);
         return;
       }
       // Lijst-mode (default)

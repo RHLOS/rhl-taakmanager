@@ -1,0 +1,324 @@
+/* ═══════════════════════════════════════════════════════════
+   PREVIEW 2 — Warm Ivoor / Crème / Taupegrijs / Roodoranje
+   Licht thema. Laad NA alle andere stylesheets.
+   Originele bestanden zijn NIET aangepast.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────
+   1. CSS-VARIABELEN (root override)
+   ───────────────────────────────────────── */
+:root {
+  /* Achtergronden — licht naar donker */
+  --bg:         #F4EBDD;   /* warm ivoor — body */
+  --sidebar-bg: #4A433D;   /* donker taupegrijs — sidebar (blijft donker) */
+  --card:       #D8C7A6;   /* gebroken crème — cards & panels */
+  --bg2:        #EDE5D6;   /* lichte warm-hover, inputs */
+
+  /* Tekst (op lichte achtergrond) */
+  --text:   #241F1B;   /* bijna zwartbruin — primaire tekst */
+  --text-2: #4A433D;   /* donker taupegrijs — secundaire tekst */
+  --text-3: #7A6E65;   /* gedempte warme toon — tertair */
+
+  /* Scheiders & randen — zichtbaar op licht */
+  --sep:    #C5B38E;
+  --border: #C5B38E;
+
+  /* Functionele kleuren */
+  --accent: #F0441A;   /* roodoranje — CTA, actief, links */
+  --orange: #8B5E0A;   /* donker amber — Privé (contrast op crème ≥4:1) */
+  --red:    #C0392B;   /* iets donkerder rood voor lichte achtergrond */
+  --green:  #1E7D3A;   /* iets donkerder groen voor lichte achtergrond */
+  --yellow: #F0441A;   /* was geel → roodoranje */
+}
+
+/* ─────────────────────────────────────────
+   2. BODY — lichte basis
+   ───────────────────────────────────────── */
+body { background: var(--bg); }
+
+/* ─────────────────────────────────────────
+   3. SIDEBAR — blijft donker (dragende merkkleur)
+      Override alle tekst naar licht
+   ───────────────────────────────────────── */
+.sidebar { background: var(--sidebar-bg); border-right-color: #3A332D; }
+
+.sidebar-logo          { color: #F4EBDD; }
+.sidebar-logo span     { color: #D8C7A6; }
+
+.sidebar-title         { color: #D8C7A6; }
+
+.sidebar-item          { color: #F4EBDD; }
+.sidebar-item:hover    { background: rgba(255,255,255,.08); }
+.sidebar-item.active   { background: rgba(240,68,26,.25); color: #F4EBDD; }
+.sidebar-item .chevron { color: #9A8373; }
+
+/* Badge (teller) in sidebar: roodoranje knop, witte tekst — OK */
+.sidebar-item .badge   { background: var(--accent); color: #fff; }
+
+/* Zoekbalk in donkere sidebar — subtiel donkerder */
+.search-input {
+  background: #3A332D;
+  border-color: #5C5248;
+  color: #F4EBDD;
+}
+.search-input:focus      { border-color: var(--accent); }
+.search-input::placeholder { color: #9A8373; }
+.search-icon             { color: #9A8373; }
+
+/* ─────────────────────────────────────────
+   4. MAIN CONTENT AREA
+   ───────────────────────────────────────── */
+.main-top   { background: var(--bg); }
+.main-scroll { background: var(--bg); }
+
+/* Topbar titel */
+.topbar h1 { color: var(--text); }
+
+/* View-switcher */
+.view-switcher {
+  background: var(--card);
+  border-color: var(--sep);
+}
+.vs-btn        { color: var(--text-2); }
+.vs-btn:hover  { color: var(--text); }
+.vs-btn.active { background: var(--accent); color: #fff; }
+
+/* ─────────────────────────────────────────
+   5. METRICS TILES
+   ───────────────────────────────────────── */
+/* .metric gebruikt var(--card) + var(--sep) — al goed via root override */
+
+/* ─────────────────────────────────────────
+   6. TOOLBAR & FILTER-KNOPPEN
+   ───────────────────────────────────────── */
+/* Primaire knop (Nieuwe taak) */
+.btn-new { background: var(--accent); color: #fff; }
+.btn-new:hover { background: #D0380F; }
+.btn-new.btn-danger { background: var(--red); }
+
+/* Secundaire knoppen */
+.filter-dd-btn {
+  background: var(--card);
+  border-color: var(--sep);
+  color: var(--text);
+}
+.filter-dd-btn:hover {
+  background: var(--bg2);
+  color: var(--text);
+}
+
+/* Werk / Privé filter specifiek */
+#btnFilterWerk  {
+  background: rgba(240,68,26,.10);
+  color: var(--accent);
+  border-color: rgba(240,68,26,.30);
+}
+#btnFilterPrive {
+  background: rgba(139,94,10,.10);
+  color: var(--orange);
+  border-color: rgba(139,94,10,.30);
+}
+
+/* ─────────────────────────────────────────
+   7. TABEL
+   ───────────────────────────────────────── */
+.table-wrap {
+  background: var(--card);
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+thead th {
+  background: var(--card);
+  color: var(--text-2);
+  border-bottom-color: var(--sep);
+}
+tbody td { border-top-color: var(--sep); }
+
+/* Rij hover op lichte achtergrond */
+tbody tr:hover td { background: rgba(0,0,0,.03); }
+
+/* Categorie badges */
+.cat.w { background: rgba(240,68,26,.12); color: var(--accent); }
+.cat.p { background: rgba(139,94,10,.12); color: var(--orange); }
+
+/* Context tags — subtiel zichtbaar op crème */
+.ctx span {
+  background: rgba(0,0,0,.07);
+  color: var(--text-2);
+}
+
+/* Checkbox onafgevinkt — zichtbaar op licht */
+.cb      { color: #B0A08A; }
+.cb.done { color: var(--green); }
+
+/* Bezig-toggle */
+.bz.off { color: #B0A08A; }
+.bz.on  { color: var(--green); }
+
+/* Ster */
+.star.off { color: #C8B89A; }
+.star.on  { color: var(--yellow); }
+
+/* Editable hover */
+.editable:hover,
+.editable-dl:hover,
+.editable-num:hover,
+.editable-select:hover { background: rgba(240,68,26,.08); }
+
+/* Inline edit input */
+.edit-input {
+  background: #fff;
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+/* ─────────────────────────────────────────
+   8. KANBAN
+   ───────────────────────────────────────── */
+.kanban-col {
+  background: var(--card);
+}
+.kanban-col.drop-target { background: rgba(240,68,26,.10); }
+
+/* Kolom-teller pill */
+.kanban-col-count {
+  background: rgba(0,0,0,.08);
+  color: var(--text-2);
+}
+
+/* Kolom-titels per type */
+.kanban-col[data-col="inbox"] .kanban-col-title { color: var(--text-2); }
+.kanban-col[data-col="bezig"] .kanban-col-title { color: var(--green); }
+.kanban-col[data-col="werk"]  .kanban-col-title { color: var(--accent); }
+.kanban-col[data-col="prive"] .kanban-col-title { color: var(--orange); }
+
+/* Kanban kaarten — wit op crème kolom voor diepte */
+.kanban-card {
+  background: #fff;
+  border-color: var(--sep);
+}
+.kanban-card:hover { border-color: var(--text-3); }
+
+/* Kaart-tekst */
+.kanban-card-project { color: var(--text-3); }
+.kanban-card-title   { color: var(--text); }
+
+/* Kaart-pills */
+.kb-pill.deadline      { background: rgba(240,68,26,.12); color: var(--accent); }
+.kb-pill.deadline.over { background: rgba(192,57,43,.15);  color: var(--red); }
+.kb-pill.context       { background: rgba(240,68,26,.10);  color: var(--accent); }
+.kb-pill.prio          { background: rgba(240,68,26,.12);  color: var(--accent); }
+
+/* ─────────────────────────────────────────
+   9. POPUPS (kolom-popup, select-popup)
+   ───────────────────────────────────────── */
+.col-popup {
+  background: #fff;
+  border-color: var(--sep);
+  box-shadow: 0 8px 30px rgba(0,0,0,.12);
+}
+.col-popup-btn:hover   { background: rgba(240,68,26,.08); }
+.col-popup label:hover { background: rgba(240,68,26,.08); }
+.col-popup-link        { color: var(--accent); }
+.col-popup-link:hover  { background: rgba(240,68,26,.10); }
+.col-popup-actions button {
+  background: var(--card);
+  border-color: var(--sep);
+  color: var(--text);
+}
+.col-popup-actions button.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.select-popup {
+  background: #fff;
+  border-color: var(--sep);
+  box-shadow: 0 8px 24px rgba(0,0,0,.10);
+}
+.select-popup label:hover { background: rgba(240,68,26,.08); }
+
+/* ─────────────────────────────────────────
+   10. DATE PICKER
+   ───────────────────────────────────────── */
+.date-picker-popup {
+  background: #fff;
+  border-color: var(--sep);
+  box-shadow: 0 8px 32px rgba(0,0,0,.15);
+}
+.dp-nav:hover  { background: var(--bg2); }
+.dp-day:hover:not(.other-month) { background: var(--bg2); }
+.dp-clear:hover { background: var(--bg2); }
+
+/* ─────────────────────────────────────────
+   11. MODAL
+   ───────────────────────────────────────── */
+.modal-overlay { background: rgba(36,31,27,.50); backdrop-filter: blur(4px); }
+
+.modal-box {
+  background: #fff;
+  box-shadow: 0 20px 60px rgba(0,0,0,.15);
+}
+.modal-body input[type="text"],
+.modal-body select {
+  background: #fff;
+  border-color: var(--sep);
+  color: var(--text);
+}
+.modal-body input[type="text"]:focus,
+.modal-body select:focus { border-color: var(--accent); }
+
+.modal-btn.cancel {
+  background: var(--card);
+  color: var(--text);
+}
+.modal-btn.cancel:hover { background: var(--bg2); }
+
+.modal-btn.primary { background: var(--accent); color: #fff; }
+.modal-btn.primary:hover { background: #D0380F; }
+
+/* ─────────────────────────────────────────
+   12. TOAST
+   ───────────────────────────────────────── */
+.toast {
+  background: #241F1B;
+  color: #F4EBDD;
+}
+.toast-undo { color: #F4EBDD; text-decoration: underline; }
+
+/* ─────────────────────────────────────────
+   13. CALENDAR
+   ───────────────────────────────────────── */
+.cal-day:not(.empty):hover { background: var(--bg2); }
+.cal-day.selected          { background: rgba(240,68,26,.15); border-color: var(--accent); }
+
+.cal-week-col:hover   { background: var(--bg2); }
+.cal-week-col.selected { background: rgba(240,68,26,.15); border-color: var(--accent); }
+
+.cal-detail-item:hover { background: var(--bg2); }
+
+.cal-week-chip.werk  { background: rgba(240,68,26,.12); color: var(--accent); }
+.cal-week-chip.prive { background: rgba(139,94,10,.12);  color: var(--orange); }
+
+/* ─────────────────────────────────────────
+   14. ANALYSE PANEL
+   ───────────────────────────────────────── */
+.analyse-panel {
+  background: var(--bg);
+  border-left-color: var(--sep);
+}
+.analyse-filter-btn {
+  background: var(--card);
+  border-color: var(--sep);
+  color: var(--text-2);
+}
+.analyse-filter-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ─────────────────────────────────────────
+   15. MOBILE NOTICE
+   ───────────────────────────────────────── */
+#mobile-notice { background: #F4EBDD; color: #241F1B; }

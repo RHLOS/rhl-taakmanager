@@ -40,6 +40,8 @@ Alle drie tabellen hebben `gedaan`, `gedaan_datum`, `inbox`, `verwijderd_op`, `d
 
 Aanvullende tabellen: `afgerond_log` (historie), `meta` (instellingen), `contexts` (dynamisch beheerd vanuit de app), `laag_prioriteit` + `laag_items` (legacy, niet meer in gebruik).
 
+**Let op — prio-veldnaam verschilt per tabel:** `taken.prioriteit = 'hoog'` (string), `subtaken.prio_ster = true` (boolean), `sub_subtaken.prio_ster = true` (boolean). In `app.js` staat daarom `a.prio_ster || a.prioriteit` als workaround.
+
 ### Frontend-splitsing
 
 | Bestand | Doel | Indicatieve grootte |

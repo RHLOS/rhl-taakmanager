@@ -1,5 +1,5 @@
     // ═══ Kolom-header filter/sort popups ═══
-    let allProjecten = [], allSubtaken = [], allSubsubtaken = [], allContexten = [];
+    let allProjecten = [], allSubtaken = [], allSubsubtaken = [];
     let subsByProject = new Map();
     let subsubsBySubtaak = new Map();
     let currentSort = null;
@@ -36,11 +36,10 @@
     function getFilterOptions(col) {
       switch(col) {
         case 'prio': return ['★ Prioriteit', '☆ Normaal'];
-        case 'cat': return ['Werk', 'Privé'];
+        case 'cat': return ['Werk', 'Privé', 'Natasja'];
         case 'project': return [...new Set(allProjecten.filter(p => !p.gedaan).map(p => p.taak))].sort();
         case 'taak': return [...new Set(allSubtaken.filter(s => !s.gedaan).map(s => s.tekst))].sort();
         case 'deadline': return ['Vandaag', 'Deze week', 'Heeft deadline', 'Geen deadline'];
-        case 'context': return allContexten;
         default: return [];
       }
     }
@@ -168,14 +167,6 @@
 
     // ═══ Filter/sort logica ═══
     function filterSubsByActiveFilters(items) {
-      for (const [col, selected] of Object.entries(activeFilters)) {
-        if (col === 'context') {
-          items = items.filter(item => {
-            const ctx = normalizeContext(item.context);
-            return [...selected].some(v => ctx.includes(v));
-          });
-        }
-      }
       return items;
     }
 
@@ -203,12 +194,6 @@
             if (selected.has('Deze week') && days !== null && days >= 0 && days <= 7) match = true;
             if (!match) return false;
             break;
-          case 'context':
-            const projectCtx = normalizeContext(project.context);
-            const subsCtx = getSubsFor(project.id).flatMap(s => normalizeContext(s.context));
-            const allCtx = [...new Set([...projectCtx, ...subsCtx])];
-            if (![...selected].some(v => allCtx.includes(v))) return false;
-            break;
         }
       }
       return true;
@@ -230,9 +215,6 @@
           case 'prio': va = (a.prio_ster || a.prioriteit) ? 0 : 1; vb = (b.prio_ster || b.prioriteit) ? 0 : 1; break;
           case 'taak': va = (a.tekst || '').toLowerCase(); vb = (b.tekst || '').toLowerCase(); break;
           case 'deadline': va = a.deadline || '9999-12-31'; vb = b.deadline || '9999-12-31'; break;
-          case 'context':
-            va = normalizeContext(a.context).join(',').toLowerCase();
-            vb = normalizeContext(b.context).join(',').toLowerCase(); break;
           default: va = a.volgorde || 0; vb = b.volgorde || 0;
         }
         if (va < vb) return -1 * dir;
@@ -254,9 +236,6 @@
           case 'prio': va = a.prioriteit === 'hoog' ? 0 : 1; vb = b.prioriteit === 'hoog' ? 0 : 1; break;
           case 'deadline':
             va = a.deadline || '9999-12-31'; vb = b.deadline || '9999-12-31'; break;
-          case 'context':
-            va = normalizeContext(a.context).join(',').toLowerCase();
-            vb = normalizeContext(b.context).join(',').toLowerCase(); break;
           default: va = a.nr; vb = b.nr;
         }
         if (va < vb) return -1 * dir;
@@ -542,6 +521,7 @@
       document.getElementById('btnAllesVerwerken').style.display = isInbox ? '' : 'none';
       document.getElementById('btnFilterWerk').style.display = isInbox ? 'none' : '';
       document.getElementById('btnFilterPrive').style.display = isInbox ? 'none' : '';
+      document.getElementById('btnFilterNatasja').style.display = isInbox ? 'none' : '';
 
       // In prullenmand-weergave wordt "+ Nieuwe taak" vervangen door "🗑 Alles verwijderen"
       const btnNew = document.querySelector('.btn-new');
@@ -557,7 +537,6 @@
       attachBezig();
       attachEditable();
       attachDeadlines();
-attachSelects();
       attachAddButtons();
       attachDeleteButtons();
       attachInboxVerwerkt();
@@ -566,16 +545,14 @@ attachSelects();
 
     // ═══ Init ═══
     async function reloadData() {
-      const [projecten, subtaken, subsubtaken, contexten] = await Promise.all([
+      const [projecten, subtaken, subsubtaken] = await Promise.all([
         api('taken', 'order=nr.asc'),
         api('subtaken', 'order=volgorde.asc'),
         api('sub_subtaken', 'order=volgorde.asc'),
-        api('contexts', 'order=name.asc')
       ]);
       allProjecten = projecten;
       allSubtaken = subtaken;
       allSubsubtaken = subsubtaken;
-      allContexten = contexten.map(c => c.name);
       buildIndexes();
     }
 
@@ -598,17 +575,15 @@ attachSelects();
       tbody.innerHTML = `<tr><td colspan="12" style="padding:20px;color:var(--text-2);font-size:12px;">Laden...</td></tr>`;
 
       try {
-        const [projecten, subtaken, subsubtaken, contexten] = await Promise.all([
+        const [projecten, subtaken, subsubtaken] = await Promise.all([
           api('taken', 'order=nr.asc'),
           api('subtaken', 'order=volgorde.asc'),
           api('sub_subtaken', 'order=volgorde.asc'),
-          api('contexts', 'order=name.asc')
         ]);
 
         allProjecten = projecten;
         allSubtaken = subtaken;
         allSubsubtaken = subsubtaken;
-        allContexten = contexten.map(c => c.name);
         buildIndexes();
 
         await cleanupPrullenmand();
@@ -679,6 +654,7 @@ attachSelects();
         catFilter = catFilter === cat ? null : cat;
         document.getElementById('btnFilterWerk').classList.toggle('active', catFilter === 'Werk');
         document.getElementById('btnFilterPrive').classList.toggle('active', catFilter === 'Privé');
+        document.getElementById('btnFilterNatasja').classList.toggle('active', catFilter === 'Natasja');
         renderAll();
       });
     });
@@ -873,115 +849,6 @@ attachSelects();
       setTimeout(() => document.addEventListener('click', outsideHandler), 0);
     }
 
-    // ═══ Context: dropdown selectie ═══
-    function attachSelects() {
-      document.querySelectorAll('.editable-select').forEach(el => {
-        el.addEventListener('click', (e) => {
-          e.stopPropagation();
-          document.querySelectorAll('.select-popup').forEach(p => p.remove());
-
-          const id = el.dataset.id;
-          const table = el.dataset.table;
-          const field = el.dataset.field;
-          const type = el.dataset.type;
-
-          const popup = document.createElement('div');
-          popup.className = 'select-popup';
-
-          if (type === 'context') {
-            let selected = [];
-            try { selected = JSON.parse(el.dataset.raw || '[]'); } catch(e) {}
-
-            allContexten.forEach(opt => {
-              const label = document.createElement('label');
-              const cb = document.createElement('input');
-              cb.type = 'checkbox';
-              cb.value = opt;
-              cb.checked = selected.includes(opt);
-              cb.addEventListener('change', () => {
-                if (cb.checked) {
-                  selected.push(opt);
-                } else {
-                  selected = selected.filter(s => s !== opt);
-                }
-              });
-              label.appendChild(cb);
-              label.appendChild(document.createTextNode(opt));
-              popup.appendChild(label);
-            });
-
-            // + Nieuwe context
-            const addRow = document.createElement('div');
-            addRow.style.cssText = 'display:flex;gap:6px;padding:6px 10px;border-top:1px solid var(--sep);';
-            const addInput = document.createElement('input');
-            addInput.placeholder = '+ Nieuwe context';
-            addInput.style.cssText = 'flex:1;padding:4px 8px;border:1px solid var(--sep);border-radius:6px;font-size:12px;background:var(--card);color:var(--text-1);font-family:inherit;';
-            const addBtn = document.createElement('button');
-            addBtn.textContent = 'Toevoegen';
-            addBtn.style.cssText = 'padding:4px 10px;border:none;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap;';
-            addBtn.addEventListener('click', async (e) => {
-              e.stopPropagation();
-              const naam = addInput.value.trim();
-              if (!naam) return;
-              try {
-                await post('contexts', { name: naam });
-                allContexten = [...allContexten, naam].sort();
-                // Voeg checkbox toe aan popup
-                const label = document.createElement('label');
-                const cb = document.createElement('input');
-                cb.type = 'checkbox';
-                cb.value = naam;
-                cb.checked = true;
-                selected.push(naam);
-                cb.addEventListener('change', () => {
-                  if (cb.checked) selected.push(naam);
-                  else selected = selected.filter(s => s !== naam);
-                });
-                label.appendChild(cb);
-                label.appendChild(document.createTextNode(naam));
-                popup.insertBefore(label, addRow);
-                addInput.value = '';
-              } catch (err) {
-                alert('Toevoegen mislukt: ' + err.message);
-              }
-            });
-            addInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addBtn.click(); });
-            addRow.appendChild(addInput);
-            addRow.appendChild(addBtn);
-            popup.appendChild(addRow);
-
-            const saveBtn = document.createElement('div');
-            saveBtn.style.cssText = 'padding:6px 14px;text-align:center;';
-            saveBtn.innerHTML = '<button style="padding:4px 16px;border:none;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;">Opslaan</button>';
-            saveBtn.querySelector('button').addEventListener('click', async () => {
-              el.textContent = selected.length > 0 ? selected.join(', ') : '—';
-              el.dataset.raw = JSON.stringify(selected);
-              popup.remove();
-              try {
-                await patch(table, id, { [field]: selected.length > 0 ? selected : null });
-              } catch (err) {
-                alert('Opslaan mislukt: ' + err.message);
-              }
-            });
-            popup.appendChild(saveBtn);
-          }
-
-          const rect = el.getBoundingClientRect();
-          popup.style.position = 'fixed';
-          popup.style.left = rect.left + 'px';
-          popup.style.top = (rect.bottom + 4) + 'px';
-          document.body.appendChild(popup);
-
-          const closePopup = (ev) => {
-            if (!popup.contains(ev.target) && ev.target !== el) {
-              popup.remove();
-              document.removeEventListener('click', closePopup);
-            }
-          };
-          setTimeout(() => document.addEventListener('click', closePopup), 0);
-        });
-      });
-    }
 
     // ═══ + knoppen: taken toevoegen ═══
     function attachAddButtons() {

@@ -1,6 +1,8 @@
     // ═══ Render helpers ═══
     function catBadge(cat) {
-      return cat === 'Werk' ? '<span class="cat w">W</span>' : '<span class="cat p">P</span>';
+      if (cat === 'Werk') return '<span class="cat w">RHLC</span>';
+      if (cat === 'Natasja') return '<span class="cat n">Natasja</span>';
+      return '<span class="cat p">Raimon</span>';
     }
 
     function starHtmlData(isOn, id, table, field) {
@@ -18,11 +20,6 @@
       return `<span class="editable-dl dl ${cls}" data-id="${id}" data-table="${table}" data-field="deadline" data-raw="${date || ''}">${display || '—'}</span>`;
     }
 
-function editableContext(ctx, id, table) {
-      const arr = normalizeContext(ctx);
-      const display = arr.length > 0 ? arr.join(', ') : '';
-      return `<span class="editable-select" data-id="${id}" data-table="${table}" data-field="context" data-type="context" data-raw='${JSON.stringify(arr)}'>${display || '—'}</span>`;
-    }
 
     function renderProject(project, subtaken, subsubtaken, tbody) {
       const cat = project.categorie;
@@ -40,7 +37,7 @@ function editableContext(ctx, id, table) {
           <td></td>
           <td></td>
           <td>${editableDeadline(project.deadline, project.id, 'taken')}</td>
-          <td>${editableContext(project.context, project.id, 'taken')}</td>
+          <td></td>
           <td class="col-add"><button class="add-btn" data-add="subtaak" data-parent-id="${project.id}" data-cat="${cat}" title="Taak toevoegen">+</button><button class="del-btn" data-del-id="${project.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
         </tr>
       `);
@@ -61,7 +58,7 @@ function editableContext(ctx, id, table) {
             <td>${hasSubs ? '<span class="chev">▶</span> ' : ''}<span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
             <td></td>
             <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
-            <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
+            <td></td>
             <td class="col-add"><button class="add-btn" data-add="subsubtaak" data-parent-id="${sub.id}" title="Subtaak toevoegen">+</button><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -78,7 +75,7 @@ function editableContext(ctx, id, table) {
               <td></td>
               <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${esc(ss.tekst)}</span></td>
               <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
-              <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
+              <td></td>
               <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
             </tr>
           `);
@@ -111,7 +108,7 @@ function editableContext(ctx, id, table) {
             <td><span style="color:var(--text-3);font-size:11px;">nieuw project</span></td>
             <td></td>
             <td>${editableDeadline(p.deadline, p.id, 'taken')}</td>
-            <td>${editableContext(p.context, p.id, 'taken')}</td>
+            <td></td>
             <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${p.id}" data-verwerkt-table="taken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${p.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -132,7 +129,7 @@ function editableContext(ctx, id, table) {
             <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
             <td></td>
             <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
-            <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
+            <td></td>
             <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${sub.id}" data-verwerkt-table="subtaken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -153,7 +150,7 @@ function editableContext(ctx, id, table) {
             <td><span style="color:var(--text-3);font-size:11px;">${esc(taakNaam)}</span></td>
             <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${ss.tekst}</span></td>
             <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
-            <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
+            <td></td>
             <td class="col-add"><button class="inbox-verwerkt-btn" data-verwerkt-id="${ss.id}" data-verwerkt-table="sub_subtaken" title="Verwerkt — uit inbox halen">↗</button><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -187,7 +184,7 @@ function editableContext(ctx, id, table) {
             <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
             <td></td>
             <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
-            <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
+            <td></td>
             <td class="col-add"><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -207,7 +204,7 @@ function editableContext(ctx, id, table) {
             <td><span style="color:var(--text-3);font-size:11px;">${esc(sub?.tekst || '?')}</span></td>
             <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${esc(ss.tekst)}</span></td>
             <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
-            <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
+            <td></td>
             <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -237,7 +234,7 @@ function editableContext(ctx, id, table) {
             <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
             <td></td>
             <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
-            <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
+            <td></td>
             <td class="col-add"><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -257,7 +254,7 @@ function editableContext(ctx, id, table) {
             <td><span style="color:var(--text-3);font-size:11px;">${esc(sub?.tekst || '?')}</span></td>
             <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${esc(ss.tekst)}</span></td>
             <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
-            <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
+            <td></td>
             <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -287,7 +284,7 @@ function editableContext(ctx, id, table) {
             <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
             <td></td>
             <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
-            <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
+            <td></td>
             <td class="col-add"><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -307,7 +304,7 @@ function editableContext(ctx, id, table) {
             <td><span style="color:var(--text-3);font-size:11px;">${esc(sub?.tekst || '?')}</span></td>
             <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${esc(ss.tekst)}</span></td>
             <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
-            <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
+            <td></td>
             <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -350,7 +347,7 @@ function editableContext(ctx, id, table) {
             <td><span style="color:var(--text-3);font-size:11px;">project</span></td>
             <td></td>
             <td>${editableDeadline(p.deadline, p.id, 'taken')}</td>
-            <td>${editableContext(p.context, p.id, 'taken')}</td>
+            <td></td>
             <td class="col-add"><button class="del-btn" data-del-id="${p.id}" data-del-table="taken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -370,7 +367,7 @@ function editableContext(ctx, id, table) {
             <td><span class="editable" data-id="${sub.id}" data-table="subtaken" data-field="tekst">${esc(sub.tekst)}</span></td>
             <td></td>
             <td>${editableDeadline(sub.deadline, sub.id, 'subtaken')}</td>
-            <td>${editableContext(sub.context, sub.id, 'subtaken')}</td>
+            <td></td>
             <td class="col-add"><button class="del-btn" data-del-id="${sub.id}" data-del-table="subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -390,7 +387,7 @@ function editableContext(ctx, id, table) {
             <td><span style="color:var(--text-3);font-size:11px;">${esc(sub?.tekst || '?')}</span></td>
             <td><span class="editable" data-id="${ss.id}" data-table="sub_subtaken" data-field="tekst">${esc(ss.tekst)}</span></td>
             <td>${editableDeadline(ss.deadline, ss.id, 'sub_subtaken')}</td>
-            <td>${editableContext(ss.context, ss.id, 'sub_subtaken')}</td>
+            <td></td>
             <td class="col-add"><button class="del-btn" data-del-id="${ss.id}" data-del-table="sub_subtaken" title="Verwijderen">🗑</button></td>
           </tr>
         `);
@@ -420,7 +417,7 @@ function editableContext(ctx, id, table) {
       }
 
       items.forEach(item => {
-        const catHtml = item.cat === 'Werk' ? '<span class="cat w">W</span>' : '<span class="cat p">P</span>';
+        const catHtml = item.cat === 'Werk' ? '<span class="cat w">RHLC</span>' : item.cat === 'Natasja' ? '<span class="cat n">Natasja</span>' : '<span class="cat p">Raimon</span>';
         tbody.insertAdjacentHTML('beforeend', `
           <tr class="row-taak">
             <td class="cd"><span class="cb done" data-id="${item.id}" data-table="${item.table}" style="cursor:pointer;" title="Terugzetten naar actief">✓</span></td>

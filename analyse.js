@@ -25,7 +25,7 @@
 
     // ── Filter state ──
     let analyseperiode = 'week'; // 'week' | 'maand'
-    let analyseCat = 'alles';   // 'alles' | 'Werk' | 'Privé'
+    let analyseCat = 'alles';   // 'alles' | 'Werk' | 'Privé' | 'Natasja'
 
     document.getElementById('filterWeek').addEventListener('click', () => {
       analyseperiode = 'week';
@@ -52,6 +52,11 @@
       updateFilterButtons();
       renderAnalyse();
     });
+    document.getElementById('filterNatasja').addEventListener('click', () => {
+      analyseCat = 'Natasja';
+      updateFilterButtons();
+      renderAnalyse();
+    });
 
     function updateFilterButtons() {
       document.getElementById('filterWeek').classList.toggle('active', analyseperiode === 'week');
@@ -59,6 +64,7 @@
       document.getElementById('filterAlles').classList.toggle('active', analyseCat === 'alles');
       document.getElementById('filterWerk').classList.toggle('active', analyseCat === 'Werk');
       document.getElementById('filterPrive').classList.toggle('active', analyseCat === 'Privé');
+      document.getElementById('filterNatasja').classList.toggle('active', analyseCat === 'Natasja');
     }
 
     // ── Hulpfuncties ──
@@ -219,7 +225,8 @@
 
       const werk = projecten.filter(p => p.categorie === 'Werk').length;
       const prive = projecten.filter(p => p.categorie === 'Privé').length;
-      const totaal = werk + prive;
+      const natasja = projecten.filter(p => p.categorie === 'Natasja').length;
+      const totaal = werk + prive + natasja;
 
       if (totaal === 0) {
         document.getElementById('chartWerkPrive').parentElement.innerHTML =
@@ -231,8 +238,8 @@
       chartInstances['werkprive'] = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: ['Werk', 'Privé'],
-          datasets: [{ data: [werk, prive], backgroundColor: ['#0071e3', '#34c759'], borderWidth: 0, hoverOffset: 4 }]
+          labels: ['RHLC', 'Raimon', 'Natasja'],
+          datasets: [{ data: [werk, prive, natasja], backgroundColor: ['#0071e3', '#ff9f0a', '#30d158'], borderWidth: 0, hoverOffset: 4 }]
         },
         options: {
           responsive: true, maintainAspectRatio: false,

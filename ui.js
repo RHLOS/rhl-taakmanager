@@ -1,8 +1,3 @@
-    // ═══ Gedeelde helpers ═══
-    function normalizeContext(ctx) {
-      return Array.isArray(ctx) ? ctx : (ctx ? [ctx] : []);
-    }
-
     // ═══ Modal helpers ═══
     function showModal(title, bodyHtml, buttons) {
       return new Promise(resolve => {
@@ -59,8 +54,9 @@
         <label>Naam</label><input type="text" id="modalInputVal" placeholder="Projectnaam">
         <label>Categorie</label>
         <select id="modalSelectCat">
-          <option value="Werk">Werk</option>
-          <option value="Privé">Privé</option>
+          <option value="Werk">RHLC</option>
+          <option value="Privé">Raimon</option>
+          <option value="Natasja">Natasja</option>
         </select>`;
       const result = await showModal(title, bodyHtml, [
         { label: 'Annuleren', class: 'cancel', value: null },

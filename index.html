@@ -139,8 +139,9 @@
         <button class="btn-new">+ Nieuwe taak</button>
         <button class="filter-dd-btn" id="btnCollapseAll">▶ Alles inklappen</button>
         <button class="filter-dd-btn" id="btnExpandAll">▼ Alles uitklappen</button>
-        <button class="filter-dd-btn cat-filter-btn" id="btnFilterWerk" data-cat="Werk">Werk</button>
-        <button class="filter-dd-btn cat-filter-btn" id="btnFilterPrive" data-cat="Privé">Privé</button>
+        <button class="filter-dd-btn cat-filter-btn" id="btnFilterWerk" data-cat="Werk">RHLC</button>
+        <button class="filter-dd-btn cat-filter-btn" id="btnFilterPrive" data-cat="Privé">Raimon</button>
+        <button class="filter-dd-btn cat-filter-btn" id="btnFilterNatasja" data-cat="Natasja">Natasja</button>
         <button class="filter-dd-btn" id="btnAllesVerwerken" style="display:none;">↗ Alles verwerken</button>
       </div>
 
@@ -158,12 +159,11 @@
             <th class="col-done">✓</th>
             <th class="col-prio th-filter" data-col="prio">PRIO <span class="th-arrow">▾</span></th>
             <th class="col-bezig">BEZIG</th>
-            <th class="col-cat th-filter" data-col="cat">W/P <span class="th-arrow">▾</span></th>
+            <th class="col-cat th-filter" data-col="cat">WIE <span class="th-arrow">▾</span></th>
             <th class="col-project th-filter" data-col="project">Project <span class="th-arrow">▾</span></th>
             <th class="col-taak th-filter" data-col="taak">Taak <span class="th-arrow">▾</span></th>
             <th class="col-subtaak">Subtaak</th>
             <th class="col-deadline th-filter" data-col="deadline">Deadline <span class="th-arrow">▾</span></th>
-<th class="col-context th-filter" data-col="context">Context <span class="th-arrow">▾</span></th>
             <th class="col-add"></th>
           </tr>
         </thead>
@@ -193,8 +193,9 @@
         <button class="analyse-filter-btn" id="filterMaand">Maand</button>
         <span style="width:8px;display:inline-block;"></span>
         <button class="analyse-filter-btn active" id="filterAlles">Alles</button>
-        <button class="analyse-filter-btn" id="filterWerk">Werk</button>
-        <button class="analyse-filter-btn" id="filterPrive">Privé</button>
+        <button class="analyse-filter-btn" id="filterWerk">RHLC</button>
+        <button class="analyse-filter-btn" id="filterPrive">Raimon</button>
+        <button class="analyse-filter-btn" id="filterNatasja">Natasja</button>
       </div>
     </div>
 
@@ -227,7 +228,7 @@
         <div class="chart-canvas-wrap"><canvas id="chartProductiviteit"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">Werk / Privé verdeling</div>
+        <div class="chart-title">RHLC / Raimon / Natasja verdeling</div>
         <div class="chart-canvas-wrap"><canvas id="chartWerkPrive"></canvas></div>
       </div>
       <div class="chart-card">

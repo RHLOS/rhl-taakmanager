@@ -200,7 +200,6 @@
     .kb-pill { font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 500; letter-spacing: .2px; }
     .kb-pill.deadline      { background: rgba(255,159,10,.18); color: var(--orange); }
     .kb-pill.deadline.over { background: rgba(255,69,58,.2);   color: var(--red); }
-    .kb-pill.context       { background: rgba(10,132,255,.15); color: var(--accent); }
     .kb-pill.prio          { background: rgba(255,159,10,.18); color: var(--orange); }
 
     /* Calendar placeholder */
@@ -344,7 +343,6 @@
     .col-taak  { width: 18%; }
     .col-subtaak { }
     .col-deadline { width: 90px; }
-.col-context { width: 100px; }
     .col-add { width: 52px; text-align: center; white-space: nowrap; }
     .add-btn {
       font-size: 16px; color: var(--green); cursor: pointer;
@@ -376,6 +374,7 @@
     }
     .cat.w { background: rgba(10,132,255,.15); color: var(--accent); }
     .cat.p { background: rgba(255,159,10,.15); color: var(--orange); }
+    .cat.n { background: rgba(48,209,88,.15); color: var(--green); }
 
     /* Chevron */
     .chev {

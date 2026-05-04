@@ -772,6 +772,9 @@ attachSelects();
             if (val !== raw) {
               try {
                 await patch(table, id, { deadline: val || null });
+                const arr = table === 'subtaken' ? allSubtaken : table === 'sub_subtaken' ? allSubsubtaken : allProjecten;
+                const item = arr.find(i => String(i.id) === String(id));
+                if (item) item.deadline = val || null;
               } catch (err) {
                 el.textContent = current;
                 alert('Opslaan mislukt: ' + err.message);

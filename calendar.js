@@ -271,15 +271,58 @@
     async function showCalItemModal(it, container) {
       const parts = it.path.split(' › ');
       const parentPath = parts.slice(0, -1).join(' › ');
+
+      // ── Verzamel onderliggende taken ──
+      let children = [];
+      if (it.level === 'project') {
+        allSubtaken.filter(s => s.taak_id === it.id && !s.gedaan && isActief(s)).forEach(s => {
+          children.push({ tekst: s.tekst, level: 'sub', deadline: s.deadline });
+          allSubsubtaken
+            .filter(ss => ss.subtaak_id === s.id && !ss.gedaan && isActief(ss))
+            .forEach(ss => children.push({ tekst: ss.tekst, level: 'subsub', deadline: ss.deadline }));
+        });
+      } else if (it.level === 'sub') {
+        allSubsubtaken
+          .filter(ss => ss.subtaak_id === it.id && !ss.gedaan && isActief(ss))
+          .forEach(ss => children.push({ tekst: ss.tekst, level: 'subsub', deadline: ss.deadline }));
+      }
+
+      // ── Kinderen HTML ──
+      let childrenHtml = '';
+      if (children.length) {
+        childrenHtml = '<div class="cal-modal-children">';
+        children.forEach(c => {
+          const prefix = c.level === 'subsub'
+            ? '<span class="cal-child-prefix subsub">↳</span>'
+            : '<span class="cal-child-prefix">•</span>';
+          const dlTag = c.deadline
+            ? `<span class="cal-modal-child-dl">${c.deadline}</span>`
+            : '';
+          childrenHtml += `<div class="cal-modal-child">${prefix}${esc(c.tekst)}${dlTag}</div>`;
+        });
+        childrenHtml += '</div>';
+      }
+
+      // ── Body HTML ──
       const bodyHtml = `
-        ${parentPath ? `<p style="color:var(--text-3);font-size:.85em;margin:0 0 .4rem;">${esc(parentPath)}</p>` : ''}
-        <p style="font-size:1.05em;margin:0 0 .6rem;">${esc(it.tekst)}</p>
-        <p style="color:var(--text-3);font-size:.85em;margin:0;">Deadline: ${it.deadline}</p>
+        ${parentPath ? `<p class="cal-modal-path">${esc(parentPath)}</p>` : ''}
+        <p class="cal-modal-title-text">${esc(it.tekst)}</p>
+        ${childrenHtml}
+        <div class="cal-modal-deadline-row">
+          <span class="cal-modal-dl-label">Deadline</span>
+          <input type="date" id="calDeadlineInput" value="${it.deadline || ''}">
+          <button type="button" class="cal-deadline-clear"
+            onclick="document.getElementById('calDeadlineInput').value=''">✕ Wis</button>
+        </div>
       `;
+
       const action = await showModal(it.tekst, bodyHtml, [
-        { label: '✓ Afvinken', value: 'done', class: 'confirm' },
-        { label: 'Sluiten',    value: null,   class: 'cancel'  }
+        { label: '✓ Afvinken',     value: 'done',   class: 'cal-check'  },
+        { label: '💾 Bewaren',     value: 'save',   class: 'cal-save'   },
+        { label: '🗑 Verwijderen', value: 'delete', class: 'cal-delete' },
+        { label: 'Sluiten',        value: null,     class: 'cal-close'  }
       ]);
+
       if (action === 'done') {
         await patch(it.table, it.id, {
           gedaan: true,
@@ -288,5 +331,25 @@
         await reloadData();
         renderCalendar(container);
         showToast('Afgevinkt ✓');
+
+      } else if (action === 'save') {
+        const newDeadline = document.getElementById('calDeadlineInput')?.value || null;
+        await patch(it.table, it.id, { deadline: newDeadline || null });
+        await reloadData();
+        renderCalendar(container);
+        showToast('Deadline opgeslagen ✓');
+
+      } else if (action === 'delete') {
+        const ok = await modalConfirm(
+          'Verwijderen?',
+          `"${it.tekst}" verplaatsen naar de prullenmand?`,
+          'Verwijderen', true
+        );
+        if (ok) {
+          await patch(it.table, it.id, { verwijderd_op: new Date().toISOString() });
+          await reloadData();
+          renderCalendar(container);
+          showToast('Verwijderd');
+        }
       }
     }

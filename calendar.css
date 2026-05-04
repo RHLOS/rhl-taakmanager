@@ -278,3 +278,116 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ═══════════════════════════════════════
+   CALENDAR MODAL EXTRAS
+   ═══════════════════════════════════════ */
+
+/* Padcrumb boven de titel */
+.cal-modal-path {
+  color: var(--text-3, #636366);
+  font-size: .83em;
+  margin: 0 0 .35rem;
+}
+
+/* Taaknaam in modal */
+.cal-modal-title-text {
+  font-size: 1.05em;
+  font-weight: 500;
+  margin: 0 0 .9rem;
+  color: var(--text, #f5f5f7);
+  line-height: 1.4;
+}
+
+/* Lijst met onderliggende taken */
+.cal-modal-children {
+  background: rgba(255,255,255,.05);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: .85rem;
+  font-size: .84em;
+  color: var(--text-2, #98989d);
+  line-height: 1.75;
+}
+.cal-modal-child {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.cal-child-prefix {
+  color: var(--text-3, #636366);
+  flex-shrink: 0;
+  font-size: .85em;
+}
+.cal-child-prefix.subsub {
+  padding-left: 1.2em;
+}
+.cal-modal-child-dl {
+  color: var(--text-3, #636366);
+  font-size: .8em;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* Deadline-rij */
+.cal-modal-deadline-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: .6rem;
+  border-top: 1px solid var(--sep, #3a3a3c);
+}
+.cal-modal-dl-label {
+  font-size: .75em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-3, #636366);
+  white-space: nowrap;
+}
+#calDeadlineInput {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg2, #2c2c2e);
+  border: 1px solid var(--sep, #3a3a3c);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: .88em;
+  font-family: inherit;
+  color: var(--text, #f5f5f7);
+  outline: none;
+  transition: border-color .15s;
+}
+#calDeadlineInput:focus { border-color: var(--accent, #0a84ff); }
+
+.cal-deadline-clear {
+  background: none;
+  border: 1px solid var(--sep, #3a3a3c);
+  border-radius: 6px;
+  color: var(--text-3, #636366);
+  cursor: pointer;
+  font-size: .78em;
+  padding: 4px 9px;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+}
+.cal-deadline-clear:hover {
+  color: #ff453a;
+  border-color: #ff453a;
+}
+
+/* ── Knopkleuren in de calendar modal ── */
+/* Groen — Afvinken & Bewaren */
+.modal-btn.cal-check,
+.modal-btn.cal-save  { background: #30d158; color: #fff; }
+.modal-btn.cal-check:hover,
+.modal-btn.cal-save:hover  { background: #28b84d; }
+
+/* Rood — Verwijderen */
+.modal-btn.cal-delete { background: #ff453a; color: #fff; }
+.modal-btn.cal-delete:hover { background: #d63028; }
+
+/* Blauw — Sluiten */
+.modal-btn.cal-close { background: #0a84ff; color: #fff; }
+.modal-btn.cal-close:hover { background: #0070d4; }

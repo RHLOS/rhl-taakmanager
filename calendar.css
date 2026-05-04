@@ -378,16 +378,18 @@
 }
 
 /* ── Knopkleuren in de calendar modal ── */
-/* Groen — Afvinken & Bewaren */
-.modal-btn.cal-check,
-.modal-btn.cal-save  { background: #30d158; color: #fff; }
-.modal-btn.cal-check:hover,
-.modal-btn.cal-save:hover  { background: #28b84d; }
+/* Groen — Afvinken */
+.modal-btn.cal-check { background: #30d158; color: #fff; }
+.modal-btn.cal-check:hover { background: #28b84d; }
+
+/* Blauw — Bewaren */
+.modal-btn.cal-save { background: #0a84ff; color: #fff; }
+.modal-btn.cal-save:hover { background: #0070d4; }
 
 /* Rood — Verwijderen */
 .modal-btn.cal-delete { background: #ff453a; color: #fff; }
 .modal-btn.cal-delete:hover { background: #d63028; }
 
-/* Blauw — Sluiten */
-.modal-btn.cal-close { background: #0a84ff; color: #fff; }
-.modal-btn.cal-close:hover { background: #0070d4; }
+/* Grijs — Sluiten */
+.modal-btn.cal-close { background: #48484a; color: #fff; }
+.modal-btn.cal-close:hover { background: #3a3a3c; }

@@ -116,7 +116,14 @@
           cb.checked = !currentFilter || currentFilter.has(opt);
           checkboxes.push(cb);
           label.appendChild(cb);
-          label.appendChild(document.createTextNode(opt));
+          if (col === 'cat') {
+            const badge = document.createElement('span');
+            badge.className = 'cat' + (opt === 'Werk' ? ' w' : opt === 'Natasja' ? ' n' : ' p');
+            badge.textContent = opt === 'Werk' ? 'RHLC' : opt;
+            label.appendChild(badge);
+          } else {
+            label.appendChild(document.createTextNode(opt));
+          }
           popup.appendChild(label);
         });
 

@@ -159,7 +159,11 @@
 
     function subCat(sub) { return allProjecten.find(p => p.id === sub.taak_id)?.categorie || 'Werk'; }
     function subsubCat(ss) { const sub = allSubtaken.find(s => s.id === ss.subtaak_id); return sub ? subCat(sub) : 'Werk'; }
-    function matchesCat(cat) { return !catFilter || cat === catFilter; }
+    function matchesCat(cat) {
+      if (catFilter && cat !== catFilter) return false;
+      if (activeFilters['cat'] && !activeFilters['cat'].has(cat)) return false;
+      return true;
+    }
 
     function renderVandaag(tbody) {
       const subs = sortItems(allSubtaken.filter(s => !s.gedaan && isActief(s) && s.deadline && daysUntil(s.deadline) <= 0 && matchesCat(subCat(s))));

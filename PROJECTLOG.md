@@ -71,3 +71,31 @@ Open:
 2. **Kanban-view nog niet user-getest** — sessie afgesloten voor verificatie. Eerstvolgende actie volgende sessie kan zijn: korte rondje door Kanban om te confirmeren dat alles werkt zoals bedoeld.
 3. **Cache-busting** ontbreekt op `index.html`-script-tags voor `style.css`, `analyse.css`, `ui.js`, `api.js`, `render.js`, `app.js`, `analyse.js`. Mobile heeft `?v=N`, desktop niet — daarom hard refresh nodig na elke deploy.
 4. **Volgende sessie:** mobiele versie verwijderen (`mobile.html` + `mobile.css` + `mobile.js`, auto-redirect in `index.html`, mobile-refs in `manifest.json`, secties in OVERDRACHT.md).
+
+## 2026-05-03 — Calendar getest, modal verbeterd, kleurpreviews, e-mail uitgebreid
+
+Drukke sessie: Calendar-view volledig getest en goedgekeurd. Daarna forse uitbreiding van de calendar-modal, twee kleurenpreviews gebouwd voor een nieuw stijlprofiel, toolbar-bug gefixed, en de dagelijkse e-mail uitgebreid met twee nieuwe secties.
+
+Wijzigingen:
+1. **Calendar-view getest:** alle vijf testpunten groen (maandgrid, rolling-week, dag-detail, afvink-modal, Werk/Privé-kleuren).
+2. **Calendar modal uitgebreid:** deadline aanpasbaar via date-input + wis-knop; onderliggende subtaken/sub-subtaken zichtbaar bij project- en taakniveau; verwijderknop met bevestigingsstap (soft-delete naar prullenmand); knopkleuren: Afvinken=groen, Bewaren=blauw, Verwijderen=rood, Sluiten=grijs.
+3. **Kleurpreviews:** twee nieuwe preview-bestanden aangemaakt (originelen onaangepast): `index-preview.html` + `style-preview.css` (donker warm taupe) en `index-preview-2.html` + `style-preview-2.css` (licht ivoor). Aanbeveling gegeven voor preview 2 (licht); gebruiker heeft nog geen keuze gemaakt.
+4. **Toolbar-bug gefixed:** `toolbar.style.display=''` verwijderde de flex-layout na view-switch. Opgelost: `display:flex` in `style.css` gezet, JS gebruikt nu `'flex'` bij terugkeer naar Lijst-modus.
+5. **Dagelijkse e-mail uitgebreid:** Edge Function `dagelijkse-reminder` herschreven met drie secties: 🔴 Vandaag & Verlopen, 📅 Deze week (deadline t+1 t/m t+7), ⭐ Prioriteit (`prioriteit='hoog'` / `prio_ster=true`). Getest en bevestigd werkend (7 items, mail ontvangen).
+
+Open:
+1. **Kleurkeuze preview** — gebruiker moet beslissen of preview 1 (donker), preview 2 (licht) of geen van beide live gaat.
+
+## 2026-05-03 — Mobiele versie verwijderd + Calendar-view gebouwd
+
+Opruim-sessie: mobiele PWA volledig weggehaald en de lang geplande Calendar-view eindelijk gebouwd. Kanban getest en goedgekeurd door gebruiker. Alle desktop-assets hebben nu cache-busting. Tussendoor ook een layout-bugfix (mobile-notice div stond foutief in `<head>`).
+
+Wijzigingen:
+1. **Mobiele versie verwijderd:** `mobile.html`, `mobile.css`, `mobile.js` weg. Auto-redirect in `index.html` vervangen door CSS-melding voor kleine schermen. Apple-mobile meta-tags verwijderd. `manifest.json` uitgehold: `orientation` → `landscape`. `BRIEFING.md` opgeschoond.
+2. **Cache-busting `?v=1`** toegevoegd aan alle desktop-assets in `index.html` (`style.css`, `analyse.css`, `ui.js`, `api.js`, `render.js`, `app.js`, `analyse.js`).
+3. **Prio-veldnaam-verschil** gedocumenteerd in `BRIEFING.md`: `taken.prioriteit = 'hoog'` vs `subtaken/sub_subtaken.prio_ster = true`.
+4. **Calendar-view** gebouwd in nieuwe bestanden `calendar.js` + `calendar.css`: maandgrid met navigatie, rolling-week (vandaag + 6 dagen), dag-detail onderaan bij klik op dag, afvink-modal bij klik op taak. Kleurcodering Werk (blauw) / Privé (oranje).
+5. **Bugfix:** `<div id="mobile-notice">` stond foutief in `<head>` — verplaatst naar `<body>`. Veroorzaakte toolbar-layout-breuk (knoppen stapelden verticaal).
+
+Open:
+1. **Calendar gebruiker-test** — nog niet uitvoerig getest in productie.

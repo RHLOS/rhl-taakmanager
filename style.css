@@ -232,6 +232,11 @@
     .metric.prio .num { color: var(--red); }
     .metric.werk .num { color: var(--accent); }
 
+    /* ── Toolbar ── */
+    #mainToolbar {
+      display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    }
+
     /* ── Toolbar knoppen ── */
     .filter-dd-btn {
       display: flex; align-items: center; gap: 6px;

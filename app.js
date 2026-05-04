@@ -497,7 +497,7 @@
       if (tableWrap)  tableWrap.style.display = '';
       if (kanbanWrap) kanbanWrap.style.display = 'none';
       if (calWrap)    calWrap.style.display = 'none';
-      if (toolbar)    toolbar.style.display = '';
+      if (toolbar)    toolbar.style.display = 'flex';
 
       const expandState = saveExpandState();
       const tbody = document.getElementById('tbody');

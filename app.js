@@ -514,13 +514,15 @@
         filtered.forEach(p => renderProject(p, allSubtaken, allSubsubtaken, tbody));
       }
 
-      const openAll = allProjecten.filter(p => !p.gedaan);
+      const openAll = allProjecten.filter(p => !p.gedaan && (!catFilter || p.categorie === catFilter));
+      const openProjectIds = new Set(openAll.map(p => p.id));
+      const openSubs = allSubtaken.filter(s => !s.gedaan && isActief(s) && openProjectIds.has(s.taak_id));
+      const openSubIds = new Set(openSubs.map(s => s.id));
+      const openSubsubs = allSubsubtaken.filter(s => !s.gedaan && isActief(s) && openSubIds.has(s.subtaak_id));
       document.getElementById('mTotal').textContent = openAll.length;
-      document.getElementById('mOpen').textContent = allSubtaken.filter(s => !s.gedaan && isActief(s)).length;
+      document.getElementById('mOpen').textContent = openSubs.length;
       document.getElementById('mPrio').textContent = openAll.filter(p => projectIsPrio(p)).length;
-      document.getElementById('mAlles').textContent =
-        allSubtaken.filter(s => !s.gedaan && isActief(s)).length +
-        allSubsubtaken.filter(s => !s.gedaan && isActief(s)).length;
+      document.getElementById('mAlles').textContent = openSubs.length + openSubsubs.length;
 
       updateSidebar();
       const isInbox = currentView === 'inbox';

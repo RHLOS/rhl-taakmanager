@@ -452,6 +452,7 @@
     /* Deadline */
     .dl { font-size: 12px; font-weight: 500; white-space: nowrap; }
     .dl.urgent { color: var(--red); }
+    .dl.warning { color: var(--orange); }
     .dl.normal { color: var(--text-3); }
 
     /* Context tags */

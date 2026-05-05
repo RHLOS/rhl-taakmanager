@@ -15,8 +15,8 @@
 
     function editableDeadline(date, id, table) {
       const display = date ? formatDate(date) : '';
-      const urgent = date && daysUntil(date) <= 7;
-      const cls = date ? (urgent ? 'urgent' : 'normal') : '';
+      const days = date ? daysUntil(date) : null;
+      const cls = days === null ? '' : days <= 2 ? 'urgent' : days <= 7 ? 'warning' : 'normal';
       return `<span class="editable-dl dl ${cls}" data-id="${id}" data-table="${table}" data-field="deadline" data-raw="${date || ''}">${display || '—'}</span>`;
     }
 

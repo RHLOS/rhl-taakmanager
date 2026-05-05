@@ -745,7 +745,7 @@
             if (val) {
               el.dataset.raw = val;
               const days = daysUntil(val);
-              el.className = `editable-dl dl ${days <= 7 ? 'urgent' : 'normal'}`;
+              el.className = `editable-dl dl ${days <= 2 ? 'urgent' : days <= 7 ? 'warning' : 'normal'}`;
               el.textContent = formatDate(val);
             } else {
               el.dataset.raw = '';

@@ -599,6 +599,7 @@
 
         renderAll();
         bindBtnNew();
+        bindKeyboardShortcuts();
 
         document.getElementById('tilePrio').addEventListener('click', () => {
           if (displayMode !== 'lijst') setDisplayMode('lijst');
@@ -955,6 +956,21 @@
         } catch (err) {
           alert('Toevoegen mislukt: ' + err.message);
         }
+      });
+    }
+
+    // ═══ Keyboard shortcuts ═══
+    let keyboardBound = false;
+    function bindKeyboardShortcuts() {
+      if (keyboardBound) return;
+      keyboardBound = true;
+      document.addEventListener('keydown', (ev) => {
+        if (ev.key !== 'n' && ev.key !== 'N') return;
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        if (document.activeElement?.isContentEditable) return;
+        if (document.getElementById('modal')?.style.display !== 'none') return;
+        document.querySelector('.btn-new')?.click();
       });
     }
 

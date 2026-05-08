@@ -99,3 +99,44 @@ Wijzigingen:
 
 Open:
 1. **Calendar gebruiker-test** — nog niet uitvoerig getest in productie.
+
+## 2026-05-04 — WIE-kolom, bila-projecten, bugfixes
+
+Productieve sessie: kleurkeuze definitief afgerond, twee bugfixes doorgevoerd, kolom "W/P" omgebouwd naar "WIE" met drie categorieën, context-kolom volledig verwijderd, en twee vaste bila-projecten aangemaakt in Supabase.
+
+Wijzigingen:
+1. **Kleurkeuze gesloten:** gebruiker besloot geen nieuw kleurenprofiel. Preview-bestanden (`index-preview.html`, `index-preview-2.html`) verwijderd. Apple Dark definitief.
+2. **Deadline-bug fix:** deadline-wijziging werd teruggedraaid na tab-wissel omdat de in-memory array (`allSubtaken` / `allSubsubtaken` / `allProjecten`) niet bijgewerkt werd na een succesvolle patch. Fix: na patch ook de array in sync brengen. Getest en goedgekeurd.
+3. **WIE-kolom:** "W/P" → "WIE". Badges hernoemd: Werk → RHLC (blauw), Privé → Raimon (oranje), nieuw Natasja (groen). Filterknoppen toolbar aangepast. Supabase constraint `taken_categorie_check` uitgebreid met 'Natasja'. Dropdown nieuwe-taak-modal heeft nu drie opties.
+4. **Context-kolom verwijderd:** kolomheader, `editableContext()` functie, alle ~18 aanroepen, `allContexten`, `attachSelects()`, `normalizeContext()`, context-sort/filterlogica, contexts-API-fetch, en bijbehorende CSS — alles weg.
+5. **Bila-projecten aangemaakt:** twee vaste bila-projecten in Supabase:
+   - "Bila — Raimon" (Privé, deadline 09/05, 12 taken waaronder HSPI met 4 sub-subtaken en ster-prio)
+   - "Bila — Natasja" (Natasja, deadline 09/05, 8 taken waaronder Huisstijl deadline 13/05, Norton 17/07)
+6. **WIE-filter fixes:** Natasja-filterknop groen, filterpopup toont gekleurde badges, `activeFilters['cat']` werkt nu ook in Vandaag/Week/Prioriteit-views (was alleen in projectlijst-view).
+
+Open:
+1. **Kanban Natasja-kolom:** in `kanban.js` vallen Natasja-taken door de fallback in de 'Werk'-kolom. Beslissen: aparte Natasja-kolom toevoegen of anders oplossen.
+
+## 2026-05-05 — Inspectie + bevindingen doorvoeren
+
+Brede inspectie van de app (features, code, UI, veiligheid) resulteerde in 16 bevindingen. De vier hoogste prioriteiten zijn direct aangepakt. Overige bevindingen staan als open punten in de todolijst voor de volgende sessie.
+
+Wijzigingen:
+1. **Kanban Natasja-taken verborgen:** besloten om Natasja-taken niet te tonen in Kanban (waren via fallback in 'Werk' beland). Één filterregel toegevoegd in `kanban.js`.
+2. **RLS policies gefixed (veiligheid):** alle Supabase-tabellen stonden op `public, ALL`. Policies omgezet naar `anon`-rol zodat toegang minimaal de anon-key vereist.
+3. **Dode CSS opgeruimd:** `style-preview.css` + `style-preview-2.css` verwijderd (454 regels).
+4. **Deadline-urgentie gradatie:** drie niveaus ingevoerd: rood ≤2 dagen, oranje 3–7 dagen, grijs >7 dagen. Was voorheen alles ≤7 rood.
+5. **Metrics meeschalen met WIE-filter:** tellers (projecten, open taken, alle taken, prio) volgen nu de actieve catFilter mee. Waren voorheen altijd totalen.
+
+Open:
+1. **B13** — Keyboard shortcut voor nieuwe taak (N)
+2. **B2** — `delWhere` heeft geen input-validatie
+3. **B8** — Undo ontbreekt bij verwijderen naar prullenmand
+4. **B9** — Inbox-badge telt sub_subtaken; controleer of view die ook toont
+5. **B10** — Zoekfunctie wist query stil bij sidebar-klik
+6. **B11** — Kanban en Calendar hebben geen WIE-filter
+7. **B6** — Sortering O(n²) in `sortItems`
+8. **B4** — Prio-veldnaam uniformeren (Supabase-migratie nodig)
+9. **B7** — Calendar placeholder-tekst dode code in `index.html:179`
+10. **B16** — Cache-busting `?v=1` is handmatig
+11. **B5/B15** — Architectuur: alles globaal, geen ES modules

@@ -140,3 +140,22 @@ Open:
 9. **B7** — Calendar placeholder-tekst dode code in `index.html:179`
 10. **B16** — Cache-busting `?v=1` is handmatig
 11. **B5/B15** — Architectuur: alles globaal, geen ES modules
+
+## 2026-05-09 — Keyboard shortcut nieuwe taak (B13)
+
+Korte sessie: één bevinding uit de lijst afgehandeld. B13 geïmplementeerd en live op GitHub Pages.
+
+Wijzigingen:
+1. **B13 — Keyboard shortcut `N`:** druk `N` wanneer je niet in een inputveld zit om direct het "Nieuw project"-scherm te openen. Guard checkt of focus op input/textarea/select staat, of de modal al open is. Functie `bindKeyboardShortcuts()` toegevoegd in `app.js`; eenmalig aangemeld vanuit init. Gemerged naar `main` en gepushed.
+
+Open:
+1. **B2** — `delWhere` heeft geen input-validatie
+2. **B8** — Undo ontbreekt bij verwijderen naar prullenmand
+3. **B9** — Inbox-badge telt sub_subtaken; controleer of view die ook toont
+4. **B10** — Zoekfunctie wist query stil bij sidebar-klik
+5. **B11** — Kanban en Calendar hebben geen WIE-filter
+6. **B6** — Sortering O(n²) in `sortItems`
+7. **B4** — Prio-veldnaam uniformeren (Supabase-migratie nodig)
+8. **B7** — Calendar placeholder-tekst dode code in `index.html:179`
+9. **B16** — Cache-busting `?v=1` is handmatig
+10. **B5/B15** — Architectuur: alles globaal, geen ES modules

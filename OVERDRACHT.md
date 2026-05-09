@@ -1,34 +1,33 @@
 # Overdracht — rhl-taakmanager
-*Laatste update: 2026-05-05*
+*Laatste update: 2026-05-09*
 
 ## Openingsbericht volgende sessie
 
 ```
-Sessie rhl-taakmanager — vorige sessie 2026-05-05
+Sessie rhl-taakmanager — vorige sessie 2026-05-09
 Lees CLAUDE.md, BRIEFING.md en OVERDRACHT.md van dit project.
-Brede inspectie gedaan; 4 van de 16 bevindingen zijn afgerond. Volgende actie: B13 — keyboard shortcut nieuwe taak (of kies een ander open punt uit de lijst).
+B13 (keyboard shortcut N) is afgerond en live. 10 bevindingen staan nog open. Volgende actie: kies een punt uit de lijst, of pak B8 (undo bij prullenmand-verwijdering) als laaghangende vrucht.
 ```
 
 ---
 
 ## Waar staan we
 
-App volledig operationeel. Na brede inspectie zijn de vier hoogste prioriteiten afgehandeld: RLS-policies gefixed, dode CSS verwijderd, deadline-urgentie heeft nu 3 gradaties, en metrics schalen mee met de WIE-filter. Er staan nog 11 bevindingen open in de todolijst.
+App volledig operationeel. Na de inspectie van 2026-05-05 zijn nu 6 van de 16 bevindingen afgehandeld. Er staan nog 10 bevindingen open, variërend van kleine bugfixes tot een Supabase-migratie.
 
 ## Open punten
 
-1. **B13** — Keyboard shortcut nieuwe taak (`N` als je niet in een inputveld zit)
-2. **B2** — `delWhere` in `api.js` heeft geen input-validatie; filter-string gaat direct in URL
-3. **B8** — Undo ontbreekt bij verwijderen naar prullenmand (wel bij afvinken)
-4. **B9** — Inbox-badge telt sub_subtaken; controleer of de inbox-view die ook volledig toont
-5. **B10** — Zoekfunctie wist query stil wanneer je op een sidebar-item klikt
-6. **B11** — Kanban en Calendar hebben geen WIE-filter (toolbar verborgen in die modes)
-7. **B6** — `sortItems` doet O(n²) linear scan voor parent-project lookup
-8. **B4** — Prio-veldnaam uniformeren: `taken.prioriteit` = string, `subtaken/sub_subtaken.prio_ster` = boolean — Supabase-migratie nodig
-9. **B7** — Calendar placeholder-tekst dode code in `index.html:179`
-10. **B16** — Cache-busting `?v=1` is handmatig; vergeten te verhogen = stale cache bij deploy
-11. **B5/B15** — Architectuur: alles globaal in één scope, geen ES modules (info, geen actie vereist)
+1. **B2** — `delWhere` in `api.js` heeft geen input-validatie; filter-string gaat direct in URL
+2. **B8** — Undo ontbreekt bij verwijderen naar prullenmand (wel bij afvinken)
+3. **B9** — Inbox-badge telt sub_subtaken; controleer of de inbox-view die ook volledig toont
+4. **B10** — Zoekfunctie wist query stil wanneer je op een sidebar-item klikt
+5. **B11** — Kanban en Calendar hebben geen WIE-filter (toolbar verborgen in die modes)
+6. **B6** — `sortItems` doet O(n²) linear scan voor parent-project lookup
+7. **B4** — Prio-veldnaam uniformeren: `taken.prioriteit` = string, `subtaken/sub_subtaken.prio_ster` = boolean — Supabase-migratie nodig
+8. **B7** — Calendar placeholder-tekst dode code in `index.html:179`
+9. **B16** — Cache-busting `?v=1` is handmatig; vergeten te verhogen = stale cache bij deploy
+10. **B5/B15** — Architectuur: alles globaal in één scope, geen ES modules (info, geen actie vereist)
 
 ## Volgende actie
 
-B13 doorvoeren (keyboard shortcut nieuwe taak), of een ander punt kiezen uit de lijst hierboven.
+Kies een punt uit de lijst. B8 (undo bij prullenmand-verwijdering) is een goede laaghangende vrucht — beperkte scope, geen migratie nodig.

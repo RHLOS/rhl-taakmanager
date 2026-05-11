@@ -159,3 +159,22 @@ Open:
 8. **B7** — Calendar placeholder-tekst dode code in `index.html:179`
 9. **B16** — Cache-busting `?v=1` is handmatig
 10. **B5/B15** — Architectuur: alles globaal, geen ES modules
+
+## 2026-05-11 — Alle 16 bevindingen afgehandeld
+
+Opruimsessie: alle openstaande bevindingen uit de inspectie van 2026-05-05 zijn verwerkt. De codebase is schoon en de app draait zonder bekende issues in productie.
+
+Wijzigingen:
+1. **B7** — Dode calendar placeholder verwijderd uit `index.html` en bijbehorende CSS-regel uit `style.css`.
+2. **B8** — Bleek al opgelost in sessie 2026-05-05; OVERDRACHT was stale.
+3. **B9** — Controle: inbox-view toont sub_subtaken correct — geen bug.
+4. **B10** — `clearSearch()` hulpfunctie toegevoegd; zoekquery wist nu expliciet bij sidebar-klik in plaats van stil in `renderAll()`.
+5. **B11** — WIE-filterknoppen (RHLC/Raimon/Natasja) zichtbaar in Kanban en Calendar via `showToolbarFilterOnly()`; `catFilter` toegepast in `buildKanbanItems()` en `buildCalItems()`.
+6. **B16** — GitHub Actions workflow `.github/workflows/cache-bust.yml` maakt `?v=TIMESTAMP` automatisch bij elke push naar `main`.
+7. **B2** — `ALLOWED_TABLES` whitelist toegevoegd aan `del()` en `delWhere()` in `api.js`.
+8. **B6** — `sortItems()` herschreven met `Map`-lookups: O(n²) → O(n log n).
+9. **B4** — Supabase-migratie: `prio_ster boolean` toegevoegd aan `taken` en `sub_subtaken`, data gemigreerd. Frontend volledig bijgewerkt: alle `prioriteit === 'hoog'`-checks vervangen door `prio_ster`, star-toggle special-case verwijderd.
+
+Open:
+1. Legacy-kolommen `taken.prioriteit` (text) en `sub_subtaken.prioriteit` (boolean) opruimen in Supabase — wacht minimaal één week na deploy ter verificatie.
+2. B5/B15 — Architectuur: alles globaal, geen ES modules (info, geen actie vereist).

@@ -1,7 +1,7 @@
 # rhl-taakmanager — Briefing
 
-**Versie:** 0.1
-**Laatste update:** 2026-04-28
+**Versie:** 0.2
+**Laatste update:** 2026-05-11
 
 ## Wat is dit project?
 
@@ -25,6 +25,7 @@ Live: https://rhlos.github.io/rhl-taakmanager/
 | Database + API | Supabase (PostgreSQL + REST) — project ref `fhkttfzqdjynzmtjbujv` |
 | Frontend | Vanilla HTML/CSS/JS, geen framework |
 | Hosting | GitHub Pages (deployt vanaf `main`) |
+| CI | GitHub Actions — cache-bust workflow (`.github/workflows/cache-bust.yml`) |
 | E-mail | Resend API via Supabase Edge Function |
 | Cron | pg_cron + pg_net (in Supabase) |
 | AI-integratie | Supabase MCP server (Claude Desktop) |
@@ -40,7 +41,7 @@ Alle drie tabellen hebben `gedaan`, `gedaan_datum`, `inbox`, `verwijderd_op`, `d
 
 Aanvullende tabellen: `afgerond_log` (historie), `meta` (instellingen), `contexts` (dynamisch beheerd vanuit de app), `laag_prioriteit` + `laag_items` (legacy, niet meer in gebruik).
 
-**Let op — prio-veldnaam verschilt per tabel:** `taken.prioriteit = 'hoog'` (string), `subtaken.prio_ster = true` (boolean), `sub_subtaken.prio_ster = true` (boolean). In `app.js` staat daarom `a.prio_ster || a.prioriteit` als workaround.
+**Prio-veld uniform:** alle drie tabellen gebruiken `prio_ster boolean`. Migratie uitgevoerd 2026-05-11. Let op: `taken.prioriteit` (text) en `sub_subtaken.prioriteit` (boolean) bestaan nog in Supabase als legacy-kolommen — kunnen worden verwijderd na verificatieperiode.
 
 ### Frontend-splitsing
 

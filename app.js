@@ -400,6 +400,7 @@
         div.innerHTML = `<span class="icon">▸</span> ${p.taak} <span class="badge">${count || ''}</span>`;
         div.addEventListener('click', () => {
           if (displayMode !== 'lijst') setDisplayMode('lijst');
+          clearSearch();
           currentView = `project:${p.id}`;
           renderAll();
           document.querySelectorAll('.chev').forEach(c => c.classList.add('open'));
@@ -441,13 +442,14 @@
       });
     }
 
+    function clearSearch() {
+      if (!searchQuery) return;
+      searchQuery = '';
+      const inp = document.getElementById('searchInput');
+      if (inp) inp.value = '';
+    }
+
     function renderAll() {
-      // Auto-clear search wanneer we niet (meer) in de zoekresultaten-view zitten
-      if (currentView !== 'zoekresultaten' && searchQuery) {
-        searchQuery = '';
-        const inp = document.getElementById('searchInput');
-        if (inp) inp.value = '';
-      }
 
       // Display-mode dispatch (Lijst | Kanban | Calendar)
       const tableWrap = document.querySelector('.table-wrap');
@@ -1188,6 +1190,7 @@
       item.addEventListener('click', () => {
         // Sidebar nav betekent: terug naar Lijst-modus
         if (displayMode !== 'lijst') setDisplayMode('lijst');
+        clearSearch();
         currentView = item.dataset.view;
         renderAll();
       });

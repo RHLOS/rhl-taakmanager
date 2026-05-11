@@ -202,9 +202,7 @@
     .kb-pill.deadline.over { background: rgba(255,69,58,.2);   color: var(--red); }
     .kb-pill.prio          { background: rgba(255,159,10,.18); color: var(--orange); }
 
-    /* Calendar placeholder */
     .calendar-board { padding: 80px 20px; text-align: center; background: var(--card); border-radius: 12px; }
-    .cal-placeholder { color: var(--text-2); font-size: 14px; }
     .btn-new {
       padding: 8px 18px; border-radius: 8px; border: none;
       background: var(--green); color: #fff;

@@ -25,7 +25,7 @@
           return {
             id: ss.id, table: 'sub_subtaken',
             tekst: ss.tekst, deadline: ss.deadline, context: ss.context,
-            prio: !!ss.prioriteit, bezig: !!ss.bezig, inbox: !!ss.inbox,
+            prio: !!ss.prio_ster, bezig: !!ss.bezig, inbox: !!ss.inbox,
             _project: project, _parentSub: sub, _level: 'subsub',
           };
         });

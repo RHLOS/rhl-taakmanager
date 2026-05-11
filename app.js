@@ -184,7 +184,7 @@
             if (!selected.has(project.categorie)) return false;
             break;
           case 'prio':
-            const isPrio = project.prioriteit === 'hoog';
+            const isPrio = project.prio_ster;
             const label = isPrio ? '★ Prioriteit' : '☆ Normaal';
             if (!selected.has(label)) return false;
             break;
@@ -224,7 +224,7 @@
         switch(currentSort.col) {
           case 'project': va = (projA?.taak || '').toLowerCase(); vb = (projB?.taak || '').toLowerCase(); break;
           case 'cat': va = projA?.categorie || ''; vb = projB?.categorie || ''; break;
-          case 'prio': va = (a.prio_ster || a.prioriteit) ? 0 : 1; vb = (b.prio_ster || b.prioriteit) ? 0 : 1; break;
+          case 'prio': va = a.prio_ster ? 0 : 1; vb = b.prio_ster ? 0 : 1; break;
           case 'taak': va = (a.tekst || '').toLowerCase(); vb = (b.tekst || '').toLowerCase(); break;
           case 'deadline': va = a.deadline || '9999-12-31'; vb = b.deadline || '9999-12-31'; break;
           default: va = a.volgorde || 0; vb = b.volgorde || 0;
@@ -245,7 +245,7 @@
         switch(currentSort.col) {
           case 'project': va = a.taak.toLowerCase(); vb = b.taak.toLowerCase(); break;
           case 'cat': va = a.categorie; vb = b.categorie; break;
-          case 'prio': va = a.prioriteit === 'hoog' ? 0 : 1; vb = b.prioriteit === 'hoog' ? 0 : 1; break;
+          case 'prio': va = a.prio_ster ? 0 : 1; vb = b.prio_ster ? 0 : 1; break;
           case 'deadline':
             va = a.deadline || '9999-12-31'; vb = b.deadline || '9999-12-31'; break;
           default: va = a.nr; vb = b.nr;
@@ -271,7 +271,7 @@
     }
 
     function projectIsPrio(project) {
-      if (project.prioriteit === 'hoog') return true;
+      if (project.prio_ster) return true;
       return getSubsFor(project.id).some(s => !s.gedaan && s.prio_ster);
     }
 
@@ -359,7 +359,7 @@
     function countPrio() {
       let count = 0;
       allProjecten.filter(p => !p.gedaan && isActief(p)).forEach(p => {
-        if (p.prioriteit === 'hoog') count++;
+        if (p.prio_ster) count++;
         getSubsFor(p.id).filter(s => !s.gedaan && isActief(s)).forEach(s => {
           if (s.prio_ster) count++;
           getSubsubsFor(s.id).filter(ss => !ss.gedaan && isActief(ss) && ss.prio_ster).forEach(() => count++);
@@ -965,7 +965,7 @@
             nr: nr,
             taak: result.naam,
             categorie: result.cat,
-            prioriteit: 'normaal'
+            prio_ster: false
           });
 
           await fetch(`${SB}/rest/v1/meta?sleutel=eq.volgend_nr`, {
@@ -1143,12 +1143,7 @@
           star.classList.toggle('on');
           star.classList.toggle('off');
 
-          let value;
-          if (field === 'prioriteit' && table === 'taken') {
-            value = isOn ? 'normaal' : 'hoog';
-          } else {
-            value = !isOn;
-          }
+          const value = !isOn;
 
           try {
             await patch(table, id, { [field]: value });

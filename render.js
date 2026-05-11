@@ -23,14 +23,14 @@
 
     function renderProject(project, subtaken, subsubtaken, tbody) {
       const cat = project.categorie;
-      const isPrio = project.prioriteit === 'hoog';
+      const isPrio = project.prio_ster;
       const openSubs = filterSubsByActiveFilters(getSubsFor(project.id).filter(s => !s.gedaan && isActief(s)));
 
       tbody.insertAdjacentHTML('beforeend', `
         <tr class="row-project" data-project-id="${project.id}">
           <td class="col-nr-cell">${project.nr}</td>
           <td class="cd"></td>
-          <td class="cp">${starHtmlData(isPrio, project.id, 'taken', 'prioriteit')}</td>
+          <td class="cp">${starHtmlData(isPrio, project.id, 'taken', 'prio_ster')}</td>
           <td class="cbz"></td>
           <td>${catBadge(cat)}</td>
           <td><span class="chev">▶</span> <span class="editable" data-id="${project.id}" data-table="taken" data-field="taak">${esc(project.taak)}</span></td>
@@ -68,7 +68,7 @@
             <tr class="row-subtaak collapsed" data-parent-taak="${sub.id}">
               <td class="col-nr-cell">${taakNr}.${ssi + 1}</td>
               <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
-              <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+              <td class="cp">${starHtmlData(ss.prio_ster, ss.id, 'sub_subtaken', 'prio_ster')}</td>
             <td class="cbz">${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
               <td></td>
               <td></td>
@@ -101,7 +101,7 @@
           <tr class="row-taak">
             <td class="col-nr-cell"></td>
             <td class="cd"></td>
-            <td class="cp">${starHtmlData(p.prioriteit === 'hoog', p.id, 'taken', 'prioriteit')}</td>
+            <td class="cp">${starHtmlData(p.prio_ster, p.id, 'taken', 'prio_ster')}</td>
             <td class="cbz"></td>
             <td>${catBadge(cat)}</td>
             <td><span class="editable" data-id="${p.id}" data-table="taken" data-field="taak">${p.taak}</span></td>
@@ -143,7 +143,7 @@
           <tr class="row-subtaak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
-            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+            <td class="cp">${starHtmlData(ss.prio_ster, ss.id, 'sub_subtaken', 'prio_ster')}</td>
             <td class="cbz">${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
             <td></td>
             <td><span style="color:var(--text-3);font-size:11px;">${project ? project.taak : '?'}</span></td>
@@ -201,7 +201,7 @@
           <tr class="row-subtaak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
-            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+            <td class="cp">${starHtmlData(ss.prio_ster, ss.id, 'sub_subtaken', 'prio_ster')}</td>
             <td class="cbz">${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
             <td></td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
@@ -251,7 +251,7 @@
           <tr class="row-subtaak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
-            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+            <td class="cp">${starHtmlData(ss.prio_ster, ss.id, 'sub_subtaken', 'prio_ster')}</td>
             <td class="cbz">${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
             <td></td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
@@ -267,7 +267,7 @@
 
     function renderPrioriteit(tbody) {
       const subs = sortItems(allSubtaken.filter(s => !s.gedaan && isActief(s) && s.prio_ster && matchesCat(subCat(s))));
-      const subsubs = sortItems(allSubsubtaken.filter(ss => !ss.gedaan && isActief(ss) && ss.prioriteit && matchesCat(subsubCat(ss))));
+      const subsubs = sortItems(allSubsubtaken.filter(ss => !ss.gedaan && isActief(ss) && ss.prio_ster && matchesCat(subsubCat(ss))));
 
       if (subs.length === 0 && subsubs.length === 0) {
         tbody.innerHTML = `<tr><td colspan="14" style="text-align:center;padding:40px;color:var(--text-2);">Geen prioriteit taken</td></tr>`;
@@ -301,7 +301,7 @@
           <tr class="row-subtaak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
-            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+            <td class="cp">${starHtmlData(ss.prio_ster, ss.id, 'sub_subtaken', 'prio_ster')}</td>
             <td class="cbz">${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
             <td></td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>
@@ -344,7 +344,7 @@
           <tr class="row-taak">
             <td class="col-nr-cell"></td>
             <td class="cd"></td>
-            <td class="cp">${starHtmlData(p.prioriteit === 'hoog', p.id, 'taken', 'prioriteit')}</td>
+            <td class="cp">${starHtmlData(p.prio_ster, p.id, 'taken', 'prio_ster')}</td>
             <td class="cbz"></td>
             <td>${catBadge(p.categorie)}</td>
             <td><span class="editable" data-id="${p.id}" data-table="taken" data-field="taak">${esc(p.taak)}</span></td>
@@ -384,7 +384,7 @@
           <tr class="row-subtaak">
             <td class="col-nr-cell"></td>
             <td class="cd"><span class="cb" data-id="${ss.id}" data-table="sub_subtaken">○</span></td>
-            <td class="cp">${starHtmlData(ss.prioriteit, ss.id, 'sub_subtaken', 'prioriteit')}</td>
+            <td class="cp">${starHtmlData(ss.prio_ster, ss.id, 'sub_subtaken', 'prio_ster')}</td>
             <td class="cbz">${bezigHtmlData(ss.bezig, ss.id, 'sub_subtaken')}</td>
             <td></td>
             <td><span style="color:var(--text-3);font-size:11px;">${esc(project?.taak || '?')}</span></td>

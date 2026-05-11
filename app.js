@@ -210,12 +210,17 @@
       if (!currentSort) return items;
       const s = [...items];
       const dir = currentSort.dir === 'asc' ? 1 : -1;
+      // O(n) Maps bouwen zodat de sort-comparator O(1) parent-lookups doet
+      const projById = new Map(allProjecten.map(p => [p.id, p]));
+      const subById  = new Map(allSubtaken.map(st => [st.id, st]));
+      function getProj(item) {
+        return projById.get(item.taak_id) ||
+          projById.get(subById.get(item.subtaak_id)?.taak_id);
+      }
       s.sort((a, b) => {
         let va, vb;
-        const projA = allProjecten.find(p => p.id === a.taak_id) ||
-          (() => { const st = allSubtaken.find(st => st.id === a.subtaak_id); return allProjecten.find(p => p.id === st?.taak_id); })();
-        const projB = allProjecten.find(p => p.id === b.taak_id) ||
-          (() => { const st = allSubtaken.find(st => st.id === b.subtaak_id); return allProjecten.find(p => p.id === st?.taak_id); })();
+        const projA = getProj(a);
+        const projB = getProj(b);
         switch(currentSort.col) {
           case 'project': va = (projA?.taak || '').toLowerCase(); vb = (projB?.taak || '').toLowerCase(); break;
           case 'cat': va = projA?.categorie || ''; vb = projB?.categorie || ''; break;

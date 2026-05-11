@@ -28,13 +28,18 @@
       return r.json();
     }
 
+    const ALLOWED_TABLES = new Set(['taken','subtaken','sub_subtaken','contexts','meta','afgerond_log']);
+
     async function del(table, idOrFilter) {
+      if (!ALLOWED_TABLES.has(table)) throw new Error(`Ongeldige tabel: ${table}`);
       const filter = idOrFilter ? `id=eq.${idOrFilter}` : '';
       const r = await fetch(`${SB}/rest/v1/${table}?${filter}`, { method: 'DELETE', headers: hdrs });
       if (!r.ok) throw new Error('Fout bij verwijderen');
     }
 
     async function delWhere(table, filter) {
+      if (!ALLOWED_TABLES.has(table)) throw new Error(`Ongeldige tabel: ${table}`);
+      if (!filter || typeof filter !== 'string') throw new Error('Ongeldig filter');
       const r = await fetch(`${SB}/rest/v1/${table}?${filter}`, { method: 'DELETE', headers: hdrs });
       if (!r.ok) throw new Error('Fout bij verwijderen');
     }

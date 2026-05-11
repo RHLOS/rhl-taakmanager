@@ -30,7 +30,9 @@
           };
         });
 
-      return [...subs, ...subsubs].filter(it => it._project?.categorie !== 'Natasja');
+      const all = [...subs, ...subsubs];
+      if (catFilter) return all.filter(it => it._project?.categorie === catFilter);
+      return all.filter(it => it._project?.categorie !== 'Natasja');
     }
 
     function classifyKanbanItem(it) {

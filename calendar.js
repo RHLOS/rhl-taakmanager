@@ -43,6 +43,7 @@
         });
       });
 
+      if (catFilter) return items.filter(it => it.cat === catFilter);
       return items;
     }
 

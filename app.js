@@ -442,6 +442,21 @@
       });
     }
 
+    // Toolbar-hulpfuncties: toon alleen WIE-filterknoppen (kanban/calendar) of alles (lijst)
+    function showToolbarFilterOnly(toolbar) {
+      toolbar.style.display = 'flex';
+      toolbar.querySelector('.btn-new').style.display = 'none';
+      document.getElementById('btnCollapseAll').style.display = 'none';
+      document.getElementById('btnExpandAll').style.display = 'none';
+      document.getElementById('btnAllesVerwerken').style.display = 'none';
+    }
+    function showToolbarFull(toolbar) {
+      toolbar.style.display = 'flex';
+      document.getElementById('btnCollapseAll').style.display = '';
+      document.getElementById('btnExpandAll').style.display = '';
+      // btn-new en btnAllesVerwerken worden elders beheerd (prullenmand/inbox-logica)
+    }
+
     function clearSearch() {
       if (!searchQuery) return;
       searchQuery = '';
@@ -462,7 +477,7 @@
         if (tableWrap)  tableWrap.style.display = 'none';
         if (kanbanWrap) kanbanWrap.style.display = '';
         if (calWrap)    calWrap.style.display = 'none';
-        if (toolbar)    toolbar.style.display = 'none';
+        if (toolbar)    showToolbarFilterOnly(toolbar);
         if (metricsEl)  metricsEl.style.display = '';
         document.getElementById('viewTitle').textContent = 'Kanban';
         renderKanban(kanbanWrap);
@@ -474,7 +489,7 @@
         if (tableWrap)  tableWrap.style.display = 'none';
         if (kanbanWrap) kanbanWrap.style.display = 'none';
         if (calWrap)    calWrap.style.display = '';
-        if (toolbar)    toolbar.style.display = 'none';
+        if (toolbar)    showToolbarFilterOnly(toolbar);
         if (metricsEl)  metricsEl.style.display = '';
         document.getElementById('viewTitle').textContent = 'Calendar';
         document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
@@ -485,7 +500,7 @@
       if (tableWrap)  tableWrap.style.display = '';
       if (kanbanWrap) kanbanWrap.style.display = 'none';
       if (calWrap)    calWrap.style.display = 'none';
-      if (toolbar)    toolbar.style.display = 'flex';
+      if (toolbar)    showToolbarFull(toolbar);
 
       const expandState = saveExpandState();
       const tbody = document.getElementById('tbody');

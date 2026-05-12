@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths-ignore:
       - '.github/**'
+  workflow_dispatch:
 
 jobs:
   bump-version:

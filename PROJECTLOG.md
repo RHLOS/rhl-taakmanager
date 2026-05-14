@@ -178,3 +178,15 @@ Wijzigingen:
 Open:
 1. Legacy-kolommen `taken.prioriteit` (text) en `sub_subtaken.prioriteit` (boolean) opruimen in Supabase — wacht minimaal één week na deploy ter verificatie.
 2. B5/B15 — Architectuur: alles globaal, geen ES modules (info, geen actie vereist).
+
+## 2026-05-12 — Cache-bust workflow gerepareerd
+
+Korte sessie: de cache-bust workflow (aangemaakt 2026-05-11) bleek bij alle eerdere runs te falen wegens ontbrekende schrijfrechten. Fix doorgevoerd, handmatig getest en workflow vervolgens weer opgeruimd.
+
+Wijzigingen:
+1. **Schrijfrechten toegevoegd:** `permissions: contents: write` in `.github/workflows/cache-bust.yml` — ontbrak waardoor de workflow na 3 seconden crashte.
+2. **`workflow_dispatch` tijdelijk toegevoegd** om handmatig te kunnen testen zonder echte push; na succesvolle test (#6, groen, 12s) weer verwijderd.
+3. Alle wijzigingen gemerged naar `main` en gepushed.
+
+Open:
+1. Legacy-kolommen `taken.prioriteit` en `sub_subtaken.prioriteit` opruimen in Supabase — verificatieperiode (1 week) is voorbij.

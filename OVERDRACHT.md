@@ -1,34 +1,50 @@
 # Overdracht — rhl-taakmanager
-*Laatste update: 2026-05-12*
+*Laatste update: 2026-05-19*
+
+## Status: AFGESLOTEN
+
+Dit project is op 2026-05-19 uit productie gehaald. Raimon werkt verder in [`code/project-management/`](../project-management/), dat dezelfde Supabase-database deelt.
 
 ## Openingsbericht volgende sessie
 
 ```
-Sessie rhl-taakmanager — vorige sessie 2026-05-12
-Lees CLAUDE.md, BRIEFING.md en OVERDRACHT.md van dit project.
-Cache-bust workflow is gerepareerd en werkt. Verificatieperiode legacy-kolommen is voorbij.
-Volgende actie: legacy-kolommen taken.prioriteit en sub_subtaken.prioriteit verwijderen uit Supabase, of een nieuwe feature kiezen.
+Dit project is afgesloten op 2026-05-19. Het is vervangen door code/project-management.
+Lees CLAUDE.md, BRIEFING.md en PROJECTLOG.md alleen als referentie/archief.
+Mocht er onverhoopt een nieuwe sessie hier nodig zijn: niets meer aanraken aan
+Supabase, MCP-config of de Personal Access Token — die zijn gedeeld met de projectmanager.
 ```
 
 ---
 
-## Waar staan we
+## Wat is er uitgezet
 
-App volledig operationeel (desktop). Codebase schoon. Cache-bust workflow draait correct na een permissie-fix van vandaag.
+| Onderdeel | Status |
+|---|---|
+| Dagelijkse e-mailreminder (pg_cron) | ✅ gestopt (`cron.unschedule`) |
+| Edge Function `dagelijkse-reminder` | ✅ verwijderd |
+| Resend API-keys (Onboarding + Scheduler) | ✅ ingetrokken |
+| GitHub Pages site | ✅ uit (Branch = None) |
+| GitHub repo `RHLOS/rhl-taakmanager` | ✅ gearchiveerd (read-only) |
 
-## Open punten
+## Wat blijft staan en waarom
 
-1. **Opruimen legacy-kolommen** (klaar om te doen): `taken.prioriteit` (text) en `sub_subtaken.prioriteit` (boolean) kunnen nu uit Supabase — verificatieperiode van één week na de migratie (2026-05-11) is voorbij.
-2. **B5/B15** — Architectuur: alles globaal in één scope, geen ES modules (info, geen actie vereist).
+| Onderdeel | Reden |
+|---|---|
+| Supabase-project `fhkttfzqdjynzmtjbujv` | Gedeeld met projectmanager — niet pauzeren |
+| MCP-blok in `claude_desktop_config.json` | `--project-ref` is nog correct voor projectmanager |
+| Personal Access Token `sbp_…` | Nodig voor toekomstige projectmanager-MCP-sessies |
+| Tabellen `taken` en `subtaken` | Gedeeld met projectmanager |
+| Tabel `sub_subtaken` en andere taakmanager-specifieke tabellen | Op te schonen vanuit de projectmanager-sessie |
 
-## Volgende actie
+## Archief-waarde
 
-Legacy-kolommen opruimen via Supabase SQL, of een nieuwe feature starten — naar keuze.
+De code (in deze repo) blijft als referentie behouden. Patronen die mogelijk nuttig zijn voor de projectmanager:
+- Cache-bust workflow (`.github/workflows/cache-bust.yml`)
+- Apple Dark thema (variabelen in `style.css`)
+- Supabase fetch-helpers met `ALLOWED_TABLES` whitelist (`api.js`)
 
-## Werkafspraken (samenvatting)
+## Werkafspraken (historisch — voor referentie)
 
 - Token-zuinig: `grep` + `offset/limit`, Sonnet ipv Opus
-- Niets bouwen zonder toestemming — stap voor stap
 - Bij Supabase-SQL: altijd "wis eerst het tekstveld"
-- Na elke wijziging: commit + push (`main` = live op GitHub Pages)
-- Link: https://rhlos.github.io/rhl-taakmanager/ (privévenster Cmd+Shift+N)
+- Gebruiker is een leek — simpel uitleggen

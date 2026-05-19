@@ -190,3 +190,25 @@ Wijzigingen:
 
 Open:
 1. Legacy-kolommen `taken.prioriteit` en `sub_subtaken.prioriteit` opruimen in Supabase — verificatieperiode (1 week) is voorbij.
+
+## 2026-05-19 — Taakmanager afgesloten
+
+Raimon stapt over op de nieuwe `project-management`-app. Deze taakmanager wordt definitief uit productie gehaald. De Supabase-database blijft in gebruik — wordt gedeeld met de projectmanager (zelfde project `fhkttfzqdjynzmtjbujv`, gedeelde tabellen `taken` en `subtaken`).
+
+Wijzigingen:
+1. **Dagelijkse e-mailreminder gestopt:** pg_cron job `dagelijkse-reminder` verwijderd (`SELECT cron.unschedule('dagelijkse-reminder')`).
+2. **Edge Function verwijderd:** `dagelijkse-reminder` in Supabase weggegooid.
+3. **Resend API-keys ingetrokken:** zowel `Onboarding` (sending access) als `Scheduler` (full access) verwijderd in Resend dashboard.
+4. **GitHub Pages uitgezet:** Branch op None → site offline (https://rhlos.github.io/rhl-taakmanager/).
+5. **GitHub repo gearchiveerd:** `RHLOS/rhl-taakmanager` op read-only gezet via Danger Zone.
+6. **Taken-data geëxporteerd:** Raimon heeft alle taken al in een md-bestand opgeslagen voor transfer naar projectmanager.
+
+Niet gedaan (bewust):
+1. Supabase-project pauzeren — zou projectmanager platleggen (gedeelde DB).
+2. Supabase MCP-blok uit `claude_desktop_config.json` halen — `--project-ref` is nog correct voor projectmanager.
+3. Personal Access Token `sbp_…` intrekken — nog nodig voor toekomstige projectmanager-MCP-sessies.
+4. Taakmanager-specifieke tabellen (`sub_subtaken` etc.) opschonen — wordt opgepakt vanuit de projectmanager-sessie, die weet welke tabellen exclusief van de taakmanager waren.
+5. `_shared/context/klanten-en-netwerken.md` bijwerken — opgepakt vanuit de projectmanager-sessie.
+
+Open:
+- Geen. Project is afgesloten.
